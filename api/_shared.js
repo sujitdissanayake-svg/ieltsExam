@@ -1,0 +1,105 @@
+const crypto = require('crypto');
+
+const base64UrlEncode = (input) => {
+  const buf = Buffer.isBuffer(input) ? input : Buffer.from(String(input), 'utf8');
+  return buf
+    .toString('base64')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/g, '');
+};
+
+const base64UrlDecodeToBuffer = (input) => {
+  const str = String(input || '')
+    .replace(/-/g, '+')
+    .replace(/_/g, '/');
+  const padLength = (4 - (str.length % 4)) % 4;
+  const padded = str + '='.repeat(padLength);
+  return Buffer.from(padded, 'base64');
+};
+
+const sha256Hex = (input) => {
+  return crypto.createHash('sha256').update(String(input), 'utf8').digest('hex');
+};
+
+const hmacSha256Base64Url = (secret, data) => {
+  return base64UrlEncode(crypto.createHmac('sha256', String(secret)).update(String(data), 'utf8').digest());
+};
+
+const signToken = (payload, secret) => {
+  const header = { alg: 'HS256', typ: 'JWT' };
+  const headerPart = base64UrlEncode(JSON.stringify(header));
+  const payloadPart = base64UrlEncode(JSON.stringify(payload));
+  const signingInput = `${headerPart}.${payloadPart}`;
+  const sig = hmacSha256Base64Url(secret, signingInput);
+  return `${signingInput}.${sig}`;
+};
+
+const verifyToken = (token, secret) => {
+  const parts = String(token || '').split('.');
+  if (parts.length !== 3) throw new Error('Invalid token.');
+
+  const [headerPart, payloadPart, sig] = parts;
+  const signingInput = `${headerPart}.${payloadPart}`;
+  const expectedSig = hmacSha256Base64Url(secret, signingInput);
+
+  const a = Buffer.from(String(sig), 'utf8');
+  const b = Buffer.from(String(expectedSig), 'utf8');
+  if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) {
+    throw new Error('Invalid token signature.');
+  }
+
+  const payloadJson = base64UrlDecodeToBuffer(payloadPart).toString('utf8');
+  let payload;
+  try {
+    payload = JSON.parse(payloadJson);
+  } catch {
+    throw new Error('Invalid token payload.');
+  }
+
+  const now = Math.floor(Date.now() / 1000);
+  if (payload && typeof payload.exp === 'number' && now > payload.exp) {
+    throw new Error('Code expired.');
+  }
+
+  return payload;
+};
+
+const readJsonBody = async (req, { maxBytes = 32 * 1024 } = {}) => {
+  return new Promise((resolve, reject) => {
+    let size = 0;
+    const chunks = [];
+
+    req.on('data', (chunk) => {
+      size += chunk.length;
+      if (size > maxBytes) {
+        reject(new Error('Request too large.'));
+        req.destroy();
+        return;
+      }
+      chunks.push(chunk);
+    });
+
+    req.on('end', () => {
+      const raw = Buffer.concat(chunks).toString('utf8');
+      if (!raw) {
+        resolve({});
+        return;
+      }
+      try {
+        resolve(JSON.parse(raw));
+      } catch {
+        reject(new Error('Invalid JSON.'));
+      }
+    });
+
+    req.on('error', reject);
+  });
+};
+
+module.exports = {
+  sha256Hex,
+  signToken,
+  verifyToken,
+  readJsonBody,
+};

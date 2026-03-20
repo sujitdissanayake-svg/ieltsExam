@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IELTS Free Mock Registration</title>
+    <link rel="stylesheet" href="styles.css?v=20260226" />
+  </head>
+  <body>
+    <main class="portal-page" aria-label="Test Taker Registration">
+      <div class="portal-shell">
+        <section class="portal-left" aria-label="Welcome message">
+          <h1 class="portal-welcome-title">Welcome</h1>
+          <p class="portal-welcome-subtitle">IELTS Test Taker Portal</p>
+          <p class="portal-welcome-text">
+            Sign in or create an account to access mock tests and practice materials.
+          </p>
+
+          <form class="portal-form" autocomplete="on" id="portal-login-form" aria-label="Login form" style="margin-top:18px;">
+            <p class="portal-card-intro" style="margin:0 0 6px;">Already have an account? Log in</p>
+
+            <label class="portal-field">
+              <span class="portal-label">Email</span>
+              <input class="portal-input" type="email" name="email" required placeholder="you@example.com" />
+            </label>
+
+            <label class="portal-field">
+              <span class="portal-label">Password</span>
+              <input class="portal-input" type="password" id="portal-login-password" name="password" placeholder="Your password" />
+              <div class="portal-password-toggle">
+                <input class="portal-checkbox" type="checkbox" id="portal-login-show" data-toggle-password="portal-login-password" />
+                <label for="portal-login-show">Show password</label>
+              </div>
+              <button class="portal-forgot" type="button">Forgotten Password?</button>
+            </label>
+
+            <button class="portal-submit" type="submit">Sign in</button>
+
+            <p class="portal-small-note" id="portal-login-note"></p>
+
+          </form>
+        </section>
+
+        <section class="portal-card" aria-label="Registration form">
+          <h2 class="portal-card-title" style="font-weight: 800;">Sign Up | Create an Account</h2>
+          <p class="portal-card-intro">Enter your details to create an account.</p>
+
+          <form class="portal-form" autocomplete="on" id="portal-register-form">
+            <label class="portal-field">
+              <span class="portal-label">Full name</span>
+              <input class="portal-input" type="text" name="name" required placeholder="Your full name" />
+            </label>
+
+            <label class="portal-field">
+              <span class="portal-label">Email</span>
+              <input class="portal-input" type="email" name="email" required placeholder="you@example.com" />
+            </label>
+
+            <label class="portal-field">
+              <span class="portal-label">WhatsApp number</span>
+              <input class="portal-input" type="tel" name="whatsapp" required placeholder="e.g. +44 7123 456789" />
+            </label>
+
+            <label class="portal-field">
+              <span class="portal-label">Password</span>
+              <input class="portal-input" type="password" id="portal-register-password" name="password" placeholder="Create a password (optional)" />
+              <div class="portal-password-toggle">
+                <input class="portal-checkbox" type="checkbox" id="portal-register-show" data-toggle-password="portal-register-password" />
+                <label for="portal-register-show">Show password</label>
+              </div>
+            </label>
+
+            <button class="portal-submit" type="submit">Continue</button>
+
+            <p class="portal-small-note" id="portal-register-note"></p>
+          </form>
+        </section>
+      </div>
+    </main>
+
+    <div class="portal-modal" id="portal-verify-modal" role="dialog" aria-modal="true" aria-label="Email verification" hidden>
+      <div class="portal-modal-card" role="document">
+        <h2 class="portal-card-title" style="margin:0;">Email verification</h2>
+        <p class="portal-card-intro" id="portal-verify-help" style="margin:6px 0 8px;">Enter the 6-digit code we sent to your email.</p>
+
+        <form class="portal-form" autocomplete="on" id="portal-verify-form" style="gap:12px;margin-top:2px;">
+          <label class="portal-field">
+            <span class="portal-label">Verification code</span>
+            <input
+              class="portal-input"
+              type="text"
+              name="code"
+              inputmode="numeric"
+              autocomplete="one-time-code"
+              placeholder="Enter 6-digit code"
+              pattern="[0-9]{6}"
+              maxlength="6"
+              required
+            />
+          </label>
+
+          <button class="portal-submit" type="submit" id="portal-verify-submit">Verify & Continue</button>
+          <button class="portal-submit" type="button" id="portal-verify-resend">Send code again</button>
+
+          <p class="portal-small-note" id="portal-verify-note" style="margin:0;">Your code expires after 10 minutes.</p>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        (function bindBackToHome() {
+          try {
+            var homeUrl = (window.location && window.location.origin) ? window.location.origin + '/' : '/';
+            window.history.pushState({ __freeMockPortalTrap: true }, '', window.location.href);
+            window.addEventListener('popstate', function () {
+              try {
+                window.location.replace(homeUrl);
+              } catch (_) {
+                window.location.href = homeUrl;
+              }
+            });
+          } catch (_) {}
+        })();
+
+        var registerForm = document.getElementById('portal-register-form');
+        var registerNote = document.getElementById('portal-register-note');
+        var loginForm = document.getElementById('portal-login-form');
+        var loginNote = document.getElementById('portal-login-note');
+        if (!registerForm || !registerNote) return;
+
+        var verifyModal = document.getElementById('portal-verify-modal');
+        var verifyHelp = document.getElementById('portal-verify-help');
+        var verifyForm = document.getElementById('portal-verify-form');
+        var verifyNote = document.getElementById('portal-verify-note');
+        var verifySubmitBtn = document.getElementById('portal-verify-submit');
+        var verifyResendBtn = document.getElementById('portal-verify-resend');
+
+        var registerSubmitButton = registerForm.querySelector('button[type="submit"]');
+
+        function simpleHash(input) {
+          var str = String(input || '');
+          var hash = 0;
+          for (var i = 0; i < str.length; i++) {
+            hash = ((hash << 5) - hash + str.charCodeAt(i)) | 0;
+          }
+          return String(Math.abs(hash));
+        }
+
+        function passwordHashFor(email, password) {
+          var e = String(email || '').trim().toLowerCase();
+          var p = String(password || '');
+          if (!e || !p) return '';
+          return simpleHash(e + ':' + p);
+        }
+
+        (function bindShowPasswordToggles() {
+          var toggles = document.querySelectorAll('input[type="checkbox"][data-toggle-password]');
+          for (var i = 0; i < toggles.length; i++) {
+            (function (toggle) {
+              if (!toggle || toggle.__bound) return;
+              toggle.__bound = true;
+              toggle.addEventListener('change', function () {
+                var targetId = toggle.getAttribute('data-toggle-password') || '';
+                var input = targetId ? document.getElementById(targetId) : null;
+                if (!input) return;
+                try {
+                  input.type = toggle.checked ? 'text' : 'password';
+                } catch (_) {}
+              });
+            })(toggles[i]);
+          }
+        })();
+
+        function isLocalHost() {
+          return (
+            window.location.hostname === 'localhost' ||
+            window.location.hostname === '127.0.0.1' ||
+            window.location.hostname === '::1'
+          );
+        }
+
+        function directorPanelUrl() {
+          return isLocalHost() ? 'director-panel.html' : 'director-panel';
+        }
+
+        function isDirectorCredentials(email, password) {
+          var e = String(email || '').trim().toLowerCase();
+          var p = String(password || '');
+          return e === 'sujit.dissanayake@gmail.com' && p === '1428Aws#pkR';
+        }
+
+        var target = null;
+        try {
+          var params = new URLSearchParams(window.location.search || '');
+          target = params.get('target');
+        } catch (_) {
+          target = null;
+        }
+
+        function sanitizeSameOriginTarget(raw) {
+          if (!raw) return '';
+          var value = String(raw).trim();
+          if (!value) return '';
+          if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(value)) return '';
+          try {
+            var url = new URL(value, window.location.origin);
+            if (url.origin !== window.location.origin) return '';
+            if (/\/\.\.(\/|$)/.test(url.pathname)) return '';
+            if (/\.\./.test(url.pathname)) return '';
+            return url.pathname + url.search + url.hash;
+          } catch (_) {
+            return '';
+          }
+        }
+
+        function defaultFreeMockTarget() {
+          return isLocalHost() ? 'ielts-academic.html' : 'ielts-academic';
+        }
+
+        function goToTargetIfProvided() {
+          var safeTarget = sanitizeSameOriginTarget(target);
+          var dest = safeTarget || defaultFreeMockTarget();
+          try {
+            window.location.href = dest;
+          } catch (_) {
+            // ignore
+          }
+        }
+
+        function setNote(el, text, kind) {
+          if (!el) return;
+          el.textContent = text;
+          if (kind === 'success') {
+            el.style.color = '#16a34a';
+            el.style.fontWeight = '500';
+          } else if (kind === 'error') {
+            el.style.color = '#dc2626';
+            el.style.fontWeight = '600';
+          } else {
+            el.style.color = '#9ca3af';
+            el.style.fontWeight = '400';
+          }
+        }
+
+        function openVerifyModal(email) {
+          if (!verifyModal || !verifyForm || !verifyNote || !verifyHelp) return;
+
+          verifyModal.hidden = false;
+          verifyModal.classList.add('is-visible');
+          try {
+            document.documentElement.classList.add('is-modal-open');
+          } catch (_) {}
+
+          if (email) {
+            verifyHelp.textContent = 'Enter the 6-digit code we sent to ' + email + '.';
+          } else {
+            verifyHelp.textContent = 'Enter the 6-digit code we sent to your email.';
+          }
+
+          setNote(verifyNote, 'Your code expires after 10 minutes.', 'info');
+
+          try {
+            var input = verifyForm.elements['code'];
+            if (input) {
+              input.value = '';
+              input.focus();
+            }
+          } catch (_) {}
+        }
+
+        function closeVerifyModal() {
+          if (!verifyModal) return;
+          verifyModal.hidden = true;
+          verifyModal.classList.remove('is-visible');
+          try {
+            document.documentElement.classList.remove('is-modal-open');
+          } catch (_) {}
+        }
+
+        function setVerifyBusy(isBusy, noteText, kind) {
+          if (verifySubmitBtn) verifySubmitBtn.disabled = !!isBusy;
+          if (verifyResendBtn) verifyResendBtn.disabled = !!isBusy;
+          if (verifyNote && noteText) setNote(verifyNote, noteText, kind || 'info');
+        }
+
+        function postJson(url, payload) {
+          return fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload || {}),
+          }).then(function (res) {
+            return res
+              .json()
+              .catch(function () {
+                return {};
+              })
+              .then(function (data) {
+                return { ok: res.ok, status: res.status, data: data };
+              });
+          });
+        }
+
+        var currentVerificationToken = '';
+
+        function sendVerificationCode(name, email) {
+          if (!registerSubmitButton) return Promise.reject(new Error('Missing submit button'));
+          registerSubmitButton.disabled = true;
+          setNote(registerNote, 'Sending verification code to ' + email + '...', 'info');
+          return postJson('/api/send-verification', { name: name, email: email }).then(function (result) {
+            registerSubmitButton.disabled = false;
+
+            if (!result.ok) {
+              var msg = (result.data && (result.data.error || result.data.message)) || 'Unable to send verification code.';
+              var hint = result.data && result.data.hint ? String(result.data.hint) : '';
+              if (hint) msg = msg + ' ' + hint;
+              throw new Error(msg);
+            }
+
+            var token = result.data && result.data.token ? String(result.data.token) : '';
+            if (!token) throw new Error('Verification token missing.');
+
+            currentVerificationToken = token;
+            openVerifyModal(email);
+          });
+        }
+
+        function persistRegistrationDraft(payload) {
+          try {
+            window.localStorage.setItem('ieltsPortalProfile', JSON.stringify(payload || {}));
+            if (payload && payload.email) window.localStorage.setItem('ieltsPortalEmail', String(payload.email));
+            if (payload && payload.name) window.localStorage.setItem('ieltsPortalName', String(payload.name));
+            if (payload && payload.whatsapp) window.localStorage.setItem('ieltsPortalWhatsApp', String(payload.whatsapp));
+            if (payload && payload.email && payload.passwordHash) {
+              window.localStorage.setItem('ieltsPortalPasswordHash', String(payload.passwordHash));
+            }
+          } catch (_) {}
+        }
+
+        function getRegisterFormValues() {
+          var name = ((registerForm.elements['name'] && registerForm.elements['name'].value) || '').trim();
+          var email = ((registerForm.elements['email'] && registerForm.elements['email'].value) || '').trim();
+          var whatsapp = ((registerForm.elements['whatsapp'] && registerForm.elements['whatsapp'].value) || '').trim();
+
+          var password = ((registerForm.elements['password'] && registerForm.elements['password'].value) || '');
+          var passwordHash = passwordHashFor(email, password);
+
+          return {
+            name: name,
+            email: email,
+            whatsapp: whatsapp,
+            passwordHash: passwordHash,
+            createdAt: new Date().toISOString(),
+          };
+        }
+
+        registerForm.addEventListener('submit', function (e) {
+          e.preventDefault();
+          var values = getRegisterFormValues();
+          var name = values.name;
+          var email = values.email;
+
+          persistRegistrationDraft(values);
+
+          if (!email) {
+            setNote(registerNote, 'Please enter your email address.', 'error');
+            return;
+          }
+
+          sendVerificationCode(name, email).catch(function (err) {
+            setNote(registerNote, err && err.message ? err.message : 'Unable to send verification code.', 'error');
+          });
+        });
+
+        if (verifyForm && verifyModal && verifyNote && verifySubmitBtn && verifyResendBtn) {
+          verifyResendBtn.addEventListener('click', function () {
+            var values = getRegisterFormValues();
+            var name = values.name;
+            var email = values.email;
+            if (!email) {
+              setNote(verifyNote, 'Please enter your email address.', 'error');
+              return;
+            }
+
+            setVerifyBusy(true, 'Sending a new code to ' + email + '...', 'info');
+            postJson('/api/send-verification', { name: name, email: email })
+              .then(function (result) {
+                if (!result.ok) {
+                  var msg = (result.data && (result.data.error || result.data.message)) || 'Unable to resend code.';
+                  var hint = result.data && result.data.hint ? String(result.data.hint) : '';
+                  if (hint) msg = msg + ' ' + hint;
+                  throw new Error(msg);
+                }
+                var token = result.data && result.data.token ? String(result.data.token) : '';
+                if (!token) throw new Error('Verification token missing.');
+                currentVerificationToken = token;
+                setNote(verifyNote, 'A new code was sent. Please check your email.', 'success');
+              })
+              .catch(function (err) {
+                setNote(verifyNote, err && err.message ? err.message : 'Unable to resend code.', 'error');
+              })
+              .finally(function () {
+                setVerifyBusy(false);
+              });
+          });
+
+          verifyForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            var values = getRegisterFormValues();
+            var name = values.name;
+            var email = values.email;
+            var whatsapp = values.whatsapp;
+
+            var code = String((verifyForm.elements['code'] && verifyForm.elements['code'].value) || '').trim();
+            if (!/^[0-9]{6}$/.test(code)) {
+              setNote(verifyNote, 'Enter the 6-digit code we emailed to you.', 'error');
+              return;
+            }
+
+            if (!currentVerificationToken) {
+              setNote(verifyNote, 'Missing verification details. Please click Continue again.', 'error');
+              return;
+            }
+
+            setVerifyBusy(true, 'Verifying code...', 'info');
+            postJson('/api/verify-code', { token: currentVerificationToken, code: code })
+              .then(function (result) {
+                if (!result.ok) {
+                  var msg = (result.data && (result.data.error || result.data.message)) || 'Incorrect or expired code.';
+                  throw new Error(msg);
+                }
+
+                try {
+                  window.localStorage.setItem('ieltsPortalRegistered', 'true');
+                  window.localStorage.setItem('ieltsPortalEmail', email);
+                  if (name) window.localStorage.setItem('ieltsPortalName', name);
+                  if (whatsapp) window.localStorage.setItem('ieltsPortalWhatsApp', whatsapp);
+                  if (values && values.passwordHash) window.localStorage.setItem('ieltsPortalPasswordHash', String(values.passwordHash));
+                } catch (_) {}
+
+                setNote(verifyNote, 'Email verified. Redirecting...', 'success');
+
+                setTimeout(function () {
+                  closeVerifyModal();
+                  goToTargetIfProvided();
+                }, 700);
+              })
+              .catch(function (err) {
+                setNote(verifyNote, err && err.message ? err.message : 'Incorrect or expired code.', 'error');
+              })
+              .finally(function () {
+                setVerifyBusy(false);
+              });
+          });
+        }
+
+        if (loginForm && loginNote) {
+          loginForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            var email = ((loginForm.elements['email'] && loginForm.elements['email'].value) || '').trim();
+            var password = ((loginForm.elements['password'] && loginForm.elements['password'].value) || '');
+
+            if (isDirectorCredentials(email, password)) {
+              try {
+                window.sessionStorage.setItem('ieltsDirectorAuthed', 'true');
+              } catch (_) {}
+              window.location.href = directorPanelUrl();
+              return;
+            }
+
+            if (!email) {
+              setNote(loginNote, 'Please enter your email address.', 'error');
+              return;
+            }
+            if (!password) {
+              setNote(loginNote, 'Please enter your password.', 'error');
+              return;
+            }
+
+            var storedEmail = '';
+            var storedHash = '';
+            try {
+              storedEmail = String(window.localStorage.getItem('ieltsPortalEmail') || '').trim();
+              storedHash = String(window.localStorage.getItem('ieltsPortalPasswordHash') || '').trim();
+            } catch (_) {
+              storedEmail = '';
+              storedHash = '';
+            }
+
+            if (!storedEmail || storedEmail.toLowerCase() !== email.toLowerCase()) {
+              setNote(loginNote, 'No account found for this email on this browser. Please sign up first.', 'error');
+              return;
+            }
+
+            var providedHash = passwordHashFor(email, password);
+            if (!storedHash || !providedHash || storedHash !== providedHash) {
+              setNote(loginNote, 'Incorrect password. Please try again.', 'error');
+              return;
+            }
+
+            try {
+              window.localStorage.setItem('ieltsPortalRegistered', 'true');
+            } catch (_) {}
+
+            setNote(loginNote, 'Signed in successfully.', 'success');
+            setTimeout(function () {
+              goToTargetIfProvided();
+            }, 600);
+          });
+        }
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IELTS Listening</title>
+    <link rel="stylesheet" href="styles.css?v=20260309-4" />
+    <script src="ielts-flow-guard.js?v=20260310-2" defer></script>
+  </head>
+  <body class="listening-soundcheck">
+    <header class="academic-topbar" aria-label="IELTS top bar">
+      <div class="academic-topbar-inner">
+        <img
+          class="academic-topbar-ielts"
+          src="assets/IELTS%20Exam%20logo%202-trim.png?v=20260226b"
+          alt="IELTS"
+        />
+
+        <div class="academic-topbar-right" aria-label="Header actions">
+          <div class="academic-topbar-partners" aria-label="IELTS partners">
+            <img class="academic-topbar-partner" src="assets/british-council-trim-no-official.png?v=20260226" alt="British Council" loading="lazy" />
+            <img class="academic-topbar-partner" src="assets/IDP-trim-no-official.png?v=20260226" alt="IDP" loading="lazy" />
+            <span class="academic-topbar-cambridge" aria-label="Cambridge Assessment English">Cambridge Assessment English</span>
+          </div>
+
+          <div class="listening-topbar-actions" aria-label="Header icons">
+            <button class="listening-topbar-icon" type="button" aria-label="Connection status">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M2.5 9.5a14 14 0 0 1 19 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                <path d="M5.5 12.5a10 10 0 0 1 13 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                <path d="M8.5 15.5a6 6 0 0 1 7 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                <path d="M12 19h0" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+              </svg>
+            </button>
+            <button class="listening-topbar-icon" type="button" aria-label="Notifications">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M12 22a2.5 2.5 0 0 0 2.4-2h-4.8A2.5 2.5 0 0 0 12 22Z" fill="currentColor" opacity="0.9" />
+                <path d="M18 10a6 6 0 1 0-12 0c0 7-2.5 7-2.5 7h17S18 17 18 10Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+              </svg>
+            </button>
+            <button class="header__optionsButton___1BF6Z" type="button" aria-label="Options">
+              <span class="header__icon___1ECrT">
+                <span class="sr-only">Options</span>
+                <i class="fa fa-bars fa-3" aria-hidden="true"></i>
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="academic-topbar-under" aria-label="Audio volume">
+        <div class="soundcheck-underbar">
+          <div class="soundcheck-candidate" aria-label="Candidate number">
+            <span class="soundcheck-candidate-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z" fill="currentColor" opacity="0.9" />
+                <path d="M4 21a8 8 0 0 1 16 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              </svg>
+            </span>
+            <span>Candidate Number:217575</span>
+          </div>
+
+          <div class="soundcheck-volume" aria-label="Volume">
+            <span class="soundcheck-volume-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M11 5L7 9H4v6h3l4 4V5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+                <path d="M15.5 8.5a4 4 0 0 1 0 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              </svg>
+            </span>
+            <input id="volume" class="soundcheck-volume-range" type="range" min="0" max="100" value="70" aria-label="Volume" />
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="soundcheck-main" aria-label="Test sound">
+      <section class="soundcheck-panel" aria-label="Sound check panel">
+        <div class="soundcheck-titleRow">
+          <span class="soundcheck-headphones" aria-hidden="true">
+              <img class="soundcheck-headphones-img" src="assets/Earphone-transparent.png?v=20260226" alt="" />
+          </span>
+          <h1 class="soundcheck-title">Test sound</h1>
+        </div>
+
+        <div class="soundcheck-box" aria-label="Instructions">
+          <p class="soundcheck-instruction">
+            Put on your headphones and click on the <strong>Play sound</strong> button to play a sample sound.
+          </p>
+
+          <div class="soundcheck-actions">
+            <button class="soundcheck-btn" id="playSound" type="button">Play sound</button>
+          </div>
+
+          <p class="soundcheck-warning">
+            <span class="soundcheck-warning-icon" aria-hidden="true">!</span>
+            <span>If you cannot hear the sound clearly, please tell the invigilator.</span>
+          </p>
+
+          <div class="soundcheck-actions">
+            <button class="soundcheck-btn" id="continueBtn" type="button">Continue</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      (function () {
+        var playBtn = document.getElementById('playSound');
+        var continueBtn = document.getElementById('continueBtn');
+        var volumeEl = document.getElementById('volume');
+        var voiceAudio = null;
+        var audioCtx = null;
+        var gainNode = null;
+        var mediaSource = null;
+
+        function syncVolumeSliderUi() {
+          try {
+            if (!volumeEl) return;
+            volumeEl.style.setProperty('--vol', String(volumeEl.value || 0));
+          } catch (_) {}
+        }
+
+        function setPlayButtonPlaying(isPlaying) {
+          if (!playBtn) return;
+          playBtn.textContent = isPlaying ? 'Stop sound' : 'Play sound';
+        }
+
+        function ensureVoiceAudio() {
+          if (voiceAudio) return voiceAudio;
+          voiceAudio = new Audio('assets/IELTS%20Volume%20Checker.mp4?v=20260302');
+          voiceAudio.preload = 'auto';
+          voiceAudio.playsInline = true;
+
+          voiceAudio.addEventListener('ended', function () {
+            setPlayButtonPlaying(false);
+          });
+
+          voiceAudio.addEventListener('pause', function () {
+            // Some browsers fire pause on ended; keep label consistent.
+            if (voiceAudio && voiceAudio.ended) setPlayButtonPlaying(false);
+          });
+
+          return voiceAudio;
+        }
+
+        function ensureAudioGraph() {
+          try {
+            var Ctx = window.AudioContext || window.webkitAudioContext;
+            if (!Ctx) return;
+            if (audioCtx) return;
+
+            audioCtx = new Ctx();
+            gainNode = audioCtx.createGain();
+            gainNode.gain.value = getVolume();
+            gainNode.connect(audioCtx.destination);
+
+            // Create media element source exactly once per audio element.
+            var audio = ensureVoiceAudio();
+            mediaSource = audioCtx.createMediaElementSource(audio);
+            mediaSource.connect(gainNode);
+          } catch (_) {
+            // If Web Audio setup fails, fall back to audio.volume.
+            audioCtx = null;
+            gainNode = null;
+            mediaSource = null;
+          }
+        }
+
+        function applyVolume() {
+          var v = getVolume();
+          try {
+            if (gainNode) {
+              gainNode.gain.value = v;
+              if (voiceAudio) voiceAudio.volume = 1;
+              return;
+            }
+          } catch (_) {}
+          try {
+            if (voiceAudio) voiceAudio.volume = v;
+          } catch (_) {}
+        }
+
+        function playRecordedVoice() {
+          try {
+            var audio = ensureVoiceAudio();
+
+            ensureAudioGraph();
+            try {
+              if (audioCtx && audioCtx.state === 'suspended' && typeof audioCtx.resume === 'function') {
+                audioCtx.resume().catch(function () {});
+              }
+            } catch (_) {}
+
+            // Stop any previous playback so repeated clicks don't stack sounds.
+            audio.pause();
+            try {
+              audio.currentTime = 0;
+            } catch (_) {}
+
+            applyVolume();
+
+            return audio.play();
+          } catch (_) {
+            return null;
+          }
+        }
+
+        function stopRecordedVoice() {
+          try {
+            if (!voiceAudio) return;
+            voiceAudio.pause();
+            try {
+              voiceAudio.currentTime = 0;
+            } catch (_) {}
+          } catch (_) {}
+        }
+
+        function getVolume() {
+          var v = 70;
+          if (volumeEl) v = Number(volumeEl.value || 70);
+          if (!isFinite(v)) v = 70;
+          v = Math.max(0, Math.min(100, v));
+          return v / 100;
+        }
+
+        if (playBtn) {
+          playBtn.addEventListener('click', function () {
+            var audio = voiceAudio;
+            var isPlaying = !!(audio && !audio.paused && !audio.ended);
+            if (isPlaying) {
+              stopRecordedVoice();
+              setPlayButtonPlaying(false);
+              return;
+            }
+
+            setPlayButtonPlaying(true);
+            var playPromise = playRecordedVoice();
+            if (!playPromise) {
+              setPlayButtonPlaying(false);
+              return;
+            }
+
+            // If play() is blocked/rejected, revert the label.
+            if (typeof playPromise.catch === 'function') {
+              playPromise.catch(function () {
+                setPlayButtonPlaying(false);
+              });
+            }
+          });
+
+          // Keep volume responsive while playing.
+          if (volumeEl) {
+            var onVol = function () {
+              syncVolumeSliderUi();
+              applyVolume();
+            };
+            volumeEl.addEventListener('input', onVol);
+            volumeEl.addEventListener('change', onVol);
+
+            // Set initial UI fill.
+            syncVolumeSliderUi();
+          }
+        }
+
+        if (continueBtn) {
+          continueBtn.addEventListener('click', function () {
+            stopRecordedVoice();
+            var isLocal =
+              window.location.hostname === 'localhost' ||
+              window.location.hostname === '127.0.0.1' ||
+              window.location.hostname === '::1';
+            var target = isLocal ? 'ielts-listening-instructions.html' : 'ielts-listening-instructions';
+            try {
+              window.location.replace(target);
+            } catch (_) {
+              window.location.href = target;
+            }
+          });
+        }
+      })();
+    </script>
+  </body>
+</html>

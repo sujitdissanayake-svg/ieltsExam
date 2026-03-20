@@ -1,0 +1,1637 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Director Panel</title>
+    <link rel="stylesheet" href="styles.css?v=20260226" />
+  </head>
+  <body>
+    <main class="packages-page" aria-label="Director Panel">
+      <div class="packages-shell">
+        <div class="packages-top">
+          <a class="packages-back" href="/">← Back to Home</a>
+          <h1 class="packages-title">Director Panel</h1>
+        </div>
+
+        <section class="packages-info" aria-label="Director modules">
+          <section class="packages-info-section packages-info-section--indented" aria-label="Modules">
+            <h2 class="packages-info-title">
+              <button type="button" id="dp-modules-btn" class="packages-back" aria-label="Open Modules">
+                <span>Modules</span>
+              </button>
+            </h2>
+            <ul class="packages-info-list" id="dp-stats-list">
+              <li>Loading…</li>
+            </ul>
+
+            <form class="portal-form" id="dp-metrics-form" style="margin-top:14px;max-width:560px;">
+              <label class="portal-field">
+                <span class="portal-label">Students taking exams (manual)</span>
+                <input class="portal-input" type="number" min="0" step="1" name="studentsTaking" placeholder="e.g. 12" />
+              </label>
+              <label class="portal-field">
+                <span class="portal-label">Accounts (manual)</span>
+                <input class="portal-input" type="number" min="0" step="1" name="accounts" placeholder="e.g. 1050" />
+              </label>
+              <label class="portal-field">
+                <span class="portal-label">Tests booked (manual)</span>
+                <input class="portal-input" type="number" min="0" step="1" name="testsBooked" placeholder="e.g. 340" />
+              </label>
+              <label class="portal-field">
+                <span class="portal-label">Examiners (manual)</span>
+                <input class="portal-input" type="number" min="0" step="1" name="examiners" placeholder="e.g. 6" />
+              </label>
+              <button class="portal-submit" type="submit">Save Module Numbers</button>
+              <p class="portal-small-note" id="dp-metrics-note" style="margin:0;"></p>
+            </form>
+          </section>
+
+          <section class="packages-info-section packages-info-section--indented" aria-label="Add papers">
+            <h2 class="packages-info-title"><span class="packages-info-icon" aria-hidden="true">🧾</span> <span>Add Papers to Mock Tests</span></h2>
+
+            <div class="dp-paper-layout">
+              <form class="portal-form" id="dp-paper-form" style="max-width:760px;">
+              <label class="portal-field">
+                <span class="portal-label">Section</span>
+                <select class="portal-input" name="section" required>
+                  <option value="listening">Listening (Paper + Audio)</option>
+                  <option value="reading">Reading</option>
+                  <option value="writing">Writing</option>
+                  <option value="speaking">Speaking</option>
+                </select>
+              </label>
+
+              <label class="portal-field">
+                <span class="portal-label">Paper title</span>
+                <input class="portal-input" type="text" name="title" required placeholder="e.g. Academic Listening Test 01" />
+              </label>
+
+              <label class="portal-field" id="dp-paper-text-field">
+                <span class="portal-label">Paper content</span>
+                <textarea class="portal-input" name="content" rows="8" placeholder="Paste the paper text / passage / tasks here"></textarea>
+              </label>
+
+              <div id="dp-listening-audio-fields" style="display:none;">
+                <label class="portal-field">
+                  <span class="portal-label">Audio URL (optional)</span>
+                  <input class="portal-input" type="url" name="audioUrl" placeholder="https://.../audio.mp3" />
+                </label>
+
+                <label class="portal-field">
+                  <span class="portal-label">Or upload audio file (optional)</span>
+                  <input class="portal-input" type="file" name="audioFile" accept="audio/*" />
+                </label>
+              </div>
+
+              <button class="portal-submit" type="submit">Save Paper</button>
+              <button class="portal-submit" type="button" id="dp-paper-export">Export Papers (JSON)</button>
+              <label class="portal-field">
+                <span class="portal-label">Import Papers (JSON)</span>
+                <input class="portal-input" type="file" id="dp-paper-import" accept="application/json" />
+              </label>
+              <p class="portal-small-note" id="dp-paper-note" style="margin:0;"></p>
+              </form>
+
+              <aside class="dp-paper-style" id="dp-paper-style" aria-label="Listening question styles" hidden>
+                <div class="dp-paper-style-title">Listening Question Styles</div>
+                <div class="dp-paper-style-sub">Choose a template to fill the paper.</div>
+                <div class="dp-paper-style-actions" role="list">
+                  <button class="dp-style-btn" type="button" data-style="free-mock">Free Mock (Mixed)</button>
+                  <button class="dp-style-btn" type="button" data-style="notes">Notes / Form (Blanks)</button>
+                  <button class="dp-style-btn" type="button" data-style="table">Table Completion</button>
+                  <button class="dp-style-btn" type="button" data-style="mcq">Multiple Choice (A/B/C)</button>
+                  <button class="dp-style-btn" type="button" data-style="timetable">Timetable Completion</button>
+                  <button class="dp-style-btn" type="button" data-style="sentences">Sentence Completion</button>
+                </div>
+                <p class="portal-small-note" id="dp-paper-style-note" style="margin:10px 0 0;"></p>
+              </aside>
+            </div>
+
+            <div style="margin-top:10px;">
+              <p class="portal-card-intro" style="margin:10px 0 8px;">Saved Papers</p>
+              <div id="dp-paper-list"></div>
+            </div>
+          </section>
+
+          <section class="packages-info-section packages-info-section--indented" aria-label="Answer keys">
+            <h2 class="packages-info-title"><span class="packages-info-icon" aria-hidden="true">✅</span> <span>Answer Keys & Auto Band Score (Listening/Reading)</span></h2>
+
+            <form class="portal-form" id="dp-keys-form" style="max-width:760px;">
+              <label class="portal-field">
+                <span class="portal-label">Module</span>
+                <select class="portal-input" name="module" required>
+                  <option value="listening">Listening</option>
+                  <option value="reading">Reading</option>
+                </select>
+              </label>
+
+              <label class="portal-field">
+                <span class="portal-label">Key title</span>
+                <input class="portal-input" type="text" name="title" required placeholder="e.g. Listening Test 01 Key" />
+              </label>
+
+              <label class="portal-field">
+                <span class="portal-label">Correct answers (one per line)</span>
+                <textarea class="portal-input" name="answers" rows="6" placeholder="1) A\n2) C\n3) TRUE\n..."></textarea>
+              </label>
+
+              <label class="portal-field">
+                <span class="portal-label">Candidate answers to score (one per line)</span>
+                <textarea class="portal-input" name="candidate" rows="6" placeholder="Paste candidate answers here to calculate correct count"></textarea>
+              </label>
+
+              <button class="portal-submit" type="submit">Save Answer Key</button>
+              <button class="portal-submit" type="button" id="dp-score-now">Score Now</button>
+              <p class="portal-small-note" id="dp-score-note" style="margin:0;"></p>
+            </form>
+
+            <div style="margin-top:10px;">
+              <p class="portal-card-intro" style="margin:10px 0 8px;">Saved Answer Keys</p>
+              <div id="dp-keys-list"></div>
+            </div>
+          </section>
+
+          <section class="packages-info-section packages-info-section--indented" aria-label="Writing AI">
+            <h2 class="packages-info-title"><span class="packages-info-icon" aria-hidden="true">🧠</span> <span>Writing Band Score (AI)</span></h2>
+            <p class="portal-small-note" style="margin:0;max-width:760px;">
+              This panel can be connected to an AI provider to score Writing using a model answer + rubric. Tell me which AI you want to use (OpenAI / Azure / other) and I’ll wire it.
+            </p>
+          </section>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      (function () {
+        function isLocalHost() {
+          return (
+            window.location.hostname === 'localhost' ||
+            window.location.hostname === '127.0.0.1' ||
+            window.location.hostname === '::1'
+          );
+        }
+
+        function portalUrl() {
+          return isLocalHost() ? 'portal.html' : '/portal';
+        }
+
+        function modulesUrl() {
+          return isLocalHost() ? 'modules.html' : '/modules';
+        }
+
+        function getQueryParams() {
+          try {
+            return new URLSearchParams(window.location.search || '');
+          } catch (_) {
+            return new URLSearchParams('');
+          }
+        }
+
+        function normalizeComponent(value) {
+          var v = String(value || '').trim().toLowerCase();
+          if (v === 'listening' || v === 'reading' || v === 'writing' || v === 'speaking') return v;
+          return 'listening';
+        }
+
+        function sectionLabel(section) {
+          var s = normalizeComponent(section);
+          if (s === 'listening') return 'Listening';
+          if (s === 'reading') return 'Reading';
+          if (s === 'writing') return 'Writing';
+          if (s === 'speaking') return 'Speaking';
+          return 'Listening';
+        }
+
+        function buildListeningTemplate(moduleNumber) {
+          var n = String(moduleNumber || '').trim();
+          var header = 'IELTS LISTENING — MODULE ' + (n || '');
+          return (
+            header + '\n' +
+            '----------------------------------------\n\n' +
+            'PART 1 (Questions 1–10)\n' +
+            'Instructions: (e.g. Complete the notes / form. NO MORE THAN THREE WORDS AND/OR A NUMBER.)\n\n' +
+            'Questions 1–10\n' +
+            '1) ______\n' +
+            '2) ______\n' +
+            '3) ______\n' +
+            '4) ______\n' +
+            '5) ______\n' +
+            '6) ______\n' +
+            '7) ______\n' +
+            '8) ______\n' +
+            '9) ______\n' +
+            '10) ______\n\n' +
+            'PART 2 (Questions 11–20)\n' +
+            'Instructions: (e.g. Choose TWO letters / Match the information / Complete the table.)\n\n' +
+            'Questions 11–20\n' +
+            '11) ______\n' +
+            '12) ______\n' +
+            '13) ______\n' +
+            '14) ______\n' +
+            '15) ______\n' +
+            '16) ______\n' +
+            '17) ______\n' +
+            '18) ______\n' +
+            '19) ______\n' +
+            '20) ______\n\n' +
+            'PART 3 (Questions 21–30)\n' +
+            'Instructions: (e.g. Multiple choice / Match speakers to opinions / Complete notes.)\n\n' +
+            'Questions 21–30\n' +
+            '21) ______\n' +
+            '22) ______\n' +
+            '23) ______\n' +
+            '24) ______\n' +
+            '25) ______\n' +
+            '26) ______\n' +
+            '27) ______\n' +
+            '28) ______\n' +
+            '29) ______\n' +
+            '30) ______\n\n' +
+            'PART 4 (Questions 31–40)\n' +
+            'Instructions: (e.g. Complete the summary. NO MORE THAN TWO WORDS.)\n\n' +
+            'Questions 31–40\n' +
+            '31) ______\n' +
+            '32) ______\n' +
+            '33) ______\n' +
+            '34) ______\n' +
+            '35) ______\n' +
+            '36) ______\n' +
+            '37) ______\n' +
+            '38) ______\n' +
+            '39) ______\n' +
+            '40) ______\n'
+          );
+        }
+
+        function buildReadingTemplate(moduleNumber) {
+          var n = String(moduleNumber || '').trim();
+          var header = 'IELTS READING — MODULE ' + (n || '');
+          return (
+            header + '\n' +
+            '----------------------------------------\n\n' +
+            'PASSAGE 1\n' +
+            '(Paste Passage 1 text here)\n\n' +
+            'Questions 1–13\n' +
+            '1) ______\n' +
+            '2) ______\n' +
+            '3) ______\n' +
+            '4) ______\n' +
+            '5) ______\n' +
+            '6) ______\n' +
+            '7) ______\n' +
+            '8) ______\n' +
+            '9) ______\n' +
+            '10) ______\n' +
+            '11) ______\n' +
+            '12) ______\n' +
+            '13) ______\n\n' +
+            'PASSAGE 2\n' +
+            '(Paste Passage 2 text here)\n\n' +
+            'Questions 14–26\n' +
+            '14) ______\n' +
+            '15) ______\n' +
+            '16) ______\n' +
+            '17) ______\n' +
+            '18) ______\n' +
+            '19) ______\n' +
+            '20) ______\n' +
+            '21) ______\n' +
+            '22) ______\n' +
+            '23) ______\n' +
+            '24) ______\n' +
+            '25) ______\n' +
+            '26) ______\n\n' +
+            'PASSAGE 3\n' +
+            '(Paste Passage 3 text here)\n\n' +
+            'Questions 27–40\n' +
+            '27) ______\n' +
+            '28) ______\n' +
+            '29) ______\n' +
+            '30) ______\n' +
+            '31) ______\n' +
+            '32) ______\n' +
+            '33) ______\n' +
+            '34) ______\n' +
+            '35) ______\n' +
+            '36) ______\n' +
+            '37) ______\n' +
+            '38) ______\n' +
+            '39) ______\n' +
+            '40) ______\n'
+          );
+        }
+
+        function buildWritingTemplate(moduleNumber) {
+          var n = String(moduleNumber || '').trim();
+          var header = 'IELTS WRITING — MODULE ' + (n || '');
+          return (
+            header + '\n' +
+            '----------------------------------------\n\n' +
+            'TASK 1\n' +
+            '(Paste Task 1 prompt here)\n\n' +
+            'TASK 2\n' +
+            '(Paste Task 2 prompt here)\n'
+          );
+        }
+
+        function buildSpeakingTemplate(moduleNumber) {
+          var n = String(moduleNumber || '').trim();
+          var header = 'IELTS SPEAKING — MODULE ' + (n || '');
+          return (
+            header + '\n' +
+            '----------------------------------------\n\n' +
+            'PART 1\n' +
+            '(Add Part 1 questions here)\n\n' +
+            'PART 2 (Cue Card)\n' +
+            '(Add cue card + prompts here)\n\n' +
+            'PART 3\n' +
+            '(Add Part 3 discussion questions here)\n'
+          );
+        }
+
+        function buildListeningTemplateFreeMock(moduleNumber) {
+          var n = String(moduleNumber || '').trim();
+          return (
+            'IELTS LISTENING — MODULE ' + (n || '') + '\n' +
+            '----------------------------------------\n\n' +
+            'PART 1 (Questions 1–10)\n' +
+            'Complete the notes / form. Write NO MORE THAN THREE WORDS AND/OR A NUMBER.\n\n' +
+            'School Excursion (sample structure)\n' +
+            'Day: Wednesday (Example)\n' +
+            'Destination: 1) ______\n' +
+            'Weather: 2) ______\n' +
+            'Arrival time: 3) ______\n' +
+            'Activities planned:\n' +
+            'See: 4) ______\n' +
+            'Eat: Catered lunch\n' +
+            'Attend: 5) ______\n' +
+            'Return time: 6) ______\n\n' +
+            'Questions 7–10\n' +
+            'Complete the table. Write ONE WORD ONLY.\n' +
+            '7) ______\n' +
+            '8) ______\n' +
+            '9) ______\n' +
+            '10) ______\n\n' +
+            'PART 2 (Questions 11–20)\n' +
+            'Choose the correct answer (A, B or C).\n\n' +
+            '11) ______\n' +
+            'A) ______\n' +
+            'B) ______\n' +
+            'C) ______\n\n' +
+            '12) ______\n' +
+            'A) ______\n' +
+            'B) ______\n' +
+            'C) ______\n\n' +
+            '13) ______\n' +
+            'A) ______\n' +
+            'B) ______\n' +
+            'C) ______\n\n' +
+            '14) ______\n' +
+            'A) ______\n' +
+            'B) ______\n' +
+            'C) ______\n\n' +
+            '15) ______\n' +
+            'A) ______\n' +
+            'B) ______\n' +
+            'C) ______\n\n' +
+            '16) ______\n' +
+            '17) ______\n' +
+            '18) ______\n' +
+            '19) ______\n' +
+            '20) ______\n\n' +
+            'PART 3 (Questions 21–30)\n' +
+            'Complete the timetable / table.\n\n' +
+            '21) ______\n' +
+            '22) ______\n' +
+            '23) ______\n' +
+            '24) ______\n' +
+            '25) ______\n' +
+            '26) ______\n' +
+            '27) ______\n' +
+            '28) ______\n' +
+            '29) ______\n' +
+            '30) ______\n\n' +
+            'PART 4 (Questions 31–40)\n' +
+            'Complete the sentences / notes. Write NO MORE THAN TWO WORDS AND/OR A NUMBER.\n\n' +
+            '31) ______\n' +
+            '32) ______\n' +
+            '33) ______\n' +
+            '34) ______\n\n' +
+            '35) ______\n' +
+            '36) ______\n' +
+            '37) ______\n' +
+            '38) ______\n' +
+            '39) ______\n' +
+            '40) ______\n'
+          );
+        }
+
+        function buildListeningTemplateNotesOnly(moduleNumber) {
+          var n = String(moduleNumber || '').trim();
+          var header = 'IELTS LISTENING — MODULE ' + (n || '');
+          return (
+            header + '\n' +
+            '----------------------------------------\n\n' +
+            'NOTES / FORM COMPLETION (sample)\n' +
+            'Write NO MORE THAN THREE WORDS AND/OR A NUMBER.\n\n' +
+            'Questions 1–40\n' +
+            '1) ______\n' +
+            '2) ______\n' +
+            '3) ______\n' +
+            '4) ______\n' +
+            '5) ______\n' +
+            '6) ______\n' +
+            '7) ______\n' +
+            '8) ______\n' +
+            '9) ______\n' +
+            '10) ______\n' +
+            '11) ______\n' +
+            '12) ______\n' +
+            '13) ______\n' +
+            '14) ______\n' +
+            '15) ______\n' +
+            '16) ______\n' +
+            '17) ______\n' +
+            '18) ______\n' +
+            '19) ______\n' +
+            '20) ______\n' +
+            '21) ______\n' +
+            '22) ______\n' +
+            '23) ______\n' +
+            '24) ______\n' +
+            '25) ______\n' +
+            '26) ______\n' +
+            '27) ______\n' +
+            '28) ______\n' +
+            '29) ______\n' +
+            '30) ______\n' +
+            '31) ______\n' +
+            '32) ______\n' +
+            '33) ______\n' +
+            '34) ______\n' +
+            '35) ______\n' +
+            '36) ______\n' +
+            '37) ______\n' +
+            '38) ______\n' +
+            '39) ______\n' +
+            '40) ______\n'
+          );
+        }
+
+        function buildListeningTemplateTableCompletion(moduleNumber) {
+          var n = String(moduleNumber || '').trim();
+          return (
+            'IELTS LISTENING — MODULE ' + (n || '') + '\n' +
+            '----------------------------------------\n\n' +
+            'TABLE COMPLETION (sample)\n' +
+            'Write ONE WORD ONLY for each answer.\n\n' +
+            'Questions 1–10\n' +
+            '1) ______\n' +
+            '2) ______\n' +
+            '3) ______\n' +
+            '4) ______\n' +
+            '5) ______\n' +
+            '6) ______\n' +
+            '7) ______\n' +
+            '8) ______\n' +
+            '9) ______\n' +
+            '10) ______\n'
+          );
+        }
+
+        function buildListeningTemplateMcq(moduleNumber) {
+          var n = String(moduleNumber || '').trim();
+          var header = 'IELTS LISTENING — MODULE ' + (n || '');
+          var lines = [
+            header,
+            '----------------------------------------',
+            '',
+            'MULTIPLE CHOICE (A, B or C)',
+            'Questions 1–10',
+            '1) ______',
+            'A) ______',
+            'B) ______',
+            'C) ______',
+            '',
+            '2) ______',
+            'A) ______',
+            'B) ______',
+            'C) ______',
+            '',
+            '3) ______',
+            'A) ______',
+            'B) ______',
+            'C) ______',
+            '',
+            '4) ______',
+            'A) ______',
+            'B) ______',
+            'C) ______',
+            '',
+            '5) ______',
+            'A) ______',
+            'B) ______',
+            'C) ______',
+            '',
+            '6) ______',
+            'A) ______',
+            'B) ______',
+            'C) ______',
+            '',
+            '7) ______',
+            'A) ______',
+            'B) ______',
+            'C) ______',
+            '',
+            '8) ______',
+            'A) ______',
+            'B) ______',
+            'C) ______',
+            '',
+            '9) ______',
+            'A) ______',
+            'B) ______',
+            'C) ______',
+            '',
+            '10) ______',
+            'A) ______',
+            'B) ______',
+            'C) ______',
+            ''
+          ];
+          return lines.join('\n');
+        }
+
+        function buildListeningTemplateTimetable(moduleNumber) {
+          var n = String(moduleNumber || '').trim();
+          return (
+            'IELTS LISTENING — MODULE ' + (n || '') + '\n' +
+            '----------------------------------------\n\n' +
+            'TIMETABLE COMPLETION (sample)\n' +
+            'Complete the timetable.\n\n' +
+            'Questions 21–30\n' +
+            'Monday: 21) ______\n' +
+            'Tuesday: 22) ______\n' +
+            'Wednesday: 23) ______\n' +
+            'Thursday: 24) ______\n' +
+            'Friday: 25) ______\n' +
+            'Saturday: 26) ______\n' +
+            'Sunday: 27) ______\n' +
+            '28) ______\n' +
+            '29) ______\n' +
+            '30) ______\n'
+          );
+        }
+
+        function buildListeningTemplateSentences(moduleNumber) {
+          var n = String(moduleNumber || '').trim();
+          return (
+            'IELTS LISTENING — MODULE ' + (n || '') + '\n' +
+            '----------------------------------------\n\n' +
+            'SENTENCE COMPLETION (sample)\n' +
+            'Write NO MORE THAN TWO WORDS for each answer.\n\n' +
+            'Questions 31–40\n' +
+            '31) ______ ______\n' +
+            '32) ______ ______\n' +
+            '33) ______ ______\n' +
+            '34) ______ ______\n' +
+            '35) ______ ______\n' +
+            '36) ______ ______\n' +
+            '37) ______ ______\n' +
+            '38) ______ ______\n' +
+            '39) ______ ______\n' +
+            '40) ______ ______\n'
+          );
+        }
+
+        function buildListeningTemplateByStyle(style, moduleNumber) {
+          var s = String(style || '').trim().toLowerCase();
+          if (s === 'notes') return buildListeningTemplateNotesOnly(moduleNumber);
+          if (s === 'table') return buildListeningTemplateTableCompletion(moduleNumber);
+          if (s === 'mcq') return buildListeningTemplateMcq(moduleNumber);
+          if (s === 'timetable') return buildListeningTemplateTimetable(moduleNumber);
+          if (s === 'sentences') return buildListeningTemplateSentences(moduleNumber);
+          return buildListeningTemplateFreeMock(moduleNumber);
+        }
+
+        function buildPaperTemplate(section, moduleNumber) {
+          var s = normalizeComponent(section);
+          if (s === 'reading') return buildReadingTemplate(moduleNumber);
+          if (s === 'writing') return buildWritingTemplate(moduleNumber);
+          if (s === 'speaking') return buildSpeakingTemplate(moduleNumber);
+          return buildListeningTemplateFreeMock(moduleNumber);
+        }
+
+        function buildListeningAnswerKeyTemplate() {
+          var lines = [];
+          for (var i = 1; i <= 40; i++) {
+            lines.push(i + ')');
+          }
+          return lines.join('\n') + '\n';
+        }
+
+        function buildAnswersTemplate(module) {
+          var s = normalizeComponent(module);
+          if (s === 'reading' || s === 'listening') return buildListeningAnswerKeyTemplate();
+          if (s === 'writing') return 'Task 1:\n\nTask 2:\n';
+          if (s === 'speaking') return 'Part 1:\n\nPart 2:\n\nPart 3:\n';
+          return buildListeningAnswerKeyTemplate();
+        }
+
+        function applyPrefillFromQuery(db) {
+          var params = getQueryParams();
+          var action = String(params.get('action') || '').trim();
+          var moduleNumber = String(params.get('module') || '').trim();
+          var component = normalizeComponent(params.get('component') || params.get('section') || 'listening');
+          var listeningStyle = String(params.get('style') || '').trim();
+
+          if (action !== 'add-paper' && action !== 'delete-add' && action !== 'add-answers') return Promise.resolve();
+
+          if (action === 'add-answers') {
+            var keysForm = document.getElementById('dp-keys-form');
+            if (!keysForm) return Promise.resolve();
+
+            try {
+              keysForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } catch (_) {}
+
+            try {
+              var moduleEl = keysForm.elements['module'];
+              if (moduleEl) {
+                if (component === 'listening' || component === 'reading') moduleEl.value = component;
+              }
+
+              var titleEl = keysForm.elements['title'];
+              if (titleEl && !String(titleEl.value || '').trim()) {
+                titleEl.value = moduleNumber ? (sectionLabel(component) + ' Test ' + moduleNumber + ' Key') : (sectionLabel(component) + ' Answer Key');
+              }
+
+              var answersEl = keysForm.elements['answers'];
+              if (answersEl && !String(answersEl.value || '').trim()) {
+                answersEl.value = buildAnswersTemplate(component);
+              }
+
+              var note = document.getElementById('dp-score-note');
+              if (note) {
+                if (component !== 'listening' && component !== 'reading') {
+                  note.textContent = 'Answer Keys are only for Listening/Reading. (Selected: ' + sectionLabel(component) + ')';
+                } else {
+                  note.textContent = moduleNumber ? ('Module ' + moduleNumber + ' ready: add ' + sectionLabel(component) + ' answers (1–40).') : ('Ready: add ' + sectionLabel(component) + ' answers (1–40).');
+                }
+              }
+            } catch (_) {}
+
+            return Promise.resolve(true);
+          }
+
+          var form = document.getElementById('dp-paper-form');
+          if (!form) return Promise.resolve();
+
+          function matchesComponentModule(p) {
+            if (!p || String(p.section || '') !== component) return false;
+            if (!moduleNumber) return false;
+            if (String(p.moduleNumber || '') === moduleNumber) return true;
+
+            var title = String(p.title || '').trim().toLowerCase();
+            var expected = (sectionLabel(component) + ' test ' + moduleNumber).toLowerCase();
+            if (title === expected) return true;
+            if (title.indexOf(expected) === 0) return true;
+
+            var content = String(p.content || '').toLowerCase();
+            if (content.indexOf(('module ' + moduleNumber).toLowerCase()) >= 0) return true;
+            if (content.indexOf(('module ' + moduleNumber).toUpperCase().toLowerCase()) >= 0) return true;
+            return false;
+          }
+
+          function doDeleteIfNeeded() {
+            if (action !== 'delete-add') return Promise.resolve();
+            if (!db || !moduleNumber) return Promise.resolve();
+
+            var note = document.getElementById('dp-paper-note');
+            if (note) note.textContent = 'Deleting existing ' + sectionLabel(component) + ' paper(s) for module ' + moduleNumber + '…';
+
+            return loadAllPapers(db)
+              .then(function (rows) {
+                var toDelete = [];
+                for (var i = 0; i < (rows || []).length; i++) {
+                  var p = rows[i];
+                  if (matchesComponentModule(p)) toDelete.push(p.id);
+                }
+                if (!toDelete.length) return true;
+                return Promise.all(
+                  toDelete.map(function (id) {
+                    return idbDelete(db, STORE_PAPERS, id);
+                  })
+                );
+              })
+              .then(function () {
+                // Refresh lists after delete.
+                return Promise.all([renderPaperList(db), renderStats(db)]);
+              })
+              .catch(function () {
+                return true;
+              });
+          }
+
+          try {
+            form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          } catch (_) {}
+
+          try {
+            var sectionEl = form.elements['section'];
+            if (sectionEl) {
+              sectionEl.value = component;
+              try {
+                sectionEl.dispatchEvent(new Event('change', { bubbles: true }));
+              } catch (_) {
+                // ignore
+              }
+            }
+
+            var titleEl = form.elements['title'];
+            var contentEl = form.elements['content'];
+
+            var shouldOverwrite = action === 'delete-add';
+            if (titleEl && (shouldOverwrite || !String(titleEl.value || '').trim())) {
+              titleEl.value = moduleNumber ? (sectionLabel(component) + ' Test ' + moduleNumber) : (sectionLabel(component) + ' Test');
+            }
+            if (contentEl && (shouldOverwrite || !String(contentEl.value || '').trim())) {
+              if (component === 'listening' && listeningStyle) {
+                contentEl.value = buildListeningTemplateByStyle(listeningStyle, moduleNumber);
+              } else {
+                contentEl.value = buildPaperTemplate(component, moduleNumber);
+              }
+            }
+
+            var note = document.getElementById('dp-paper-note');
+            if (note) note.textContent = '';
+          } catch (_) {
+            // ignore
+          }
+
+          return doDeleteIfNeeded().then(function () {
+            var note = document.getElementById('dp-paper-note');
+            if (note) {
+              var extra = component === 'listening' ? ' and audio' : '';
+              if (action === 'delete-add' && moduleNumber) note.textContent = 'Module ' + moduleNumber + ' reset: add ' + sectionLabel(component) + ' paper' + extra + '.';
+              else if (moduleNumber) note.textContent = 'Module ' + moduleNumber + ' ready: add ' + sectionLabel(component) + ' paper' + extra + '.';
+              else note.textContent = 'Ready: add ' + sectionLabel(component) + ' paper' + extra + '.';
+            }
+            return true;
+          });
+        }
+
+        try {
+          var ok = window.sessionStorage.getItem('ieltsDirectorAuthed') === 'true';
+          if (!ok) {
+            window.location.replace(portalUrl());
+          }
+        } catch (_) {
+          window.location.replace(portalUrl());
+        }
+
+        // Storage (IndexedDB)
+        // localStorage was OK for a few items, but 60+ papers (and audio) needs IndexedDB.
+        var DB_NAME = 'ieltsDirectorDb';
+        var DB_VERSION = 1;
+        var STORE_PAPERS = 'papers';
+        var STORE_KEYS = 'keys';
+        var STORE_METRICS = 'metrics';
+
+        // Legacy localStorage keys (migrated once if present)
+        var STORAGE_PAPERS_LEGACY = 'ieltsDirectorPapers';
+        var STORAGE_KEYS_LEGACY = 'ieltsDirectorAnswerKeys';
+        var STORAGE_METRICS_LEGACY = 'ieltsDirectorMetrics';
+
+        function safeJsonParse(value, fallback) {
+          try {
+            return JSON.parse(value);
+          } catch (_) {
+            return fallback;
+          }
+        }
+
+        function openDb() {
+          return new Promise(function (resolve, reject) {
+            if (!('indexedDB' in window)) {
+              reject(new Error('IndexedDB is not available in this browser.'));
+              return;
+            }
+            var request = window.indexedDB.open(DB_NAME, DB_VERSION);
+            request.onupgradeneeded = function () {
+              var db = request.result;
+              if (!db.objectStoreNames.contains(STORE_PAPERS)) {
+                var papers = db.createObjectStore(STORE_PAPERS, { keyPath: 'id' });
+                try {
+                  papers.createIndex('bySection', 'section', { unique: false });
+                  papers.createIndex('byCreatedAt', 'createdAt', { unique: false });
+                } catch (_) {}
+              }
+              if (!db.objectStoreNames.contains(STORE_KEYS)) {
+                var keys = db.createObjectStore(STORE_KEYS, { keyPath: 'id' });
+                try {
+                  keys.createIndex('byModule', 'module', { unique: false });
+                  keys.createIndex('byCreatedAt', 'createdAt', { unique: false });
+                } catch (_) {}
+              }
+              if (!db.objectStoreNames.contains(STORE_METRICS)) {
+                db.createObjectStore(STORE_METRICS, { keyPath: 'key' });
+              }
+            };
+            request.onsuccess = function () {
+              resolve(request.result);
+            };
+            request.onerror = function () {
+              reject(request.error || new Error('Failed to open IndexedDB.'));
+            };
+          });
+        }
+
+        function idbGetAll(db, storeName) {
+          return new Promise(function (resolve, reject) {
+            try {
+              var tx = db.transaction(storeName, 'readonly');
+              var store = tx.objectStore(storeName);
+              var req = store.getAll();
+              req.onsuccess = function () {
+                resolve(req.result || []);
+              };
+              req.onerror = function () {
+                reject(req.error || new Error('Failed to read store: ' + storeName));
+              };
+            } catch (err) {
+              reject(err);
+            }
+          });
+        }
+
+        function idbPut(db, storeName, value) {
+          return new Promise(function (resolve, reject) {
+            try {
+              var tx = db.transaction(storeName, 'readwrite');
+              var store = tx.objectStore(storeName);
+              var req = store.put(value);
+              req.onsuccess = function () {
+                resolve(true);
+              };
+              req.onerror = function () {
+                reject(req.error || new Error('Failed to save to store: ' + storeName));
+              };
+            } catch (err) {
+              reject(err);
+            }
+          });
+        }
+
+        function idbDelete(db, storeName, key) {
+          return new Promise(function (resolve, reject) {
+            try {
+              var tx = db.transaction(storeName, 'readwrite');
+              var store = tx.objectStore(storeName);
+              var req = store.delete(key);
+              req.onsuccess = function () {
+                resolve(true);
+              };
+              req.onerror = function () {
+                reject(req.error || new Error('Failed to delete from store: ' + storeName));
+              };
+            } catch (err) {
+              reject(err);
+            }
+          });
+        }
+
+        function idbClear(db, storeName) {
+          return new Promise(function (resolve, reject) {
+            try {
+              var tx = db.transaction(storeName, 'readwrite');
+              var store = tx.objectStore(storeName);
+              var req = store.clear();
+              req.onsuccess = function () {
+                resolve(true);
+              };
+              req.onerror = function () {
+                reject(req.error || new Error('Failed to clear store: ' + storeName));
+              };
+            } catch (err) {
+              reject(err);
+            }
+          });
+        }
+
+        function idbGet(db, storeName, key) {
+          return new Promise(function (resolve, reject) {
+            try {
+              var tx = db.transaction(storeName, 'readonly');
+              var store = tx.objectStore(storeName);
+              var req = store.get(key);
+              req.onsuccess = function () {
+                resolve(req.result || null);
+              };
+              req.onerror = function () {
+                reject(req.error || new Error('Failed to read key from store: ' + storeName));
+              };
+            } catch (err) {
+              reject(err);
+            }
+          });
+        }
+
+        function loadMetrics(db) {
+          var empty = { studentsTaking: 0, accounts: 0, testsBooked: 0, examiners: 0 };
+          return idbGet(db, STORE_METRICS, 'metrics').then(function (row) {
+            if (!row || !row.value) return empty;
+            var v = row.value;
+            return {
+              studentsTaking: Number(v.studentsTaking || 0),
+              accounts: Number(v.accounts || 0),
+              testsBooked: Number(v.testsBooked || 0),
+              examiners: Number(v.examiners || 0),
+            };
+          });
+        }
+
+        function saveMetrics(db, metrics) {
+          return idbPut(db, STORE_METRICS, { key: 'metrics', value: metrics || {} });
+        }
+
+        function loadAllPapers(db) {
+          return idbGetAll(db, STORE_PAPERS);
+        }
+
+        function loadAllKeys(db) {
+          return idbGetAll(db, STORE_KEYS);
+        }
+
+        function groupPapers(papers) {
+          var grouped = { listening: [], reading: [], writing: [], speaking: [] };
+          for (var i = 0; i < (papers || []).length; i++) {
+            var p = papers[i];
+            var sec = p && p.section ? String(p.section) : '';
+            if (!grouped[sec]) continue;
+            grouped[sec].push(p);
+          }
+          return grouped;
+        }
+
+        function groupKeys(keys) {
+          var grouped = { listening: [], reading: [] };
+          for (var i = 0; i < (keys || []).length; i++) {
+            var k = keys[i];
+            var mod = k && k.module ? String(k.module) : '';
+            if (!grouped[mod]) continue;
+            grouped[mod].push(k);
+          }
+          return grouped;
+        }
+
+        function migrateLegacyLocalStorage(db) {
+          return Promise.all([loadAllPapers(db), loadAllKeys(db), loadMetrics(db)]).then(function (current) {
+            var existingPapers = current[0] || [];
+            var existingKeys = current[1] || [];
+            var existingMetrics = current[2] || null;
+            var hasAnything = existingPapers.length || existingKeys.length || (existingMetrics && (existingMetrics.accounts || existingMetrics.testsBooked || existingMetrics.examiners || existingMetrics.studentsTaking));
+
+            // Only migrate if DB is basically empty.
+            if (hasAnything) return true;
+
+            var legacyPapers = safeJsonParse(window.localStorage.getItem(STORAGE_PAPERS_LEGACY), null);
+            var legacyKeys = safeJsonParse(window.localStorage.getItem(STORAGE_KEYS_LEGACY), null);
+            var legacyMetrics = safeJsonParse(window.localStorage.getItem(STORAGE_METRICS_LEGACY), null);
+
+            var ops = [];
+
+            if (legacyPapers && typeof legacyPapers === 'object') {
+              ['listening', 'reading', 'writing', 'speaking'].forEach(function (sec) {
+                var arr = Array.isArray(legacyPapers[sec]) ? legacyPapers[sec] : [];
+                for (var i = 0; i < arr.length; i++) {
+                  var item = arr[i] || {};
+                  ops.push(
+                    idbPut(db, STORE_PAPERS, {
+                      id: item.id || makeId(),
+                      section: sec,
+                      title: item.title || '',
+                      content: item.content || '',
+                      audioUrl: item.audioUrl || '',
+                      // legacy stored audio as data URL; keep it as a string if present (might be large)
+                      audioDataUrl: item.audioDataUrl || '',
+                      createdAt: item.createdAt || new Date().toISOString(),
+                    })
+                  );
+                }
+              });
+            }
+
+            if (legacyKeys && typeof legacyKeys === 'object') {
+              ['listening', 'reading'].forEach(function (mod) {
+                var arr = Array.isArray(legacyKeys[mod]) ? legacyKeys[mod] : [];
+                for (var i = 0; i < arr.length; i++) {
+                  var item = arr[i] || {};
+                  ops.push(
+                    idbPut(db, STORE_KEYS, {
+                      id: item.id || makeId(),
+                      module: mod,
+                      title: item.title || '',
+                      answers: item.answers || '',
+                      createdAt: item.createdAt || new Date().toISOString(),
+                    })
+                  );
+                }
+              });
+            }
+
+            if (legacyMetrics && typeof legacyMetrics === 'object') {
+              ops.push(saveMetrics(db, legacyMetrics));
+            }
+
+            return Promise.all(ops)
+              .catch(function () {
+                return true;
+              })
+              .finally(function () {
+                try {
+                  window.localStorage.removeItem(STORAGE_PAPERS_LEGACY);
+                  window.localStorage.removeItem(STORAGE_KEYS_LEGACY);
+                  window.localStorage.removeItem(STORAGE_METRICS_LEGACY);
+                } catch (_) {}
+              });
+          });
+        }
+
+        function makeId() {
+          return 'dp_' + Math.random().toString(16).slice(2) + '_' + Date.now();
+        }
+
+        function setText(el, text) {
+          if (!el) return;
+          el.textContent = String(text || '');
+        }
+
+        function setNote(el, text, kind) {
+          if (!el) return;
+          el.textContent = text || '';
+          if (kind === 'success') {
+            el.style.color = '#16a34a';
+            el.style.fontWeight = '600';
+          } else if (kind === 'error') {
+            el.style.color = '#dc2626';
+            el.style.fontWeight = '700';
+          } else {
+            el.style.color = '#9ca3af';
+            el.style.fontWeight = '500';
+          }
+        }
+
+        function normalizeLines(text) {
+          return String(text || '')
+            .replace(/\r\n/g, '\n')
+            .split('\n')
+            .map(function (line) {
+              return String(line || '').trim();
+            })
+            .filter(function (line) {
+              return !!line;
+            });
+        }
+
+        function scoreCandidate(correctLines, candidateLines) {
+          var correct = normalizeLines(correctLines);
+          var candidate = normalizeLines(candidateLines);
+          var total = correct.length;
+          var count = 0;
+          for (var i = 0; i < total; i++) {
+            var expected = String(correct[i] || '').trim().toLowerCase();
+            var given = String(candidate[i] || '').trim().toLowerCase();
+            if (!expected) continue;
+            if (expected === given) count++;
+          }
+          return { correct: count, total: total };
+        }
+
+        function renderStats(db) {
+          var list = document.getElementById('dp-stats-list');
+          if (!list) return;
+          list.innerHTML = '<li>Loading…</li>';
+          return Promise.all([loadAllPapers(db), loadAllKeys(db), loadMetrics(db)]).then(function (rows) {
+            var papers = groupPapers(rows[0] || []);
+            var keys = groupKeys(rows[1] || []);
+            var metrics = rows[2] || { studentsTaking: 0, accounts: 0, testsBooked: 0, examiners: 0 };
+
+            var items = [];
+            items.push('Listening papers: ' + papers.listening.length);
+            items.push('Reading papers: ' + papers.reading.length);
+            items.push('Writing papers: ' + papers.writing.length);
+            items.push('Speaking papers: ' + papers.speaking.length);
+            items.push('Listening keys: ' + keys.listening.length);
+            items.push('Reading keys: ' + keys.reading.length);
+            items.push('Students taking exams (manual): ' + metrics.studentsTaking);
+            items.push('Accounts (manual): ' + metrics.accounts);
+            items.push('Tests booked (manual): ' + metrics.testsBooked);
+            items.push('Examiners (manual): ' + metrics.examiners);
+
+            list.innerHTML = '';
+            for (var i = 0; i < items.length; i++) {
+              var li = document.createElement('li');
+              li.textContent = items[i];
+              list.appendChild(li);
+            }
+          });
+        }
+
+        function renderPaperList(db) {
+          var host = document.getElementById('dp-paper-list');
+          if (!host) return;
+          host.innerHTML = '<p class="portal-small-note" style="margin:0;">Loading…</p>';
+
+          return loadAllPapers(db).then(function (papers) {
+            var all = (papers || []).slice();
+            all.sort(function (a, b) {
+              var ta = Date.parse((a && a.createdAt) || '') || 0;
+              var tb = Date.parse((b && b.createdAt) || '') || 0;
+              return tb - ta;
+            });
+
+            host.innerHTML = '';
+            if (!all.length) {
+              var empty = document.createElement('p');
+              empty.className = 'portal-small-note';
+              empty.style.margin = '0';
+              empty.textContent = 'No papers saved yet.';
+              host.appendChild(empty);
+              return;
+            }
+
+            for (var j = 0; j < all.length; j++) {
+              (function (row) {
+                var wrap = document.createElement('div');
+                wrap.style.display = 'flex';
+                wrap.style.alignItems = 'center';
+                wrap.style.justifyContent = 'space-between';
+                wrap.style.gap = '12px';
+                wrap.style.padding = '10px 12px';
+                wrap.style.border = '1px solid var(--border)';
+                wrap.style.borderRadius = '12px';
+                wrap.style.background = '#ffffff';
+                wrap.style.marginBottom = '8px';
+
+                var left = document.createElement('div');
+                var title = document.createElement('div');
+                title.style.fontWeight = '900';
+                title.style.color = 'var(--text)';
+                title.textContent = row.title || '(Untitled)';
+                var meta = document.createElement('div');
+                meta.className = 'portal-small-note';
+                meta.style.margin = '2px 0 0';
+
+                var audioInfo = '';
+                if (row.section === 'listening') {
+                  if (row.audioUrl) audioInfo = ' • Audio URL';
+                  else if (row.audioFileName || row.audioBlob || row.audioDataUrl) audioInfo = ' • Audio file';
+                }
+
+                meta.textContent = 'Section: ' + (row.section || '') + ' • Saved: ' + (row.createdAt || '') + audioInfo;
+                left.appendChild(title);
+                left.appendChild(meta);
+
+                var btn = document.createElement('button');
+                btn.className = 'portal-submit';
+                btn.type = 'button';
+                btn.textContent = 'Delete';
+                btn.style.marginTop = '0';
+                btn.addEventListener('click', function () {
+                  idbDelete(db, STORE_PAPERS, row.id)
+                    .then(function () {
+                      return Promise.all([renderPaperList(db), renderStats(db)]);
+                    })
+                    .catch(function () {
+                      // ignore
+                    });
+                });
+
+                wrap.appendChild(left);
+                wrap.appendChild(btn);
+                host.appendChild(wrap);
+              })(all[j]);
+            }
+          });
+        }
+
+        function renderKeysList(db) {
+          var host = document.getElementById('dp-keys-list');
+          if (!host) return;
+          host.innerHTML = '<p class="portal-small-note" style="margin:0;">Loading…</p>';
+          return loadAllKeys(db).then(function (keys) {
+            var all = (keys || []).slice();
+            all.sort(function (a, b) {
+              var ta = Date.parse((a && a.createdAt) || '') || 0;
+              var tb = Date.parse((b && b.createdAt) || '') || 0;
+              return tb - ta;
+            });
+
+            host.innerHTML = '';
+            if (!all.length) {
+              var empty = document.createElement('p');
+              empty.className = 'portal-small-note';
+              empty.style.margin = '0';
+              empty.textContent = 'No answer keys saved yet.';
+              host.appendChild(empty);
+              return;
+            }
+
+            for (var k = 0; k < all.length; k++) {
+              (function (row) {
+                var wrap = document.createElement('div');
+                wrap.style.display = 'flex';
+                wrap.style.alignItems = 'center';
+                wrap.style.justifyContent = 'space-between';
+                wrap.style.gap = '12px';
+                wrap.style.padding = '10px 12px';
+                wrap.style.border = '1px solid var(--border)';
+                wrap.style.borderRadius = '12px';
+                wrap.style.background = '#ffffff';
+                wrap.style.marginBottom = '8px';
+
+                var left = document.createElement('div');
+                var title = document.createElement('div');
+                title.style.fontWeight = '900';
+                title.style.color = 'var(--text)';
+                title.textContent = row.title || '(Untitled)';
+                var meta = document.createElement('div');
+                meta.className = 'portal-small-note';
+                meta.style.margin = '2px 0 0';
+                meta.textContent = 'Module: ' + (row.module || '') + ' • Answers: ' + normalizeLines(row.answers || '').length;
+                left.appendChild(title);
+                left.appendChild(meta);
+
+                var btn = document.createElement('button');
+                btn.className = 'portal-submit';
+                btn.type = 'button';
+                btn.textContent = 'Delete';
+                btn.style.marginTop = '0';
+                btn.addEventListener('click', function () {
+                  idbDelete(db, STORE_KEYS, row.id)
+                    .then(function () {
+                      return Promise.all([renderKeysList(db), renderStats(db)]);
+                    })
+                    .catch(function () {
+                      // ignore
+                    });
+                });
+
+                wrap.appendChild(left);
+                wrap.appendChild(btn);
+                host.appendChild(wrap);
+              })(all[k]);
+            }
+          });
+        }
+
+        function bindPaperForm(db) {
+          var form = document.getElementById('dp-paper-form');
+          var note = document.getElementById('dp-paper-note');
+          var sectionEl = form ? form.elements['section'] : null;
+          var audioWrap = document.getElementById('dp-listening-audio-fields');
+          var stylePanel = document.getElementById('dp-paper-style');
+          var styleNote = document.getElementById('dp-paper-style-note');
+          var exportBtn = document.getElementById('dp-paper-export');
+          var importInput = document.getElementById('dp-paper-import');
+
+          function setStyleNote(text) {
+            if (!styleNote) return;
+            styleNote.textContent = String(text || '');
+          }
+
+          function toggleStylePanel() {
+            if (!stylePanel) return;
+            var section = sectionEl ? String(sectionEl.value || '') : '';
+            var show = section === 'listening';
+            stylePanel.hidden = !show;
+          }
+
+          function applyListeningStyle(style) {
+            if (!form) return;
+            var contentEl = form.elements['content'];
+            var titleEl = form.elements['title'];
+            if (!contentEl) return;
+
+            var params = getQueryParams();
+            var moduleNumber = String(params.get('module') || '').trim();
+            var text = buildListeningTemplateByStyle(style, moduleNumber);
+
+            var existing = String(contentEl.value || '');
+            var looksLikeTemplate = /^IELTS LISTENING\s+—\s+MODULE\s+/m.test(existing) || /^IELTS LISTENING\s+—\s+MODULE\s*$/m.test(existing) || /^IELTS LISTENING\s+—\s+MODULE/m.test(existing);
+            if (!existing.trim() || looksLikeTemplate) {
+              contentEl.value = text;
+            } else {
+              contentEl.value = existing.replace(/\s*$/, '') + '\n\n' + text;
+            }
+
+            if (titleEl && !String(titleEl.value || '').trim()) {
+              titleEl.value = moduleNumber ? 'Listening Test ' + moduleNumber : 'Listening Test';
+            }
+
+            try {
+              contentEl.focus();
+            } catch (_) {}
+
+            setStyleNote('Applied: ' + String(style || 'free-mock'));
+          }
+
+          function syncSectionUi() {
+            var section = sectionEl ? String(sectionEl.value || '') : '';
+            if (audioWrap) audioWrap.style.display = section === 'listening' ? '' : 'none';
+            toggleStylePanel();
+          }
+
+          if (sectionEl) sectionEl.addEventListener('change', syncSectionUi);
+          syncSectionUi();
+
+          if (stylePanel) {
+            stylePanel.addEventListener('click', function (e) {
+              var target = e.target;
+              if (!target || !target.getAttribute) return;
+              var style = target.getAttribute('data-style');
+              if (!style) return;
+              applyListeningStyle(style);
+            });
+          }
+
+          if (exportBtn) {
+            exportBtn.addEventListener('click', function () {
+              loadAllPapers(db)
+                .then(function (papers) {
+                  var grouped = groupPapers(papers || []);
+                  // Do not export binary audio blobs (too large); keep URL + filename metadata.
+                  ['listening', 'reading', 'writing', 'speaking'].forEach(function (sec) {
+                    grouped[sec] = (grouped[sec] || []).map(function (p) {
+                      return {
+                        id: p.id,
+                        title: p.title || '',
+                        content: p.content || '',
+                        audioUrl: p.audioUrl || '',
+                        audioFileName: p.audioFileName || '',
+                        audioFileType: p.audioFileType || '',
+                        audioStored: !!(p.audioBlob || p.audioDataUrl),
+                        createdAt: p.createdAt || '',
+                      };
+                    });
+                  });
+
+                  var blob = new Blob([JSON.stringify(grouped, null, 2)], { type: 'application/json' });
+                  var url = URL.createObjectURL(blob);
+                  var a = document.createElement('a');
+                  a.href = url;
+                  a.download = 'ielts-papers.json';
+                  document.body.appendChild(a);
+                  a.click();
+                  a.remove();
+                  URL.revokeObjectURL(url);
+                  setNote(note, 'Exported papers JSON (audio files not included).', 'success');
+                })
+                .catch(function (err) {
+                  setNote(note, (err && err.message) ? err.message : 'Unable to export.', 'error');
+                });
+            });
+          }
+
+          if (importInput) {
+            importInput.addEventListener('change', function () {
+              var file = importInput.files && importInput.files[0] ? importInput.files[0] : null;
+              if (!file) return;
+              var reader = new FileReader();
+              reader.onload = function () {
+                try {
+                  var incoming = safeJsonParse(String(reader.result || ''), null);
+                  if (!incoming || typeof incoming !== 'object') throw new Error('Invalid JSON file.');
+
+                  idbClear(db, STORE_PAPERS)
+                    .then(function () {
+                      var ops = [];
+                      ['listening', 'reading', 'writing', 'speaking'].forEach(function (sec) {
+                        var arr = Array.isArray(incoming[sec]) ? incoming[sec] : [];
+                        for (var i = 0; i < arr.length; i++) {
+                          var item = arr[i] || {};
+                          ops.push(
+                            idbPut(db, STORE_PAPERS, {
+                              id: item.id || makeId(),
+                              section: sec,
+                              title: item.title || '',
+                              content: item.content || '',
+                              audioUrl: item.audioUrl || '',
+                              audioFileName: item.audioFileName || '',
+                              audioFileType: item.audioFileType || '',
+                              audioBlob: null,
+                              audioDataUrl: '',
+                              createdAt: item.createdAt || new Date().toISOString(),
+                            })
+                          );
+                        }
+                      });
+                      return Promise.all(ops);
+                    })
+                    .then(function () {
+                      return Promise.all([renderPaperList(db), renderStats(db)]);
+                    })
+                    .then(function () {
+                      setNote(note, 'Imported papers JSON. (Audio files must be re-uploaded.)', 'success');
+                    })
+                    .catch(function (err2) {
+                      setNote(note, (err2 && err2.message) ? err2.message : 'Unable to import.', 'error');
+                    });
+                } catch (err) {
+                  setNote(note, (err && err.message) ? err.message : 'Unable to import.', 'error');
+                }
+              };
+              reader.readAsText(file);
+            });
+          }
+
+          if (!form) return;
+          form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            var section = String((form.elements['section'] && form.elements['section'].value) || '').trim();
+            var title = String((form.elements['title'] && form.elements['title'].value) || '').trim();
+            var content = String((form.elements['content'] && form.elements['content'].value) || '');
+            var audioUrl = String((form.elements['audioUrl'] && form.elements['audioUrl'].value) || '').trim();
+            var audioFile = form.elements['audioFile'] && form.elements['audioFile'].files && form.elements['audioFile'].files[0]
+              ? form.elements['audioFile'].files[0]
+              : null;
+
+            var params = getQueryParams();
+            var moduleNumber = String(params.get('module') || '').trim();
+
+            if (!section || !title) {
+              setNote(note, 'Please choose a section and enter a title.', 'error');
+              return;
+            }
+
+            var entry = {
+              id: makeId(),
+              moduleNumber: moduleNumber || '',
+              section: section,
+              title: title,
+              content: content,
+              audioUrl: section === 'listening' ? audioUrl : '',
+              audioFileName: '',
+              audioFileType: '',
+              audioBlob: null,
+              audioDataUrl: '',
+              createdAt: new Date().toISOString(),
+            };
+
+            function finalizeSave() {
+              idbPut(db, STORE_PAPERS, entry)
+                .then(function () {
+                  return Promise.all([renderPaperList(db), renderStats(db)]);
+                })
+                .then(function () {
+                  setNote(note, 'Paper saved.', 'success');
+                  try {
+                    form.reset();
+                  } catch (_) {}
+                  syncSectionUi();
+                })
+                .catch(function (err) {
+                  setNote(note, (err && err.message) ? err.message : 'Unable to save paper.', 'error');
+                });
+            }
+
+            // Store audio as Blob in IndexedDB when uploaded.
+            if (section === 'listening' && audioFile) {
+              entry.audioFileName = String(audioFile.name || 'audio');
+              entry.audioFileType = String(audioFile.type || '');
+              entry.audioBlob = audioFile;
+            }
+
+            finalizeSave();
+          });
+        }
+
+        function bindMetricsForm(db) {
+          var form = document.getElementById('dp-metrics-form');
+          var note = document.getElementById('dp-metrics-note');
+          if (!form) return;
+          loadMetrics(db)
+            .then(function (current) {
+              try {
+                form.elements['studentsTaking'].value = String(current.studentsTaking || 0);
+                form.elements['accounts'].value = String(current.accounts || 0);
+                form.elements['testsBooked'].value = String(current.testsBooked || 0);
+                form.elements['examiners'].value = String(current.examiners || 0);
+              } catch (_) {}
+            })
+            .catch(function () {
+              // ignore
+            });
+
+          form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            var metrics = {
+              studentsTaking: Number((form.elements['studentsTaking'] && form.elements['studentsTaking'].value) || 0),
+              accounts: Number((form.elements['accounts'] && form.elements['accounts'].value) || 0),
+              testsBooked: Number((form.elements['testsBooked'] && form.elements['testsBooked'].value) || 0),
+              examiners: Number((form.elements['examiners'] && form.elements['examiners'].value) || 0),
+            };
+            saveMetrics(db, metrics)
+              .then(function () {
+                return renderStats(db);
+              })
+              .then(function () {
+                setNote(note, 'Saved.', 'success');
+              })
+              .catch(function (err) {
+                setNote(note, (err && err.message) ? err.message : 'Unable to save.', 'error');
+              });
+          });
+        }
+
+        function bindKeysForm(db) {
+          var form = document.getElementById('dp-keys-form');
+          var note = document.getElementById('dp-score-note');
+          var scoreBtn = document.getElementById('dp-score-now');
+          if (!form) return;
+
+          function scoreNow() {
+            var correct = String((form.elements['answers'] && form.elements['answers'].value) || '');
+            var candidate = String((form.elements['candidate'] && form.elements['candidate'].value) || '');
+            var result = scoreCandidate(correct, candidate);
+            if (!result.total) {
+              setNote(note, 'Add the correct answers first (one per line).', 'error');
+              return;
+            }
+            setNote(note, 'Score: ' + result.correct + ' / ' + result.total + ' correct (band conversion not configured).', 'success');
+          }
+
+          if (scoreBtn) scoreBtn.addEventListener('click', scoreNow);
+
+          form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            var module = String((form.elements['module'] && form.elements['module'].value) || '').trim();
+            var title = String((form.elements['title'] && form.elements['title'].value) || '').trim();
+            var answers = String((form.elements['answers'] && form.elements['answers'].value) || '');
+
+            var params = getQueryParams();
+            var moduleNumber = String(params.get('module') || '').trim();
+            if (!module || !title) {
+              setNote(note, 'Please select a module and enter a title.', 'error');
+              return;
+            }
+            if (!normalizeLines(answers).length) {
+              setNote(note, 'Please paste the correct answers (one per line).', 'error');
+              return;
+            }
+            var entry = {
+              id: makeId(),
+              module: module,
+              moduleNumber: moduleNumber || '',
+              title: title,
+              answers: answers,
+              createdAt: new Date().toISOString(),
+            };
+            idbPut(db, STORE_KEYS, entry)
+              .then(function () {
+                return Promise.all([renderKeysList(db), renderStats(db)]);
+              })
+              .then(function () {
+                setNote(note, 'Answer key saved.', 'success');
+              })
+              .catch(function (err) {
+                setNote(note, (err && err.message) ? err.message : 'Unable to save answer key.', 'error');
+              });
+          });
+        }
+
+        openDb()
+          .then(function (db) {
+            return migrateLegacyLocalStorage(db).then(function () {
+              return db;
+            });
+          })
+          .then(function (db) {
+            var modulesBtn = document.getElementById('dp-modules-btn');
+            if (modulesBtn) {
+              modulesBtn.addEventListener('click', function () {
+                window.location.href = modulesUrl();
+              });
+            }
+            bindMetricsForm(db);
+            bindPaperForm(db);
+            bindKeysForm(db);
+            return applyPrefillFromQuery(db).then(function () {
+              return Promise.all([renderStats(db), renderPaperList(db), renderKeysList(db)]);
+            });
+          })
+          .catch(function (err) {
+            var list = document.getElementById('dp-stats-list');
+            if (list) {
+              list.innerHTML = '';
+              var li = document.createElement('li');
+              li.textContent = (err && err.message) ? err.message : 'Unable to start Director Panel storage.';
+              list.appendChild(li);
+            }
+          });
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,13 @@
+# Speed up Vercel uploads (CLI deploy) by excluding local-only artifacts.
+node_modules
+
+# Build/utility scripts not needed at runtime
+tools
+
+# Local editor / OS noise
+.vscode
+.DS_Store
+Thumbs.db
+
+# Optional: local logs
+*.log

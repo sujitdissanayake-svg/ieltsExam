@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Modules</title>
+    <link rel="stylesheet" href="styles.css?v=20260226" />
+  </head>
+  <body>
+    <main class="packages-page" aria-label="Modules">
+      <div class="packages-shell">
+        <div class="packages-top">
+          <a class="packages-back" id="modules-back" href="#">← Back to Director Panel</a>
+          <h1 class="packages-title">Modules</h1>
+        </div>
+
+        <section class="packages-info" aria-label="Modules list">
+          <section class="packages-info-section packages-info-section--indented" aria-label="Modules selector">
+            <h2 class="packages-info-title"><span>Modules</span></h2>
+
+            <form class="portal-form" id="modules-form" style="margin-top:6px;max-width:980px;">
+              <div class="modules-row">
+                <label class="portal-field" style="margin:0;">
+                  <span class="portal-label">Select Module (1–40)</span>
+                  <select class="portal-input" id="module-select" name="module" required>
+                    <option value="" selected disabled>Select…</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                    <option value="11">11</option>
+                    <option value="12">12</option>
+                    <option value="13">13</option>
+                    <option value="14">14</option>
+                    <option value="15">15</option>
+                    <option value="16">16</option>
+                    <option value="17">17</option>
+                    <option value="18">18</option>
+                    <option value="19">19</option>
+                    <option value="20">20</option>
+                    <option value="21">21</option>
+                    <option value="22">22</option>
+                    <option value="23">23</option>
+                    <option value="24">24</option>
+                    <option value="25">25</option>
+                    <option value="26">26</option>
+                    <option value="27">27</option>
+                    <option value="28">28</option>
+                    <option value="29">29</option>
+                    <option value="30">30</option>
+                    <option value="31">31</option>
+                    <option value="32">32</option>
+                    <option value="33">33</option>
+                    <option value="34">34</option>
+                    <option value="35">35</option>
+                    <option value="36">36</option>
+                    <option value="37">37</option>
+                    <option value="38">38</option>
+                    <option value="39">39</option>
+                    <option value="40">40</option>
+                  </select>
+
+                  <div class="modules-components" id="modules-components" aria-label="Components" hidden>
+                    <button class="module-component-btn" type="button" data-component="listening" aria-pressed="false">Listening</button>
+                    <button class="module-component-btn" type="button" data-component="reading" aria-pressed="false">Reading</button>
+                    <button class="module-component-btn" type="button" data-component="writing" aria-pressed="false">Writing</button>
+                    <button class="module-component-btn" type="button" data-component="speaking" aria-pressed="false">Speaking</button>
+                  </div>
+                </label>
+
+                <div class="modules-right" aria-label="Module actions panel">
+                  <div class="modules-actions" id="modules-actions" aria-label="Module actions" hidden>
+                    <button class="module-action-btn" type="button" data-action="add-paper">Add a Paper</button>
+                    <button class="module-action-btn" type="button" data-action="delete-add">Delete and Add</button>
+                    <button class="module-action-btn" type="button" data-action="add-answers">Add Answers</button>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </section>
+
+          <section class="packages-info-section packages-info-section--indented" aria-label="Paper structures">
+            <h2 class="packages-info-title"><span>Paper Structures</span></h2>
+
+            <aside class="modules-structures" id="modules-structures" aria-label="Paper structures panel" style="margin-top:10px;">
+              <div class="modules-structures-sub" id="modules-structures-sub">Select a module and component to see templates.</div>
+              <div class="modules-structures-actions" id="modules-structures-actions" hidden>
+                <button class="modules-structure-btn" type="button" data-style="free-mock">Free Mock (Mixed)</button>
+                <button class="modules-structure-btn" type="button" data-style="notes">Notes / Form (Blanks)</button>
+                <button class="modules-structure-btn" type="button" data-style="table">Table Completion</button>
+                <button class="modules-structure-btn" type="button" data-style="mcq">Multiple Choice (A/B/C)</button>
+                <button class="modules-structure-btn" type="button" data-style="timetable">Timetable Completion</button>
+                <button class="modules-structure-btn" type="button" data-style="sentences">Sentence Completion</button>
+              </div>
+              <p class="portal-small-note" id="modules-structures-note" style="margin:10px 0 0;"></p>
+            </aside>
+
+            <div class="modules-embed" id="modules-embed" hidden style="margin-top:12px;">
+              <iframe class="modules-embed-frame" id="modules-embed-frame" title="Director Panel" loading="lazy"></iframe>
+            </div>
+          </section>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      (function () {
+        function isLocalHost() {
+          return (
+            window.location.hostname === 'localhost' ||
+            window.location.hostname === '127.0.0.1' ||
+            window.location.hostname === '::1'
+          );
+        }
+
+        function directorPanelUrl() {
+          return isLocalHost() ? 'director-panel.html' : '/director-panel';
+        }
+
+        function buildFutureUrl(moduleNumber, action, component, style) {
+          // Placeholder wiring for later: keep it simple and consistent.
+          // You can later route these to separate admin files or to director-panel with a query param.
+          var base = directorPanelUrl();
+          var sep = base.indexOf('?') >= 0 ? '&' : '?';
+          var url = (
+            base +
+            sep +
+            'module=' +
+            encodeURIComponent(String(moduleNumber || '')) +
+            '&action=' +
+            encodeURIComponent(String(action || '')) +
+            '&component=' +
+            encodeURIComponent(String(component || 'listening'))
+          );
+
+          if (style) {
+            url += '&style=' + encodeURIComponent(String(style || ''));
+          }
+          return url;
+        }
+
+        var back = document.getElementById('modules-back');
+        if (back) back.setAttribute('href', directorPanelUrl());
+
+        var select = document.getElementById('module-select');
+        var actions = document.getElementById('modules-actions');
+        var components = document.getElementById('modules-components');
+        var embed = document.getElementById('modules-embed');
+        var embedFrame = document.getElementById('modules-embed-frame');
+        var structuresSub = document.getElementById('modules-structures-sub');
+        var structuresActions = document.getElementById('modules-structures-actions');
+        var structuresNote = document.getElementById('modules-structures-note');
+        if (select && actions && components) {
+          // Ensure a predictable initial state.
+          actions.style.display = 'none';
+          components.style.display = 'none';
+
+          var selectedComponent = '';
+          var lastModule = '';
+          var selectedStyle = '';
+
+          function setStructuresNote(text) {
+            if (!structuresNote) return;
+            structuresNote.textContent = String(text || '');
+          }
+
+          function syncStructureUi() {
+            if (!structuresActions) return;
+            var btns = structuresActions.querySelectorAll('button[data-style]');
+            for (var i = 0; i < btns.length; i++) {
+              var b = btns[i];
+              var st = String(b.getAttribute('data-style') || '');
+              var isActive = st === selectedStyle;
+              if (isActive) b.classList.add('is-active');
+              else b.classList.remove('is-active');
+            }
+          }
+
+          function syncComponentUi() {
+            var btns = components.querySelectorAll('button[data-component]');
+            for (var i = 0; i < btns.length; i++) {
+              var b = btns[i];
+              var comp = String(b.getAttribute('data-component') || '');
+              var isActive = comp === selectedComponent;
+              b.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+              if (isActive) b.classList.add('is-active');
+              else b.classList.remove('is-active');
+            }
+          }
+
+          function updateActions() {
+            var value = String(select.value || '').trim();
+            var hasModule = !!value;
+
+            if (hasModule && value !== lastModule) {
+              // New module selected: require component selection again.
+              selectedComponent = '';
+              lastModule = value;
+              selectedStyle = '';
+            }
+
+            actions.hidden = !hasModule;
+            actions.style.display = hasModule ? 'flex' : 'none';
+            actions.setAttribute('aria-hidden', hasModule ? 'false' : 'true');
+            actions.setAttribute('data-module', value);
+            actions.setAttribute('data-component', selectedComponent);
+            actions.setAttribute('data-style', selectedStyle);
+
+            // Disable action buttons until a component is selected.
+            var enabled = hasModule && !!selectedComponent;
+            var actionBtns = actions.querySelectorAll('button[data-action]');
+            for (var i = 0; i < actionBtns.length; i++) {
+              actionBtns[i].disabled = !enabled;
+            }
+
+            // Paper structures panel content
+            if (structuresSub) {
+              if (!hasModule) structuresSub.textContent = 'Select a module and component to see templates.';
+              else if (!selectedComponent) structuresSub.textContent = 'Now select a component (Listening/Reading/Writing/Speaking).';
+              else if (selectedComponent === 'listening') structuresSub.textContent = 'Select a Listening question style template.';
+              else structuresSub.textContent = 'Templates are available for Listening only right now.';
+            }
+
+            if (structuresActions) {
+              var showStructures = hasModule && selectedComponent === 'listening';
+              structuresActions.hidden = !showStructures;
+
+              var styleBtns = structuresActions.querySelectorAll('button[data-style]');
+              for (var s = 0; s < styleBtns.length; s++) {
+                styleBtns[s].disabled = !showStructures;
+              }
+              syncStructureUi();
+            }
+
+            if (!hasModule || !selectedComponent) setStructuresNote('');
+
+            if (embed) {
+              // Keep embed hidden until an action is clicked.
+              if (!hasModule) {
+                embed.hidden = true;
+                if (embedFrame) embedFrame.removeAttribute('src');
+              }
+            }
+
+            components.hidden = !hasModule;
+            components.style.display = hasModule ? 'flex' : 'none';
+            components.setAttribute('aria-hidden', hasModule ? 'false' : 'true');
+            syncComponentUi();
+          }
+
+          // Show actions when selecting any number (1–40)
+          select.addEventListener('change', updateActions);
+          select.addEventListener('input', updateActions);
+
+          // Also show actions when clicking/focusing the dropdown (useful when
+          // the same value is selected again and 'change' doesn't fire).
+          select.addEventListener('click', function () {
+            // Let the selection update first if needed.
+            setTimeout(updateActions, 0);
+          });
+          select.addEventListener('focus', updateActions);
+          select.addEventListener('blur', updateActions);
+
+          actions.addEventListener('click', function (e) {
+            var target = e.target;
+            if (!target || !target.getAttribute) return;
+            if (target.disabled) return;
+            var action = target.getAttribute('data-action');
+            if (!action) return;
+            var moduleNumber = actions.getAttribute('data-module') || '';
+            if (!moduleNumber) return;
+
+            var component = actions.getAttribute('data-component') || 'listening';
+            var style = actions.getAttribute('data-style') || '';
+
+            if ((action === 'add-paper' || action === 'delete-add') && component === 'listening' && !style) {
+              setStructuresNote('Select a Listening question style first.');
+              return;
+            }
+
+            // Load Director Panel on the same page (right side), no navigation.
+            var url = buildFutureUrl(moduleNumber, action, component, style);
+            if (embed && embedFrame) {
+              embed.hidden = false;
+              embedFrame.src = url;
+              try {
+                embed.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              } catch (_) {}
+            }
+          });
+
+          components.addEventListener('click', function (e) {
+            var target = e.target;
+            if (!target || !target.getAttribute) return;
+            var comp = target.getAttribute('data-component');
+            if (!comp) return;
+            selectedComponent = String(comp || 'listening');
+            selectedStyle = '';
+            updateActions();
+          });
+
+          if (structuresActions) {
+            structuresActions.addEventListener('click', function (e) {
+              var target = e.target;
+              if (!target || !target.getAttribute) return;
+              if (target.disabled) return;
+              var style = target.getAttribute('data-style');
+              if (!style) return;
+              selectedStyle = String(style || '');
+              setStructuresNote('Selected: ' + selectedStyle);
+              updateActions();
+            });
+          }
+
+          // Run once to ensure disabled state is applied.
+          updateActions();
+        }
+      })();
+    </script>
+  </body>
+</html>

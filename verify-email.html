@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Verify your email</title>
+    <link rel="stylesheet" href="styles.css?v=20260226" />
+  </head>
+  <body>
+    <main class="portal-page" aria-label="Email verification">
+      <div class="portal-shell">
+        <section class="portal-left" aria-label="Instructions">
+          <h1 class="portal-welcome-title">VERIFY</h1>
+          <p class="portal-welcome-subtitle">Confirm your email address</p>
+          <p class="portal-welcome-text" id="verify-help">
+            Enter the 6-digit code we sent to your email.
+          </p>
+        </section>
+
+        <section class="portal-card" aria-label="Verification form">
+          <h2 class="portal-card-title">Email verification</h2>
+          <p class="portal-card-intro">Enter the code to complete your registration.</p>
+
+          <form class="portal-form" autocomplete="on" id="verify-form">
+            <label class="portal-field">
+              <span class="portal-label">Verification code</span>
+              <input
+                class="portal-input"
+                type="text"
+                name="code"
+                inputmode="numeric"
+                autocomplete="one-time-code"
+                placeholder="Enter 6-digit code"
+                pattern="[0-9]{6}"
+                maxlength="6"
+                required
+              />
+            </label>
+
+            <button class="portal-submit" type="submit" id="verify-submit">Verify & Continue</button>
+            <button class="portal-submit" type="button" id="verify-resend">Send code again</button>
+
+            <p class="portal-small-note" id="verify-note">Your code expires after 10 minutes.</p>
+          </form>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      (function () {
+        var form = document.getElementById('verify-form');
+        var note = document.getElementById('verify-note');
+        var help = document.getElementById('verify-help');
+        var submitBtn = document.getElementById('verify-submit');
+        var resendBtn = document.getElementById('verify-resend');
+        if (!form || !note || !help || !submitBtn || !resendBtn) return;
+
+        var params;
+        try {
+          params = new URLSearchParams(window.location.search || '');
+        } catch (_) {
+          params = new URLSearchParams('');
+        }
+
+        var token = String(params.get('token') || '').trim();
+        var email = String(params.get('email') || '').trim();
+        var name = String(params.get('name') || '').trim();
+        var target = String(params.get('target') || '').trim();
+        var selectedPackage = String(params.get('package') || '').trim();
+
+        function setNote(text, kind) {
+          note.textContent = text;
+          if (kind === 'success') {
+            note.style.color = '#16a34a';
+            note.style.fontWeight = '500';
+          } else if (kind === 'error') {
+            note.style.color = '#dc2626';
+            note.style.fontWeight = '600';
+          } else {
+            note.style.color = '#9ca3af';
+            note.style.fontWeight = '400';
+          }
+        }
+
+        function postJson(url, payload) {
+          return fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload || {}),
+          }).then(function (res) {
+            return res
+              .json()
+              .catch(function () {
+                return {};
+              })
+              .then(function (data) {
+                return { ok: res.ok, status: res.status, data: data };
+              });
+          });
+        }
+
+        function redirectAfterSuccess() {
+          var pkgText = selectedPackage ? ' (Package: ' + selectedPackage + ')' : '';
+          setNote((name ? 'Thank you, ' + name + '. ' : 'Thank you. ') + 'Your email has been verified' + pkgText + '.', 'success');
+
+          try {
+            window.localStorage.setItem('ieltsPortalRegistered', 'true');
+            window.localStorage.setItem('ieltsPortalEmail', email);
+            if (name) window.localStorage.setItem('ieltsPortalName', name);
+          } catch (_) {}
+
+          setTimeout(function () {
+            var fallback = './index.html#free-mock';
+            var dest = target || fallback;
+            try {
+              window.location.href = dest;
+            } catch (_) {
+              window.location.href = fallback;
+            }
+          }, 900);
+        }
+
+        if (email) {
+          help.textContent = 'Enter the 6-digit code we sent to ' + email + '.';
+        }
+
+        if (!token || !email) {
+          setNote('Missing verification details. Please go back and register again.', 'error');
+          submitBtn.disabled = true;
+          resendBtn.disabled = true;
+          return;
+        }
+
+        resendBtn.addEventListener('click', function () {
+          resendBtn.disabled = true;
+          submitBtn.disabled = true;
+          setNote('Sending a new code to ' + email + '...', 'info');
+
+          postJson('/api/send-verification', { name: name, email: email })
+            .then(function (result) {
+              if (!result.ok) {
+                var msg = (result.data && (result.data.error || result.data.message)) || 'Unable to resend code.';
+                throw new Error(msg);
+              }
+
+              token = result.data && result.data.token ? String(result.data.token) : '';
+              if (!token) throw new Error('Verification token missing.');
+
+              setNote('A new code was sent. Please check your email.', 'success');
+
+              // Keep URL in sync so refresh still works.
+              try {
+                params.set('token', token);
+                var newUrl = window.location.pathname + '?' + params.toString();
+                window.history.replaceState({}, '', newUrl);
+              } catch (_) {}
+            })
+            .catch(function (err) {
+              setNote(err && err.message ? err.message : 'Unable to resend code.', 'error');
+            })
+            .finally(function () {
+              resendBtn.disabled = false;
+              submitBtn.disabled = false;
+            });
+        });
+
+        form.addEventListener('submit', function (e) {
+          e.preventDefault();
+
+          var code = String((form.elements['code'] && form.elements['code'].value) || '').trim();
+          if (!/^[0-9]{6}$/.test(code)) {
+            setNote('Enter the 6-digit code we emailed to you.', 'error');
+            return;
+          }
+
+          submitBtn.disabled = true;
+          resendBtn.disabled = true;
+          setNote('Verifying code...', 'info');
+
+          postJson('/api/verify-code', { token: token, code: code })
+            .then(function (result) {
+              if (!result.ok) {
+                var msg = (result.data && (result.data.error || result.data.message)) || 'Incorrect or expired code.';
+                throw new Error(msg);
+              }
+              redirectAfterSuccess();
+            })
+            .catch(function (err) {
+              setNote(err && err.message ? err.message : 'Incorrect or expired code.', 'error');
+            })
+            .finally(function () {
+              submitBtn.disabled = false;
+              resendBtn.disabled = false;
+            });
+        });
+      })();
+    </script>
+  </body>
+</html>

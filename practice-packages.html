@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Learn IELTS | Practice Packages</title>
+    <link rel="stylesheet" href="styles.css?v=20260226" />
+  </head>
+  <body>
+    <main class="packages-page" aria-label="Practice IELTS Packages">
+      <div class="packages-shell">
+        <div class="packages-top">
+          <a class="packages-back" href="index.html">← Back to Home</a>
+          <h1 class="packages-title">PRACTISE IELTS Packages</h1>
+          <p class="packages-subtitle">Choose a package to continue to registration and start Practice IELTS.</p>
+        </div>
+
+        <section class="packages-grid" aria-label="Package options">
+          <article class="package-card package-card--basic">
+            <h2 class="package-name">Basic</h2>
+            <p class="package-desc">Test takers who want a realistic computer-based experience.</p>
+            <ul class="package-features">
+              <li>1 Listening Test – explained</li>
+              <li>1 Reading Test – explained</li>
+              <li>1 Writing Test – explained</li>
+              <li>1 Speaking Test – explained</li>
+            </ul>
+            <div class="package-actions">
+              <div class="package-price" aria-label="Price">$9</div>
+              <button class="package-cta" type="button" data-package="Basic">Buy now</button>
+            </div>
+          </article>
+
+          <article class="package-card package-card--standard">
+            <h2 class="package-name">Standard</h2>
+            <p class="package-desc">Best for improving quickly with more mock tests, feedback and guidance.</p>
+            <ul class="package-features">
+              <li>Recommanded for 5.0 to 6.0 band score</li>
+              <li>5 Listening Tests – explained</li>
+              <li>5 Reading Tests – explained</li>
+              <li>5 Writing Tests – explained</li>
+              <li>5 Speaking Tests – explained</li>
+            </ul>
+            <div class="package-actions">
+              <div class="package-price" aria-label="Price">$49</div>
+              <button class="package-cta" type="button" data-package="Standard">Buy now</button>
+            </div>
+          </article>
+
+          <article class="package-card package-card--pro">
+            <h2 class="package-name">Pro</h2>
+            <p class="package-desc">For serious candidates aiming higher band scores with expert evaluation.</p>
+            <ul class="package-features">
+              <li>Recommanded for 6.5 to 7.5 band score</li>
+              <li>10 Listening Tests – explained</li>
+              <li>10 Reading Tests – explained</li>
+              <li>10 Writing Tests – explained</li>
+              <li>10 Speaking Tests – explained</li>
+            </ul>
+            <div class="package-actions">
+              <div class="package-price" aria-label="Price">$95</div>
+              <button class="package-cta" type="button" data-package="Pro">Buy now</button>
+            </div>
+          </article>
+
+          <article class="package-card package-card--custom">
+            <h2 class="package-name">Custom</h2>
+            <p class="package-desc">Need a tailored plan? Choose exactly what you want included.</p>
+            <ul class="package-features">
+              <li>Pick modules you need</li>
+              <li>Flexible scheduling</li>
+              <li>Support via WhatsApp</li>
+            </ul>
+            <div class="package-actions">
+              <button class="package-cta" type="button" data-package="Custom">Talk to Us</button>
+            </div>
+          </article>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      (function () {
+        var registered = false;
+        try {
+          registered = window.localStorage.getItem("ieltsPortalRegistered") === "true";
+        } catch (_) {
+          registered = false;
+        }
+
+        var target = null;
+        try {
+          var params = new URLSearchParams(window.location.search || "");
+          target = params.get("target");
+        } catch (_) {
+          target = null;
+        }
+
+        var buttons = document.querySelectorAll(".package-cta[data-package]");
+        for (var i = 0; i < buttons.length; i++) {
+          buttons[i].addEventListener("click", function () {
+            var pkg = this.getAttribute("data-package") || "";
+            try {
+              window.localStorage.setItem("ieltsPracticePackage", pkg);
+            } catch (_) {}
+
+            var fallback = "./index.html#practice";
+            var dest = target && String(target).trim() ? String(target).trim() : fallback;
+
+            if (registered) {
+              window.location.href = dest;
+              return;
+            }
+
+            var portalUrl =
+              "portal.html?target=" +
+              encodeURIComponent(dest) +
+              "&package=" +
+              encodeURIComponent(pkg);
+            window.location.href = portalUrl;
+          });
+        }
+      })();
+    </script>
+  </body>
+</html>

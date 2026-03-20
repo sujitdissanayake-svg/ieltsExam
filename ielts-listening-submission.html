@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IELTS Listening Submission</title>
+    <link rel="stylesheet" href="styles.css?v=20260226" />
+    <script src="ielts-flow-guard.js?v=20260310-2" defer></script>
+  </head>
+  <body>
+    <header class="listening-topbar" aria-label="Listening submission header">
+      <div class="listening-topbar-inner">
+        <div class="listening-topbar-left">
+          <div class="listening-brand" aria-label="IELTS brand">
+            <img
+              class="listening-brand-logo"
+              src="assets/IELTS%20Exam%20logo%202-trim.png?v=20260226b"
+              alt="IELTS"
+            />
+          </div>
+          <div class="listening-id-block" aria-label="Submission information">
+            <div class="listening-id-title">Submission page</div>
+            <div class="listening-audio" aria-label="Review status">
+              <span>Review your answers</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="listening-topbar-right" aria-label="Header actions">
+          <a class="listening-topbar-icon" href="ielts-listening-test.html" aria-label="Back to test" title="Back to test">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </a>
+          <a class="listening-topbar-icon" href="ielts-listening.html" aria-label="End test" title="End test">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+              <path d="M18 6L6 18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+            </svg>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <main class="listening-test-page" aria-label="IELTS Listening submission">
+      <section class="listening-test-shell">
+        var CONTRAST_MODES = ['bw', 'wb', 'yb'];
+        var TEXT_SIZES = ['default', 'lg', 'xl'];
+
+        function normalizeContrast(value) {
+          var v = String(value || 'bw');
+          return CONTRAST_MODES.indexOf(v) >= 0 ? v : 'bw';
+        }
+
+        function normalizeTextSize(value) {
+          var v = String(value || 'default');
+          return TEXT_SIZES.indexOf(v) >= 0 ? v : 'default';
+        }
+
+        function getStoredContrast() {
+          try {
+            return normalizeContrast(window.localStorage.getItem(CONTRAST_KEY) || 'bw');
+          } catch (_) {
+            return 'bw';
+          }
+        }
+
+        function getStoredTextSize() {
+          try {
+            return normalizeTextSize(window.localStorage.getItem(TEXT_SIZE_KEY) || 'default');
+          } catch (_) {
+            return 'default';
+          }
+        }
+        <header class="listening-test-head">
+          <h1 class="listening-test-title">Submission</h1>
+          <p class="listening-test-meta">
+            <span class="listening-test-time">Your answers are saved only in this browser.</span>
+          var contrast = getStoredContrast();
+          var textSize = getStoredTextSize();
+
+          root.classList.remove('options-contrast-bw', 'options-contrast-wb', 'options-contrast-yb');
+          root.classList.add('options-contrast-' + contrast);
+
+          root.classList.remove('options-text-lg', 'options-text-xl');
+          if (textSize === 'lg') root.classList.add('options-text-lg');
+          if (textSize === 'xl') root.classList.add('options-text-xl');
+
+    <script>
+      (function () {
+        var CONTRAST_KEY = 'ieltsOptionsContrast';
+        var TEXT_SIZE_KEY = 'ieltsOptionsTextSize';
+
+        function applyPreferences() {
+          var root = document.documentElement;
+          if (!root) return;
+
+          var contrast = 'default';
+          var textSize = 'default';
+          try {
+            contrast = String(window.localStorage.getItem(CONTRAST_KEY) || 'default');
+            textSize = String(window.localStorage.getItem(TEXT_SIZE_KEY) || 'default');
+          } catch (_) {}
+
+          root.classList.toggle('options-contrast-high', contrast === 'high');
+          root.classList.remove('options-text-lg', 'options-text-xl');
+          if (textSize === 'lg') root.classList.add('options-text-lg');
+          if (textSize === 'xl') root.classList.add('options-text-xl');
+        }
+
+        applyPreferences();
+
+        var partsRoot = document.getElementById('submission-parts');
+        if (!partsRoot) return;
+
+        function safeKey(key) {
+          return 'ieltsListeningAnswer:' + key;
+        }
+
+        function loadValue(key) {
+          try {
+            return String(window.localStorage.getItem(safeKey(key)) || '');
+          } catch (_) {
+            return '';
+          }
+        }
+
+        var parts = [
+          { label: 'Part 1', start: 1, end: 10 },
+          { label: 'Part 2', start: 11, end: 20 },
+          { label: 'Part 3', start: 21, end: 30 },
+          { label: 'Part 4', start: 31, end: 40 },
+        ];
+
+        for (var p = 0; p < parts.length; p++) {
+          var part = parts[p];
+
+          var partEl = document.createElement('section');
+          partEl.className = 'listening-part';
+          partEl.setAttribute('aria-label', part.label);
+
+          var h2 = document.createElement('h2');
+          h2.className = 'listening-part-title';
+          h2.textContent = part.label;
+          partEl.appendChild(h2);
+
+          var grid = document.createElement('div');
+          grid.className = 'listening-question-grid';
+
+          for (var q = part.start; q <= part.end; q++) {
+            var item = document.createElement('div');
+            item.className = 'listening-question';
+
+            var label = document.createElement('label');
+            label.className = 'listening-question-label';
+            label.setAttribute('for', 'review-q' + q);
+            label.textContent = 'Question ' + q;
+
+            var input = document.createElement('input');
+            input.className = 'listening-answer';
+            input.type = 'text';
+            input.id = 'review-q' + q;
+            input.name = 'review-q' + q;
+            input.autocomplete = 'off';
+            input.spellcheck = false;
+            input.readOnly = true;
+            input.value = loadValue('q' + q);
+
+            item.appendChild(label);
+            item.appendChild(input);
+            grid.appendChild(item);
+          }
+
+          partEl.appendChild(grid);
+          partsRoot.appendChild(partEl);
+        }
+      })();
+    </script>
+  </body>
+</html>

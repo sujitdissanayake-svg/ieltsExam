@@ -1,0 +1,1383 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IELTS Listening Test</title>
+    <link rel="stylesheet" href="styles.css?v=20260309-4" />
+    <script src="ielts-flow-guard.js?v=20260310-2"></script>
+    <script>
+      (function () {
+        // Zero-pause mode: keep audio in one persistent page.
+        var hash = String(window.location.hash || '').trim();
+        var ok = /^#listening-q(\d{1,2})$/.test(hash);
+        var target = 'ielts-listening-test.html' + (ok ? hash : '#listening-q21');
+        try {
+          window.location.replace(target);
+        } catch (_) {
+          window.location.href = target;
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <header class="listening-topbar" aria-label="Listening test header">
+      <div class="listening-topbar-inner">
+        <div class="listening-topbar-left">
+          <div class="listening-brand" aria-label="IELTS brand">
+            <img class="listening-brand-logo" src="assets/IELTS%20Exam%20logo%202-trim.png?v=20260226b" alt="IELTS" />
+          </div>
+
+          <div class="listening-id-block" aria-label="Candidate information">
+            <div class="listening-id-title">Test Taker ID</div>
+            <div class="listening-audio" aria-label="Audio status">
+              <span class="listening-audio-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M11 5L7 9H4v6h3l4 4V5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+                  <path d="M15.5 8.5a4 4 0 0 1 0 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
+              </span>
+              <span>Audio is playing</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="listening-topbar-right" aria-label="Header actions">
+          <div class="listening-topbar-actions" aria-label="Header icons">
+            <button class="listening-topbar-icon" type="button" aria-label="Connection status">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M2.5 9.5a14 14 0 0 1 19 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              <path d="M5.5 12.5a10 10 0 0 1 13 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              <path d="M8.5 15.5a6 6 0 0 1 7 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              <path d="M12 19h0" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+            </svg>
+          </button>
+          <button class="listening-topbar-icon" type="button" aria-label="Notifications">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M12 22a2.5 2.5 0 0 0 2.4-2h-4.8A2.5 2.5 0 0 0 12 22Z" fill="currentColor" opacity="0.9" />
+              <path d="M18 10a6 6 0 1 0-12 0c0 7-2.5 7-2.5 7h17S18 17 18 10Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+            </svg>
+          </button>
+          <button class="header__optionsButton___1BF6Z" id="optionsMenuButton" type="button">
+            <span class="header__icon___1ECrT">
+              <span class="sr-only">Options</span>
+              <i class="fa fa-bars fa-3" aria-hidden="true"></i>
+            </span>
+          </button>
+          </div>
+
+          <div class="listening-volume" aria-label="Volume">
+            <span class="soundcheck-volume-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M11 5L7 9H4v6h3l4 4V5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+                <path d="M15.5 8.5a4 4 0 0 1 0 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              </svg>
+            </span>
+            <input id="volume" class="soundcheck-volume-range" type="range" min="0" max="100" value="70" aria-label="Volume" />
+          </div>
+
+          <section class="options-modal" id="optionsModal" role="dialog" aria-modal="true" aria-label="Options" hidden>
+            <div class="options-modal-header" aria-label="Options header">
+              <button class="options-modal-back" id="optionsModalBack" type="button" aria-label="Back" hidden>
+                <span class="options-modal-backIcon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </span>
+                <span class="options-modal-backText">Options</span>
+              </button>
+
+              <div class="options-modal-headerTitle" id="optionsModalHeaderTitle">Options</div>
+
+              <button class="options-modal-close" id="optionsModalClose" type="button" aria-label="Close options">
+                <span aria-hidden="true">×</span>
+              </button>
+            </div>
+
+            <div class="options-modal-body">
+              <div class="options-view" id="optionsViewMain" data-view="main">
+                <a class="options-primary" href="ielts-listening-submission.html" role="button" aria-label="Go to submission page">
+                  <span class="options-primary-left">
+                    <span class="options-primary-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M21 3L10 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M21 3l-7 20-4-9-9-4 20-7Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+                      </svg>
+                    </span>
+                    <span>Go to submission page</span>
+                  </span>
+                  <span class="options-chevron" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                  </span>
+                </a>
+
+                <div class="options-group" role="menu" aria-label="Option items">
+                  <button class="options-row" type="button" role="menuitem" id="optionsContrast">
+                    <span class="options-row-left">
+                      <span class="options-row-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M12 3a9 9 0 1 0 0 18V3Z" fill="currentColor" opacity="0.25" />
+                          <path d="M12 21a9 9 0 1 0 0-18" stroke="currentColor" stroke-width="2" />
+                        </svg>
+                      </span>
+                      <span>Contrast</span>
+                    </span>
+                    <span class="options-chevron" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                    </span>
+                  </button>
+
+                  <button class="options-row" type="button" role="menuitem" id="optionsTextSize">
+                    <span class="options-row-left">
+                      <span class="options-row-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M11 19a8 8 0 1 1 0-16 8 8 0 0 1 0 16Z" stroke="currentColor" stroke-width="2" />
+                          <path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                          <path d="M11 8v6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                          <path d="M8 11h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        </svg>
+                      </span>
+                      <span>Text size</span>
+                    </span>
+                    <span class="options-chevron" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="options-view" id="optionsViewContrast" data-view="contrast" hidden>
+                <div class="options-contrast-card" role="menu" aria-label="Contrast options">
+                  <button class="options-choice" type="button" role="menuitem" data-contrast="bw">
+                    <span class="options-choice-check" aria-hidden="true">✓</span>
+                    <span>Black on white</span>
+                  </button>
+                  <button class="options-choice" type="button" role="menuitem" data-contrast="wb">
+                    <span class="options-choice-check" aria-hidden="true">✓</span>
+                    <span>White on black</span>
+                  </button>
+                  <button class="options-choice" type="button" role="menuitem" data-contrast="yb">
+                    <span class="options-choice-check" aria-hidden="true">✓</span>
+                    <span>Yellow on black</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </header>
+
+    <audio id="listeningAudio" preload="auto" playsinline>
+      <source src="assets/Listening%201-%20Free%20Mock%20Test.mp3" type="audio/mpeg" />
+    </audio>
+
+    <main class="listening-test-page listening-test-page--wide listening-test-page--withBottomBar" aria-label="IELTS Listening test">
+      <section class="listening-test-shell listening-test-shell--wide">
+        <section class="listening-partBox" aria-label="Part instructions">
+          <div class="listening-partBox-title">Part 3</div>
+          <div class="listening-partBox-sub">Listen and answer questions 21-30</div>
+        </section>
+
+        <section class="listening-paper" aria-label="Part 3 question paper">
+          <div class="listening-paper-sheet">
+            <div class="listening-paper-title">Questions 21-30</div>
+            <div class="listening-paper-choiceLine">Complete the timetable.</div>
+            <div class="listening-paper-choiceLine">Choose the correct option for each answer.</div>
+
+            <div class="listening-paper-sideBySide" aria-label="Timetable and options">
+              <div class="listening-paper-tableWrap" aria-label="Timetable">
+                <table class="listening-paper-table">
+                  <thead>
+                    <tr>
+                      <th scope="col"></th>
+                      <th scope="col">Morning</th>
+                      <th scope="col">Afternoon</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <th scope="row">Monday</th>
+                      <td>Opening Lecture</td>
+                      <td>
+                        <div class="listening-paper-blankWrap listening-paper-blankWrap--tileSlot" data-q="21" aria-label="Answer box for Question 21">
+                          <span class="listening-paper-blankNumIn" aria-hidden="true">21</span>
+                          <input class="listening-paper-blank listening-paper-blank--tileSlot" id="listening-q21" data-q="21" type="text" inputmode="text" maxlength="60" aria-label="Answer 21" />
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Tuesday</th>
+                      <td>
+                        <div class="listening-paper-blankWrap listening-paper-blankWrap--tileSlot" data-q="22" aria-label="Answer box for Question 22">
+                          <span class="listening-paper-blankNumIn" aria-hidden="true">22</span>
+                          <input class="listening-paper-blank listening-paper-blank--tileSlot" id="listening-q22" data-q="22" type="text" inputmode="text" maxlength="60" aria-label="Answer 22" />
+                        </div>
+                      </td>
+                      <td>Study Skills</td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Wednesday</th>
+                      <td class="listening-paper-cellCenter">×</td>
+                      <td>
+                        <div class="listening-paper-blankWrap listening-paper-blankWrap--tileSlot" data-q="23" aria-label="Answer box for Question 23">
+                          <span class="listening-paper-blankNumIn" aria-hidden="true">23</span>
+                          <input class="listening-paper-blank listening-paper-blank--tileSlot" id="listening-q23" data-q="23" type="text" inputmode="text" maxlength="60" aria-label="Answer 23" />
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Thursday</th>
+                      <td class="listening-paper-cellCenter">×</td>
+                      <td class="listening-paper-cellCenter">×</td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Friday</th>
+                      <td class="listening-paper-cellCenter">×</td>
+                      <td>
+                        <div class="listening-paper-blankWrap listening-paper-blankWrap--tileSlot" data-q="24" aria-label="Answer box for Question 24">
+                          <span class="listening-paper-blankNumIn" aria-hidden="true">24</span>
+                          <input class="listening-paper-blank listening-paper-blank--tileSlot" id="listening-q24" data-q="24" type="text" inputmode="text" maxlength="60" aria-label="Answer 24" />
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="listening-paper-choiceBank" id="listening-choiceBankPart3" aria-label="Options">
+                <div class="listening-choiceTile" draggable="true" data-value="BBQ" aria-label="Option BBQ"><span>BBQ</span></div>
+                <div class="listening-choiceTile" draggable="true" data-value="Careers lecture" aria-label="Option Careers lecture"><span>Careers lecture</span></div>
+                <div class="listening-choiceTile" draggable="true" data-value="Computer lab visit" aria-label="Option Computer lab visit"><span>Computer lab visit</span></div>
+                <div class="listening-choiceTile" draggable="true" data-value="Dance" aria-label="Option Dance"><span>Dance</span></div>
+                <div class="listening-choiceTile" draggable="true" data-value="Library tour" aria-label="Option Library tour"><span>Library tour</span></div>
+                <div class="listening-choiceTile" draggable="true" data-value="Student Union induction" aria-label="Option Student Union induction"><span>Student Union induction</span></div>
+                <div class="listening-choiceTile" draggable="true" data-value="University tour" aria-label="Option University tour"><span>University tour</span></div>
+                <div class="listening-choiceTile" draggable="true" data-value="Legal rights lecture" aria-label="Option Legal rights lecture"><span>Legal rights lecture</span></div>
+              </div>
+            </div>
+
+            <div class="listening-paper-nextBlock" aria-label="Questions 25 to 30">
+              <div class="listening-paper-nextTitle">Questions 25-30</div>
+              <div class="listening-paper-nextLine">Complete the labels.</div>
+              <div class="listening-paper-nextLine">Write <strong>ONE WORD OR A NUMBER</strong> for each answer.</div>
+
+              <div class="listening-paper-mocktest" aria-label="Mocktest diagram with answer boxes">
+                <img
+                  class="listening-paper-img listening-paper-img--mocktest"
+                  src="assets/Image%203%20Listening%20Mocktest.png"
+                  alt="Listening mock test diagram for Questions 25 to 30"
+                />
+
+                <div
+                  class="listening-paper-blankWrap listening-paper-blankWrap--mocktest"
+                  style="--mock-left: 22%; --mock-top: 6%; --mock-width: 50%;"
+                  data-q="25"
+                  aria-label="Answer box for Question 25"
+                >
+                  <span class="listening-paper-blankNumIn" aria-hidden="true">25</span>
+                  <input class="listening-paper-blank" id="listening-q25" data-q="25" type="text" inputmode="text" aria-label="Answer 25" />
+                </div>
+
+                <div
+                  class="listening-paper-blankWrap listening-paper-blankWrap--mocktest"
+                  style="--mock-left: -35%; --mock-top: 16%; --mock-width: 50%;"
+                  data-q="26"
+                  aria-label="Answer box for Question 26"
+                >
+                  <span class="listening-paper-blankNumIn" aria-hidden="true">26</span>
+                  <input class="listening-paper-blank" id="listening-q26" data-q="26" type="text" inputmode="text" aria-label="Answer 26" />
+                </div>
+
+                <div
+                  class="listening-paper-blankWrap listening-paper-blankWrap--mocktest"
+                  style="--mock-left: -35.5%; --mock-top: 54.7%; --mock-width: 50%;"
+                  data-q="27"
+                  aria-label="Answer box for Question 27"
+                >
+                  <span class="listening-paper-blankNumIn" aria-hidden="true">27</span>
+                  <input class="listening-paper-blank" id="listening-q27" data-q="27" type="text" inputmode="text" aria-label="Answer 27" />
+                </div>
+
+                <div
+                  class="listening-paper-blankWrap listening-paper-blankWrap--mocktest"
+                  style="--mock-left: 55%; --mock-top: 20%; --mock-width: 30%;"
+                  data-q="28"
+                  aria-label="Answer box for Question 28"
+                >
+                  <span class="listening-paper-blankNumIn" aria-hidden="true">28</span>
+                  <input class="listening-paper-blank" id="listening-q28" data-q="28" type="text" inputmode="text" aria-label="Answer 28" />
+                </div>
+
+                <div
+                  class="listening-paper-blankWrap listening-paper-blankWrap--mocktest"
+                  style="--mock-left: 86.5%; --mock-top: 25%; --mock-width: 30%;"
+                  data-q="29"
+                  aria-label="Answer box for Question 29"
+                >
+                  <span class="listening-paper-blankNumIn" aria-hidden="true">29</span>
+                  <input class="listening-paper-blank" id="listening-q29" data-q="29" type="text" inputmode="text" aria-label="Answer 29" />
+                </div>
+
+                <div
+                  class="listening-paper-blankWrap listening-paper-blankWrap--mocktest"
+                  style="--mock-left: 77%; --mock-top: 67%; --mock-width: 30%;"
+                  data-q="30"
+                  aria-label="Answer box for Question 30"
+                >
+                  <span class="listening-paper-blankNumIn" aria-hidden="true">30</span>
+                  <input class="listening-paper-blank" id="listening-q30" data-q="30" type="text" inputmode="text" aria-label="Answer 30" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <div class="listening-sideArrows" aria-label="Question navigation">
+      <button class="listening-sideArrow listening-sideArrow--prev" id="listeningPrevPartArrow" type="button" aria-label="Scroll up">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+      <button class="listening-sideArrow listening-sideArrow--next" id="listeningShowMocktestImage" type="button" aria-label="Scroll down">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+    </div>
+
+    <nav class="listening-bottomBar" aria-label="Test navigation">
+      <div class="listening-bottomBar-inner" id="listeningBottomBar">
+        <div class="listening-bottomPart" data-part="1" role="button" tabindex="0" aria-expanded="false" aria-label="Part 1 status">
+          <span class="listening-bottomPart-label">Part 1</span>
+          <span class="listening-bottomPart-meta">0 of 10</span>
+          <div class="listening-bottomQuestions" aria-label="Questions 1 to 10" hidden>
+            <a class="listening-bottomQ" href="ielts-listening-test.html#listening-q1" data-q="1">1</a>
+            <a class="listening-bottomQ" href="ielts-listening-test.html#listening-q2" data-q="2">2</a>
+            <a class="listening-bottomQ" href="ielts-listening-test.html#listening-q3" data-q="3">3</a>
+            <a class="listening-bottomQ" href="ielts-listening-test.html#listening-q4" data-q="4">4</a>
+            <a class="listening-bottomQ" href="ielts-listening-test.html#listening-q5" data-q="5">5</a>
+            <a class="listening-bottomQ" href="ielts-listening-test.html#listening-q6" data-q="6">6</a>
+            <a class="listening-bottomQ" href="ielts-listening-test.html#listening-q7" data-q="7">7</a>
+            <a class="listening-bottomQ" href="ielts-listening-test.html#listening-q8" data-q="8">8</a>
+            <a class="listening-bottomQ" href="ielts-listening-test.html#listening-q9" data-q="9">9</a>
+            <a class="listening-bottomQ" href="ielts-listening-test.html#listening-q10" data-q="10">10</a>
+          </div>
+        </div>
+
+        <div class="listening-bottomPart" data-part="2" role="button" tabindex="0" aria-expanded="false" aria-label="Part 2 status">
+          <span class="listening-bottomPart-label">Part 2</span>
+          <span class="listening-bottomPart-meta">11 of 20</span>
+          <div class="listening-bottomQuestions" aria-label="Questions 11 to 20" hidden>
+            <a class="listening-bottomQ" href="ielts-listening-test-part2.html#listening-q11" data-q="11">11</a>
+            <a class="listening-bottomQ" href="ielts-listening-test-part2.html#listening-q12" data-q="12">12</a>
+            <a class="listening-bottomQ" href="ielts-listening-test-part2.html#listening-q13" data-q="13">13</a>
+            <a class="listening-bottomQ" href="ielts-listening-test-part2.html#listening-q14" data-q="14">14</a>
+            <a class="listening-bottomQ" href="ielts-listening-test-part2.html#listening-q15" data-q="15">15</a>
+            <a class="listening-bottomQ" href="ielts-listening-test-part2.html#listening-q16" data-q="16">16</a>
+            <a class="listening-bottomQ" href="ielts-listening-test-part2.html#listening-q17" data-q="17">17</a>
+            <a class="listening-bottomQ" href="ielts-listening-test-part2.html#listening-q18" data-q="18">18</a>
+            <a class="listening-bottomQ" href="ielts-listening-test-part2.html#listening-q19" data-q="19">19</a>
+            <a class="listening-bottomQ" href="ielts-listening-test-part2.html#listening-q20" data-q="20">20</a>
+          </div>
+        </div>
+
+        <div class="listening-bottomPart listening-bottomPart--active listening-bottomPart--expanded" data-part="3" role="button" tabindex="0" aria-expanded="true" aria-label="Part 3 navigation">
+          <span class="listening-bottomPart-label">Part 3</span>
+          <span class="listening-bottomPart-meta" hidden>21 of 30</span>
+          <div class="listening-bottomQuestions" aria-label="Questions 21 to 30">
+            <a class="listening-bottomQ listening-bottomQ--current" href="#listening-q21" data-q="21" aria-current="page">21</a>
+            <a class="listening-bottomQ" href="#listening-q22" data-q="22">22</a>
+            <a class="listening-bottomQ" href="#listening-q23" data-q="23">23</a>
+            <a class="listening-bottomQ" href="#listening-q24" data-q="24">24</a>
+            <a class="listening-bottomQ" href="#listening-q25" data-q="25">25</a>
+            <a class="listening-bottomQ" href="#listening-q26" data-q="26">26</a>
+            <a class="listening-bottomQ" href="#listening-q27" data-q="27">27</a>
+            <a class="listening-bottomQ" href="#listening-q28" data-q="28">28</a>
+            <a class="listening-bottomQ" href="#listening-q29" data-q="29">29</a>
+            <a class="listening-bottomQ" href="#listening-q30" data-q="30">30</a>
+          </div>
+        </div>
+
+        <div class="listening-bottomPart" data-part="4" role="button" tabindex="0" aria-expanded="false" aria-label="Part 4 status">
+          <span class="listening-bottomPart-label">Part 4</span>
+          <span class="listening-bottomPart-meta">31 of 40</span>
+          <div class="listening-bottomQuestions" aria-label="Questions 31 to 40" hidden>
+            <a class="listening-bottomQ" href="ielts-listening-test-part4.html#listening-q31" data-q="31">31</a>
+            <a class="listening-bottomQ" href="ielts-listening-test-part4.html#listening-q32" data-q="32">32</a>
+            <a class="listening-bottomQ" href="ielts-listening-test-part4.html#listening-q33" data-q="33">33</a>
+            <a class="listening-bottomQ" href="ielts-listening-test-part4.html#listening-q34" data-q="34">34</a>
+            <a class="listening-bottomQ" href="ielts-listening-test-part4.html#listening-q35" data-q="35">35</a>
+            <a class="listening-bottomQ" href="ielts-listening-test-part4.html#listening-q36" data-q="36">36</a>
+            <a class="listening-bottomQ" href="ielts-listening-test-part4.html#listening-q37" data-q="37">37</a>
+            <a class="listening-bottomQ" href="ielts-listening-test-part4.html#listening-q38" data-q="38">38</a>
+            <a class="listening-bottomQ" href="ielts-listening-test-part4.html#listening-q39" data-q="39">39</a>
+            <a class="listening-bottomQ" href="ielts-listening-test-part4.html#listening-q40" data-q="40">40</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <script>
+      (function () {
+        var listeningAudio = document.getElementById('listeningAudio');
+
+        var AUDIO_TIME_KEY = 'ieltsListeningAudioTime';
+        var AUDIO_PLAY_KEY = 'ieltsListeningAudioPlay';
+
+        function getStoredTime() {
+          try {
+            var raw = sessionStorage.getItem(AUDIO_TIME_KEY);
+            var t = Number.parseFloat(String(raw || '0'));
+            return Number.isFinite(t) && t > 0 ? t : 0;
+          } catch (_) {
+            return 0;
+          }
+        }
+
+        function setStoredTime(t) {
+          try {
+            var n = Number(t);
+            if (!Number.isFinite(n) || n < 0) n = 0;
+            sessionStorage.setItem(AUDIO_TIME_KEY, String(n));
+          } catch (_) {}
+        }
+
+        // Audio must always play during the test. Avoid persisting a "paused" flag
+        // (it can get stuck if autoplay is blocked once).
+        function getStoredShouldPlay(_defaultValue) {
+          return true;
+        }
+
+        function setStoredShouldPlay(_shouldPlay) {
+          // No-op (kept for backwards compatibility with older saved state).
+        }
+
+        function snapshotAudioState() {
+          if (!listeningAudio) return;
+          try {
+            setStoredTime(listeningAudio.currentTime || 0);
+          } catch (_) {}
+        }
+
+        var firstGestureHooked = false;
+        function attachFirstGestureAudioStart() {
+          if (!listeningAudio) return;
+          if (firstGestureHooked) return;
+          firstGestureHooked = true;
+
+          var startOnce = function () {
+            try {
+              listeningAudio.play();
+            } catch (_) {}
+          };
+
+          try {
+            document.addEventListener('pointerdown', startOnce, { capture: true, once: true });
+            document.addEventListener('keydown', startOnce, { capture: true, once: true });
+          } catch (_) {
+            document.addEventListener('click', startOnce, true);
+          }
+        }
+
+        function tryPlayListeningAudio() {
+          if (!listeningAudio) return;
+          try {
+            var p = listeningAudio.play();
+            if (p && typeof p.catch === 'function') {
+              p.catch(function () {
+                attachFirstGestureAudioStart();
+              });
+            }
+          } catch (_) {
+            attachFirstGestureAudioStart();
+          }
+        }
+
+        (function initPersistentAudio() {
+          if (!listeningAudio) return;
+
+          var desiredTime = getStoredTime();
+          var shouldPlay = getStoredShouldPlay(false);
+
+          try {
+            // Prevent starting from 0 before we restore time.
+            listeningAudio.pause();
+          } catch (_) {}
+
+          if (shouldPlay) {
+            attachFirstGestureAudioStart();
+            try {
+              if (typeof listeningAudio.load === 'function') listeningAudio.load();
+            } catch (_) {}
+          }
+
+          function restoreAndMaybePlay() {
+            if (!listeningAudio) return;
+
+            var didSeek = false;
+            try {
+              if (desiredTime > 0 && Number.isFinite(listeningAudio.duration) && listeningAudio.duration > 0) {
+                var t = desiredTime;
+                if (t > listeningAudio.duration - 0.25) t = Math.max(0, listeningAudio.duration - 0.25);
+                try {
+                  listeningAudio.currentTime = t;
+                  didSeek = true;
+                } catch (_) {}
+              }
+            } catch (_) {}
+
+            if (!shouldPlay) return;
+
+            if (didSeek) {
+              var played = false;
+              var playOnce = function () {
+                if (played) return;
+                played = true;
+                tryPlayListeningAudio();
+              };
+              try {
+                listeningAudio.addEventListener('seeked', playOnce, { once: true });
+              } catch (_) {}
+              window.setTimeout(playOnce, 200);
+              return;
+            }
+
+            tryPlayListeningAudio();
+          }
+
+          try {
+            window.setTimeout(restoreAndMaybePlay, 0);
+            listeningAudio.addEventListener('loadedmetadata', restoreAndMaybePlay, { once: true });
+            listeningAudio.addEventListener('canplay', restoreAndMaybePlay, { once: true });
+          } catch (_) {}
+
+          try {
+            window.addEventListener('pagehide', snapshotAudioState);
+            window.addEventListener('beforeunload', snapshotAudioState);
+          } catch (_) {}
+
+          try {
+            document.addEventListener('visibilitychange', function () {
+              if (document.visibilityState === 'hidden') snapshotAudioState();
+            });
+          } catch (_) {}
+
+          try {
+            document.addEventListener(
+              'click',
+              function (e) {
+                var el = e.target;
+                if (!el || !el.closest) return;
+                var a = el.closest('a');
+                if (!a) return;
+                snapshotAudioState();
+              },
+              true
+            );
+          } catch (_) {}
+
+          var lastSave = 0;
+          try {
+            listeningAudio.addEventListener('timeupdate', function () {
+              var now = Date.now();
+              if (now - lastSave < 1500) return;
+              lastSave = now;
+              snapshotAudioState();
+            });
+            listeningAudio.addEventListener('play', snapshotAudioState);
+            listeningAudio.addEventListener('pause', snapshotAudioState);
+          } catch (_) {}
+        })();
+
+        var optionsButton = document.getElementById('optionsMenuButton');
+
+        var optionsModal = document.getElementById('optionsModal');
+        var optionsModalClose = document.getElementById('optionsModalClose');
+        var contrastBtn = document.getElementById('optionsContrast');
+        var textSizeBtn = document.getElementById('optionsTextSize');
+        var optionsBackBtn = document.getElementById('optionsModalBack');
+        var optionsHeaderTitle = document.getElementById('optionsModalHeaderTitle');
+        var optionsViewMain = document.getElementById('optionsViewMain');
+        var optionsViewContrast = document.getElementById('optionsViewContrast');
+
+        var CONTRAST_KEY = 'ieltsOptionsContrast';
+        var TEXT_SIZE_KEY = 'ieltsOptionsTextSize';
+
+        var CONTRAST_MODES = ['bw', 'wb', 'yb'];
+        var TEXT_SIZES = ['default', 'lg', 'xl'];
+
+        function normalizeContrast(value) {
+          var v = String(value || 'bw');
+          return CONTRAST_MODES.indexOf(v) >= 0 ? v : 'bw';
+        }
+
+        function normalizeTextSize(value) {
+          var v = String(value || 'default');
+          return TEXT_SIZES.indexOf(v) >= 0 ? v : 'default';
+        }
+
+        function setView(name) {
+          if (!optionsViewMain || !optionsViewContrast) return;
+
+          var isContrast = name === 'contrast';
+          optionsViewMain.hidden = isContrast;
+          optionsViewContrast.hidden = !isContrast;
+
+          if (optionsBackBtn) optionsBackBtn.hidden = !isContrast;
+          if (optionsHeaderTitle) optionsHeaderTitle.textContent = isContrast ? 'Contrast' : 'Options';
+        }
+
+        function getStoredContrast() {
+          try {
+            return normalizeContrast(window.localStorage.getItem(CONTRAST_KEY) || 'bw');
+          } catch (_) {
+            return 'bw';
+          }
+        }
+
+        function setStoredContrast(mode) {
+          try {
+            window.localStorage.setItem(CONTRAST_KEY, normalizeContrast(mode));
+          } catch (_) {}
+        }
+
+        function getStoredTextSize() {
+          try {
+            return normalizeTextSize(window.localStorage.getItem(TEXT_SIZE_KEY) || 'default');
+          } catch (_) {
+            return 'default';
+          }
+        }
+
+        function setStoredTextSize(value) {
+          try {
+            window.localStorage.setItem(TEXT_SIZE_KEY, normalizeTextSize(value));
+          } catch (_) {}
+        }
+
+        function updateContrastChecks() {
+          if (!optionsViewContrast) return;
+          var selected = getStoredContrast();
+          var choices = optionsViewContrast.querySelectorAll('[data-contrast]');
+          for (var i = 0; i < choices.length; i++) {
+            var el = choices[i];
+            var mode = el.getAttribute('data-contrast');
+            var isSelected = mode === selected;
+            el.classList.toggle('is-selected', isSelected);
+            el.setAttribute('aria-checked', isSelected ? 'true' : 'false');
+          }
+        }
+
+        function applyPreferences() {
+          var root = document.documentElement;
+          if (!root) return;
+
+          var contrast = getStoredContrast();
+          var textSize = getStoredTextSize();
+
+          root.classList.remove('options-contrast-bw', 'options-contrast-wb', 'options-contrast-yb');
+          root.classList.add('options-contrast-' + contrast);
+
+          root.classList.remove('options-text-lg', 'options-text-xl');
+          if (textSize === 'lg') root.classList.add('options-text-lg');
+          if (textSize === 'xl') root.classList.add('options-text-xl');
+        }
+
+        function closeOptions() {
+          if (!optionsModal) return;
+          optionsModal.hidden = true;
+          if (optionsButton) optionsButton.setAttribute('aria-expanded', 'false');
+          setView('main');
+        }
+
+        function openOptions() {
+          if (!optionsModal) return;
+          optionsModal.hidden = false;
+          if (optionsButton) optionsButton.setAttribute('aria-expanded', 'true');
+          if (optionsModalClose) optionsModalClose.focus();
+          setView('main');
+          updateContrastChecks();
+        }
+
+        function toggleOptions() {
+          if (!optionsModal) return;
+          if (optionsModal.hidden) openOptions();
+          else closeOptions();
+        }
+
+        applyPreferences();
+        updateContrastChecks();
+
+        if (optionsButton && optionsModal) {
+          optionsButton.setAttribute('aria-haspopup', 'dialog');
+          optionsButton.setAttribute('aria-controls', 'optionsModal');
+          optionsButton.setAttribute('aria-expanded', 'false');
+
+          optionsButton.addEventListener('click', function (e) {
+            e.preventDefault();
+            toggleOptions();
+          });
+        }
+
+        if (optionsModalClose) {
+          optionsModalClose.addEventListener('click', function (e) {
+            e.preventDefault();
+            closeOptions();
+          });
+        }
+
+        if (optionsBackBtn) {
+          optionsBackBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            setView('main');
+          });
+        }
+
+        document.addEventListener('keydown', function (e) {
+          if (e.key !== 'Escape') return;
+          closeOptions();
+        });
+
+        if (contrastBtn) {
+          contrastBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            setView('contrast');
+            updateContrastChecks();
+          });
+        }
+
+        if (optionsViewContrast) {
+          optionsViewContrast.addEventListener('click', function (e) {
+            var target = e.target;
+            if (!(target instanceof Element)) return;
+            var choice = target.closest('[data-contrast]');
+            if (!choice) return;
+            e.preventDefault();
+            var mode = choice.getAttribute('data-contrast');
+            setStoredContrast(mode);
+            applyPreferences();
+            updateContrastChecks();
+          });
+        }
+
+        if (textSizeBtn) {
+          textSizeBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            var current = getStoredTextSize();
+            var idx = TEXT_SIZES.indexOf(current);
+            var next = TEXT_SIZES[(idx + 1) % TEXT_SIZES.length] || 'default';
+            setStoredTextSize(next);
+            applyPreferences();
+          });
+        }
+
+        function setActivePaperBlank(q) {
+          var n = Number.parseInt(String(q || ''), 10);
+          if (!Number.isFinite(n)) return;
+
+          var wraps = document.querySelectorAll('.listening-paper-blankWrap');
+          for (var i = 0; i < wraps.length; i++) {
+            wraps[i].classList.remove('listening-paper-blankWrap--active');
+          }
+
+          var directWrap = document.querySelector('.listening-paper-blankWrap[data-q="' + n + '"]');
+          if (directWrap) {
+            directWrap.classList.add('listening-paper-blankWrap--active');
+            return;
+          }
+
+          var input = document.querySelector('.listening-paper-blank[data-q="' + n + '"]');
+          if (input && input.closest) {
+            var wrap = input.closest('.listening-paper-blankWrap');
+            if (wrap) wrap.classList.add('listening-paper-blankWrap--active');
+          }
+        }
+
+        function syncPaperBlankState(input) {
+          if (!input) return;
+          var wrap = input.closest('.listening-paper-blankWrap');
+          if (!wrap) return;
+          var hasValue = String(input.value || '').trim().length > 0;
+          wrap.classList.toggle('listening-paper-blankWrap--filled', hasValue);
+        }
+
+        function setCurrentBottomQuestion(q) {
+          var n = Number.parseInt(String(q || ''), 10);
+          if (!Number.isFinite(n)) return;
+
+          var bottomKeys = document.querySelectorAll('.listening-bottomQ[data-q]');
+          for (var i = 0; i < bottomKeys.length; i++) {
+            var el = bottomKeys[i];
+            var isCurrent = String(el.getAttribute('data-q')) === String(n);
+            el.classList.toggle('listening-bottomQ--current', isCurrent);
+            if (isCurrent) el.setAttribute('aria-current', 'page');
+            else el.removeAttribute('aria-current');
+          }
+
+          setActivePaperBlank(n);
+        }
+
+        function focusQuestionIfExists(q) {
+          var n = Number.parseInt(String(q || ''), 10);
+          if (!Number.isFinite(n)) return false;
+
+          var el = document.getElementById('listening-q' + n);
+          if (!el) return false;
+
+          var topbar = document.querySelector('.listening-topbar');
+          var offset = 0;
+          try {
+            offset = (topbar && topbar.getBoundingClientRect ? topbar.getBoundingClientRect().height : 0) + 16;
+          } catch (_) {
+            offset = 116;
+          }
+
+          var scrollTarget = el;
+          try {
+            if (el.closest) {
+              var wrap = el.closest('.listening-paper-blankWrap');
+              if (wrap) scrollTarget = wrap;
+            }
+          } catch (_) {}
+
+          try {
+            var r = scrollTarget.getBoundingClientRect();
+            var y = (window.pageYOffset || document.documentElement.scrollTop || 0) + r.top - offset;
+            if (y < 0) y = 0;
+            window.scrollTo({ top: y, behavior: 'smooth' });
+          } catch (_) {
+            try {
+              scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } catch (_) {
+              try {
+                scrollTarget.scrollIntoView(true);
+              } catch (_) {}
+            }
+          }
+
+          if (el instanceof HTMLInputElement) {
+            try {
+              el.focus({ preventScroll: true });
+            } catch (_) {
+              el.focus();
+            }
+          }
+          return true;
+        }
+
+        var paperBlanks = document.querySelectorAll('.listening-paper-blankWrap .listening-paper-blank[data-q]');
+        for (var i = 0; i < paperBlanks.length; i++) {
+          (function (input) {
+            try {
+              input.setAttribute('autocomplete', 'off');
+              input.setAttribute('autocorrect', 'off');
+              input.setAttribute('autocapitalize', 'off');
+              input.setAttribute('spellcheck', 'false');
+              var qName = input.getAttribute('data-q');
+              if (qName && !input.getAttribute('name')) input.setAttribute('name', 'ielts_listening_q' + String(qName));
+            } catch (_) {}
+
+            syncPaperBlankState(input);
+            input.addEventListener('input', function () {
+              syncPaperBlankState(input);
+            });
+            input.addEventListener('change', function () {
+              syncPaperBlankState(input);
+            });
+            input.addEventListener('focus', function () {
+              var q = input.getAttribute('data-q');
+              if (q) setCurrentBottomQuestion(q);
+            });
+          })(paperBlanks[i]);
+        }
+
+        var bottomBar = document.getElementById('listeningBottomBar');
+        if (bottomBar) {
+          bottomBar.addEventListener('click', function (e) {
+            var target = e.target;
+            if (target && target.nodeType === 3) target = target.parentElement;
+            if (!target || typeof target.closest !== 'function') return;
+
+            var qBtn = target.closest('.listening-bottomQ[data-q]');
+            if (qBtn) {
+              e.preventDefault();
+              var q = qBtn.getAttribute('data-q');
+              var qNum = Number.parseInt(String(q || ''), 10);
+              if (!Number.isFinite(qNum)) return;
+
+              // UX (Part 3):
+              // - Clicking Q21–24 => select and scroll to top.
+              // - Clicking Q25–30 => select and scroll to bottom.
+              if (qNum >= 21 && qNum <= 30) {
+                backshiftClear();
+                setCurrentBottomQuestion(qNum);
+                if (qNum >= 21 && qNum <= 24) scrollToTop();
+                else scrollToBottom();
+
+                try {
+                  var qEl = document.getElementById('listening-q' + qNum);
+                  if (qEl && qEl.focus) qEl.focus({ preventScroll: true });
+                } catch (_) {}
+                return;
+              }
+
+              backshiftClear();
+
+              if (qNum >= 1 && qNum <= 10) {
+                window.location.href = 'ielts-listening-test.html#listening-q' + qNum;
+                return;
+              }
+
+              if (qNum >= 11 && qNum <= 20) {
+                window.location.href = 'ielts-listening-test-part2.html#listening-q' + qNum;
+                return;
+              }
+
+              if (qNum >= 31 && qNum <= 40) {
+                window.location.href = 'ielts-listening-test-part4.html#listening-q' + qNum;
+                return;
+              }
+
+              setCurrentBottomQuestion(qNum);
+
+              // Only scroll/focus when the matching input exists on the page.
+              focusQuestionIfExists(qNum);
+              return;
+            }
+          });
+        }
+
+        var nextArrowClicks = 0;
+        var prevArrowClicks = 0;
+
+        function backshiftIsActive() {
+          try {
+            return sessionStorage.getItem('listeningBackshiftActive') === '1';
+          } catch (_) {
+            return false;
+          }
+        }
+
+        function backshiftGetStage() {
+          try {
+            var s = sessionStorage.getItem('listeningBackshiftStage');
+            var n = Number.parseInt(String(s || ''), 10);
+            return Number.isFinite(n) ? n : 0;
+          } catch (_) {
+            return 0;
+          }
+        }
+
+        function backshiftSetStage(stage) {
+          try {
+            sessionStorage.setItem('listeningBackshiftActive', '1');
+            sessionStorage.setItem('listeningBackshiftStage', String(stage));
+          } catch (_) {}
+        }
+
+        function backshiftClear() {
+          try {
+            sessionStorage.removeItem('listeningBackshiftActive');
+            sessionStorage.removeItem('listeningBackshiftStage');
+          } catch (_) {}
+        }
+
+        function scrollToBottom() {
+          var se = document.scrollingElement || document.documentElement || document.body;
+          var top = 0;
+          try {
+            top = se && se.scrollHeight ? se.scrollHeight : document.body.scrollHeight;
+          } catch (_) {
+            top = document.body.scrollHeight;
+          }
+          try {
+            window.scrollTo({ top: top, behavior: 'smooth' });
+          } catch (_) {
+            try {
+              window.scrollTo(0, top);
+            } catch (_) {}
+          }
+
+          window.setTimeout(function () {
+            try {
+              if (se) se.scrollTop = top;
+              document.documentElement.scrollTop = top;
+              document.body.scrollTop = top;
+            } catch (_) {}
+          }, 60);
+        }
+
+        function scrollToTop() {
+          try {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          } catch (_) {
+            try {
+              window.scrollTo(0, 0);
+            } catch (_) {}
+          }
+
+          window.setTimeout(function () {
+            try {
+              document.documentElement.scrollTop = 0;
+              document.body.scrollTop = 0;
+            } catch (_) {}
+          }, 60);
+        }
+
+        // Arrival from Part 4 special backshift: land at bottom of Part 3.
+        if (backshiftIsActive() && backshiftGetStage() === 2) {
+          nextArrowClicks = 0;
+          prevArrowClicks = 0;
+          window.setTimeout(function () {
+            scrollToBottom();
+            try {
+              setCurrentBottomQuestion(30);
+            } catch (_) {}
+            backshiftSetStage(3);
+          }, 0);
+        }
+
+        // Left arrow on Part 3: (1) scroll up, (2) go to Part 2.
+        var prevArrow = document.getElementById('listeningPrevPartArrow') || document.querySelector('.listening-sideArrow--prev');
+        if (prevArrow) {
+          prevArrow.setAttribute('aria-label', 'Scroll up');
+          prevArrow.addEventListener('click', function (e) {
+            e.preventDefault();
+
+            if (backshiftIsActive()) {
+              var stage = backshiftGetStage();
+              // stage 3: from bottom of Part 3 -> scroll to top of Part 3
+              if (stage === 3) {
+                nextArrowClicks = 0;
+                scrollToTop();
+                try {
+                  setCurrentBottomQuestion(21);
+                } catch (_) {}
+                backshiftSetStage(4);
+                return;
+              }
+
+              // stage 4: from top of Part 3 -> go to bottom of Part 2
+              if (stage === 4) {
+                backshiftSetStage(5);
+                window.location.href = 'ielts-listening-test-part2.html';
+                return;
+              }
+
+              // Unexpected state: clear and fall back to normal.
+              backshiftClear();
+              prevArrowClicks = 0;
+            }
+
+            if (prevArrowClicks >= 1) {
+              window.location.href = 'ielts-listening-test-part2.html';
+              return;
+            }
+
+            nextArrowClicks = 0;
+            scrollToTop();
+            prevArrowClicks = 1;
+
+            try {
+              prevArrow.setAttribute('aria-label', 'Previous part');
+              if (nextArrow) nextArrow.setAttribute('aria-label', 'Scroll down');
+            } catch (_) {}
+          });
+        }
+
+
+        // Right arrow on Part 3: (1) scroll down, (2) go to Part 4.
+        var nextArrow = document.getElementById('listeningShowMocktestImage') || document.querySelector('.listening-sideArrow--next');
+        if (nextArrow) {
+          nextArrow.setAttribute('aria-label', 'Scroll down');
+          nextArrow.addEventListener('click', function (e) {
+            e.preventDefault();
+            backshiftClear();
+            if (nextArrowClicks >= 1) {
+              window.location.href = 'ielts-listening-test-part4.html';
+              return;
+            }
+            prevArrowClicks = 0;
+            scrollToBottom();
+            nextArrowClicks = 1;
+            try {
+              nextArrow.setAttribute('aria-label', 'Next part');
+            } catch (_) {}
+          });
+        }
+
+        function normalizeChoiceValue(value) {
+          var s = String(value || '').trim();
+          if (!s) return '';
+          return s.replace(/\s+/g, ' ');
+        }
+
+        function cssEscapeAttrValue(value) {
+          var s = String(value || '');
+          try {
+            if (window.CSS && typeof window.CSS.escape === 'function') return window.CSS.escape(s);
+          } catch (_) {}
+          return s.replace(/\\/g, '\\\\').replace(/\"/g, '\\"');
+        }
+
+        function getChoiceSlotInput(slotEl) {
+          if (!slotEl) return null;
+          var input = slotEl.querySelector('.listening-paper-blank');
+          return input instanceof HTMLInputElement ? input : null;
+        }
+
+        function clearChoiceSlot(slotEl) {
+          var input = getChoiceSlotInput(slotEl);
+          if (!input) return;
+          input.value = '';
+          input.readOnly = false;
+          if (slotEl && slotEl.classList) slotEl.classList.remove('listening-paper-blankWrap--hasTile');
+          try {
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+          } catch (_) {
+            syncPaperBlankState(input);
+          }
+        }
+
+        function setChoiceSlotValue(slotEl, value) {
+          var input = getChoiceSlotInput(slotEl);
+          if (!input) return;
+          var val = normalizeChoiceValue(value);
+          input.value = val;
+          input.readOnly = !!val;
+          try {
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+          } catch (_) {
+            syncPaperBlankState(input);
+          }
+        }
+
+        (function initChoiceDragDrop() {
+          var bank = document.getElementById('listening-choiceBankPart3');
+          if (!bank) return;
+
+          var bankTiles = bank.querySelectorAll('.listening-choiceTile[draggable="true"][data-value]');
+          var slots = document.querySelectorAll('.listening-paper-blankWrap--tileSlot[data-q]');
+
+          function getSlotTile(slotEl) {
+            if (!slotEl) return null;
+            var t = slotEl.querySelector('.listening-planTile--placed[data-value]');
+            return t instanceof HTMLElement ? t : null;
+          }
+
+          function findPlacedTileByValue(value) {
+            var v = normalizeChoiceValue(value);
+            if (!v) return null;
+            var esc = cssEscapeAttrValue(v);
+            var el = document.querySelector('.listening-paper-blankWrap--tileSlot .listening-planTile--placed[data-value="' + esc + '"]');
+            return el instanceof HTMLElement ? el : null;
+          }
+
+          function removePlacedTile(tileEl) {
+            if (!tileEl) return;
+            var parent = tileEl.parentElement;
+            if (parent && parent.classList && parent.classList.contains('listening-paper-blankWrap--tileSlot')) {
+              tileEl.remove();
+              clearChoiceSlot(parent);
+            } else {
+              tileEl.remove();
+            }
+          }
+
+          function attachTileDragHandlers(tileEl, sourceKind) {
+            if (!tileEl) return;
+            tileEl.addEventListener('dragstart', function (e) {
+              var value = normalizeChoiceValue(tileEl.getAttribute('data-value') || tileEl.textContent || '');
+              if (!value) return;
+              try {
+                e.dataTransfer.setData('text/plain', 'choice:' + String(sourceKind) + ':' + encodeURIComponent(value));
+              } catch (_) {}
+              try {
+                e.dataTransfer.effectAllowed = 'move';
+              } catch (_) {}
+              tileEl.classList.add('is-dragging');
+            });
+            tileEl.addEventListener('dragend', function () {
+              tileEl.classList.remove('is-dragging');
+            });
+          }
+
+          function createPlacedTile(value) {
+            var v = normalizeChoiceValue(value);
+            if (!v) return null;
+            var el = document.createElement('div');
+            el.className = 'listening-planTile listening-planTile--placed';
+            el.setAttribute('draggable', 'true');
+            el.setAttribute('data-value', v);
+            el.setAttribute('aria-label', 'Selected option ' + v);
+            el.textContent = v;
+            attachTileDragHandlers(el, 'placed');
+            return el;
+          }
+
+          function placeValueIntoSlot(value, slotEl) {
+            if (!slotEl) return;
+            var v = normalizeChoiceValue(value);
+            if (!v) return;
+
+            var existingPlaced = findPlacedTileByValue(v);
+            if (existingPlaced) {
+              var oldSlot = existingPlaced.parentElement;
+              if (oldSlot && oldSlot === slotEl) return;
+
+              var currentInDest = getSlotTile(slotEl);
+              if (currentInDest && currentInDest !== existingPlaced) {
+                removePlacedTile(currentInDest);
+              }
+
+              slotEl.appendChild(existingPlaced);
+              slotEl.classList.add('listening-paper-blankWrap--hasTile');
+              setChoiceSlotValue(slotEl, v);
+
+              if (oldSlot && oldSlot.classList && oldSlot.classList.contains('listening-paper-blankWrap--tileSlot')) {
+                clearChoiceSlot(oldSlot);
+              }
+            } else {
+              var newTile = createPlacedTile(v);
+              if (!newTile) return;
+
+              var current = getSlotTile(slotEl);
+              if (current) removePlacedTile(current);
+
+              slotEl.appendChild(newTile);
+              slotEl.classList.add('listening-paper-blankWrap--hasTile');
+              setChoiceSlotValue(slotEl, v);
+            }
+
+            var q = slotEl.getAttribute('data-q');
+            if (q) setCurrentBottomQuestion(q);
+          }
+
+          for (var i = 0; i < bankTiles.length; i++) {
+            attachTileDragHandlers(bankTiles[i], 'bank');
+          }
+
+          for (var j = 0; j < slots.length; j++) {
+            (function (slot) {
+              slot.addEventListener('dragover', function (e) {
+                e.preventDefault();
+                try {
+                  e.dataTransfer.dropEffect = 'move';
+                } catch (_) {}
+                slot.classList.add('listening-paper-blankWrap--dropHover');
+              });
+
+              slot.addEventListener('dragleave', function () {
+                slot.classList.remove('listening-paper-blankWrap--dropHover');
+              });
+
+              slot.addEventListener('drop', function (e) {
+                e.preventDefault();
+                slot.classList.remove('listening-paper-blankWrap--dropHover');
+
+                var payload = '';
+                try {
+                  payload = e.dataTransfer.getData('text/plain');
+                } catch (_) {}
+
+                var m = String(payload || '').match(/^choice:(bank|placed):(.+)$/);
+                if (!m) return;
+                var value = '';
+                try {
+                  value = decodeURIComponent(m[2]);
+                } catch (_) {
+                  value = m[2];
+                }
+                placeValueIntoSlot(value, slot);
+              });
+            })(slots[j]);
+          }
+
+          bank.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            try {
+              e.dataTransfer.dropEffect = 'move';
+            } catch (_) {}
+          });
+
+          bank.addEventListener('drop', function (e) {
+            e.preventDefault();
+            var payload = '';
+            try {
+              payload = e.dataTransfer.getData('text/plain');
+            } catch (_) {}
+
+            var m = String(payload || '').match(/^choice:(bank|placed):(.+)$/);
+            if (!m) return;
+            var source = m[1];
+            var value = '';
+            try {
+              value = decodeURIComponent(m[2]);
+            } catch (_) {
+              value = m[2];
+            }
+
+            if (source !== 'placed') return;
+            var placed = findPlacedTileByValue(value);
+            if (!placed) return;
+            removePlacedTile(placed);
+          });
+        })();
+
+        // Default to Q21 on load.
+        setCurrentBottomQuestion(21);
+
+        (function () {
+          // If navigating via bottom bar from another part, honor the hash.
+          // (Skip if the special backshift chain is controlling initial landing.)
+          if (backshiftIsActive() && backshiftGetStage() === 2) return;
+
+          var hash = String(window.location.hash || '').trim();
+          var match = hash.match(/^#listening-q(\d{1,2})$/);
+          if (!match) return;
+          var qNum = Number.parseInt(match[1], 10);
+          if (!Number.isFinite(qNum)) return;
+          if (qNum < 21 || qNum > 30) return;
+
+          setCurrentBottomQuestion(qNum);
+          window.setTimeout(function () {
+            if (qNum >= 21 && qNum <= 24) {
+              scrollToTop();
+              try {
+                var qEl = document.getElementById('listening-q' + qNum);
+                if (qEl && qEl.focus) qEl.focus({ preventScroll: true });
+              } catch (_) {}
+              return;
+            }
+
+            if (qNum >= 25 && qNum <= 30) {
+              scrollToBottom();
+              try {
+                var qEl = document.getElementById('listening-q' + qNum);
+                if (qEl && qEl.focus) qEl.focus({ preventScroll: true });
+              } catch (_) {}
+              return;
+            }
+
+            focusQuestionIfExists(qNum);
+          }, 0);
+        })();
+
+        window.setTimeout(function () {
+          for (var i = 0; i < paperBlanks.length; i++) {
+            syncPaperBlankState(paperBlanks[i]);
+          }
+        }, 0);
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Learn IELTS | Packages</title>
+    <link rel="stylesheet" href="styles.css?v=20260226" />
+  </head>
+  <body>
+    <main class="packages-page" aria-label="Mock Test Packages">
+      <div class="packages-shell">
+        <div class="packages-top">
+          <a class="packages-back" href="/">← Back to Home</a>
+          <h1 class="packages-title"><span class="packages-title-icon" aria-hidden="true">📘</span> Choose a Package</h1>
+          <p class="packages-subtitle">Proceed to registration and begin your Mock Test.</p>
+
+          <div class="packages-info" aria-label="Package information">
+            <section class="packages-info-section packages-info-section--attempts packages-info-section--indented" aria-label="Mock Test Attempts">
+              <h2 class="packages-info-title">
+                <span class="packages-info-icon" aria-hidden="true">🎯</span>
+                <span>Mock Test Attempts</span>
+              </h2>
+              <ul class="packages-info-list">
+                <li>These are <strong>full mock test attempts</strong> where all four components are evaluated.</li>
+                <li>
+                  You will receive <strong>examiner reports</strong> for Writing and Speaking, along with <strong>band scores</strong>.
+                </li>
+              </ul>
+            </section>
+
+            <section class="packages-info-section packages-info-section--indented" aria-label="Can Practise For">
+              <h2 class="packages-info-title">
+                <span class="packages-info-icon" aria-hidden="true">✍️</span>
+                <span>Can Practise For</span>
+              </h2>
+              <ul class="packages-info-list">
+                <li>You may <strong>rewrite answers</strong> for Listening, Reading, and Writing.</li>
+                <li><strong>Band scores</strong> are provided only for Listening and Reading.</li>
+                <li>
+                  The Writing platform can be used for practice, but answers <strong>will not be evaluated</strong> or assigned a band score.
+                </li>
+                <li>Repeated Speaking tests with an examiner are <strong>not available</strong> under this option.</li>
+              </ul>
+            </section>
+          </div>
+        </div>
+
+        <section class="packages-grid" aria-label="Package options">
+          <article class="package-card package-card--lite">
+            <h2 class="package-name">Lite</h2>
+            <p class="package-desc">Test takers who want a realistic computer-based experience to know what this is.</p>
+            <ul class="package-features">
+              <li>Listening + Reading instant score</li>
+              <li>Basic performance summary</li>
+              <li>One mock attempt</li>
+              <li>Can practise for three days</li>
+              <li>Evaluation by Examiners</li>
+            </ul>
+            <div class="package-actions">
+              <div class="package-price" aria-label="Price">$14.99</div>
+              <button class="package-cta" type="button" data-package="Lite">Buy now</button>
+            </div>
+          </article>
+
+          <article class="package-card package-card--basic">
+            <h2 class="package-name">Basic</h2>
+            <p class="package-desc">Test takers who want a realistic computer-based experience.</p>
+            <ul class="package-features">
+              <li>Listening + Reading instant score</li>
+              <li>Basic performance summary</li>
+              <li>3 Mock Test Attempts</li>
+              <li>Can practise for 10 days</li>
+              <li>Evaluation by Examiners</li>
+            </ul>
+            <div class="package-actions">
+              <div class="package-price" aria-label="Price">$44.99</div>
+              <button class="package-cta" type="button" data-package="Basic">Buy now</button>
+            </div>
+          </article>
+
+          <article class="package-card package-card--standard">
+            <h2 class="package-name">Standard</h2>
+            <p class="package-desc">Best for improving quickly with more mock tests, feedback and guidance.</p>
+            <ul class="package-features">
+              <li>Recommanded for 5.0 to 6.0 band score</li>
+              <li>Listening + Reading instant score</li>
+              <li>Performance summary</li>
+              <li>05 Mock Tests</li>
+              <li>Can practise for 4 weeks</li>
+              <li>Evaluation by Examiners</li>
+            </ul>
+            <div class="package-actions">
+              <div class="package-price" aria-label="Price">$74.99</div>
+              <button class="package-cta" type="button" data-package="Standard">Buy now</button>
+            </div>
+          </article>
+
+          <article class="package-card package-card--pro">
+            <h2 class="package-name">Pro</h2>
+            <p class="package-desc">For serious candidates aiming higher band scores with expert evaluation.</p>
+            <ul class="package-features">
+              <li>Recommanded for 6.5 to 7.5 band score</li>
+              <li>Listening + Reading instant score</li>
+              <li>Performance summary</li>
+              <li>10 Mock Tests</li>
+              <li>Can practise for 2 months</li>
+              <li>Evaluation by Examiners</li>
+            </ul>
+            <div class="package-actions">
+              <div class="package-price" aria-label="Price">$149.99</div>
+              <button class="package-cta" type="button" data-package="Pro">Buy now</button>
+            </div>
+          </article>
+
+          <article class="package-card package-card--custom">
+            <h2 class="package-name">Custom</h2>
+            <p class="package-desc">Need a tailored plan? Choose exactly what you want included.</p>
+            <ul class="package-features">
+              <li>Pick modules you need</li>
+              <li>Flexible scheduling</li>
+              <li>Support via WhatsApp</li>
+            </ul>
+            <div class="package-actions">
+              <button class="package-cta" type="button" data-package="Custom">Talk to Us</button>
+            </div>
+          </article>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      (function () {
+        var registered = false;
+        try {
+          registered = window.localStorage.getItem("ieltsPortalRegistered") === "true";
+        } catch (_) {
+          registered = false;
+        }
+
+        var target = null;
+        var hasTargetParam = false;
+        try {
+          var params = new URLSearchParams(window.location.search || "");
+          target = params.get("target");
+          hasTargetParam = params.has("target");
+        } catch (_) {
+          target = null;
+          hasTargetParam = false;
+        }
+
+        (function bindBackToHome() {
+          if (!hasTargetParam) return;
+          try {
+            var homeUrl = (window.location && window.location.origin) ? window.location.origin + '/' : '/';
+            window.history.pushState({ __packagesTrap: true }, '', window.location.href);
+            window.addEventListener('popstate', function () {
+              try {
+                window.location.replace(homeUrl);
+              } catch (_) {
+                window.location.href = homeUrl;
+              }
+            });
+          } catch (_) {}
+        })();
+
+        var buttons = document.querySelectorAll(".package-cta[data-package]");
+        for (var i = 0; i < buttons.length; i++) {
+          buttons[i].addEventListener("click", function () {
+            var pkg = this.getAttribute("data-package") || "";
+            try {
+              window.localStorage.setItem("ieltsMockPackage", pkg);
+            } catch (_) {}
+
+            var fallback = "./index.html#mock";
+            var dest = target && String(target).trim() ? String(target).trim() : fallback;
+
+            if (registered) {
+              window.location.href = dest;
+              return;
+            }
+
+            var portalUrl = "portal.html?target=" + encodeURIComponent(dest) + "&package=" + encodeURIComponent(pkg);
+            window.location.href = portalUrl;
+          });
+        }
+      })();
+    </script>
+  </body>
+</html>
