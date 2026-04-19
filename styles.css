@@ -6000,6 +6000,197 @@ main {
   scroll-margin-top: calc(var(--headerHeight, 0px) + 16px);
 }
 
+/* -------------------------
+   About IELTS Section
+   ------------------------- */
+
+.about-heading {
+  margin: 0 0 16px;
+  font-size: clamp(24px, 3vw, 36px);
+  font-weight: 800;
+  font-family: Arial, Helvetica, sans-serif;
+  color: var(--text);
+  letter-spacing: 0.2px;
+}
+
+.about-heading--components {
+  margin-top: 40px;
+}
+
+.about-intro {
+  margin: 0 0 28px;
+  color: var(--muted);
+  font-size: 17px;
+  max-width: 80ch;
+  line-height: 1.65;
+}
+
+.about-types-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+.about-type-card {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 24px;
+  background: var(--surface);
+}
+
+.about-type-icon {
+  font-size: 34px;
+  margin-bottom: 10px;
+}
+
+.about-type-title {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.about-type-desc {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.about-type-list {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.about-components-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.about-component {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.about-component-badge {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 999px;
+  font-weight: 900;
+  font-size: 14px;
+  background: color-mix(in srgb, var(--topicBadge) 45%, #ffffff);
+  color: var(--text);
+  align-self: flex-start;
+}
+
+.about-component-badge--reading {
+  background: color-mix(in srgb, #a7f3d0 55%, #ffffff);
+}
+
+.about-component-badge--writing {
+  background: color-mix(in srgb, #fde68a 55%, #ffffff);
+}
+
+.about-component-badge--speaking {
+  background: color-mix(in srgb, #fca5a5 50%, #ffffff);
+}
+
+.about-component-detail {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.about-component-label {
+  font-weight: 800;
+  color: var(--muted);
+  min-width: 72px;
+}
+
+.about-component-value {
+  font-weight: 700;
+  color: var(--text);
+}
+
+.about-band-box {
+  margin-top: 40px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 28px;
+  background: #ffffff;
+}
+
+.about-band-title {
+  margin: 0 0 6px;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.about-band-intro {
+  margin: 0 0 18px;
+  color: var(--muted);
+  font-size: 15px;
+  max-width: 72ch;
+}
+
+.about-band-scale {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.about-band-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-width: 70px;
+  border-radius: 12px;
+  padding: 10px 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.about-band-num {
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.about-band-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  text-align: center;
+}
+
+.about-band-item--9 .about-band-num { color: #047857; }
+.about-band-item--8 .about-band-num { color: #059669; }
+.about-band-item--7 .about-band-num { color: #0d9488; }
+.about-band-item--6 .about-band-num { color: #0284c7; }
+.about-band-item--5 .about-band-num { color: #d97706; }
+.about-band-item--4 .about-band-num { color: #b45309; }
+.about-band-item--3 .about-band-num { color: var(--red); }
+.about-band-item--2 .about-band-num { color: var(--red); }
+.about-band-item--1 .about-band-num { color: var(--redDark); }
+
+#reviews {
+  scroll-margin-top: calc(var(--headerHeight, 0px) + 16px);
+}
+
 .dots-divider .dot {
   width: 10px;
   height: 10px;
