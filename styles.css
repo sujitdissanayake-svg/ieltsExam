@@ -6078,7 +6078,7 @@ main {
   border: 1px solid var(--border);
   border-radius: 14px;
   padding: 18px;
-  background: #ffffff;
+  background: var(--bg);
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -6130,7 +6130,7 @@ main {
   border: 1px solid var(--border);
   border-radius: 18px;
   padding: 28px;
-  background: #ffffff;
+  background: var(--bg);
 }
 
 .about-band-title {
