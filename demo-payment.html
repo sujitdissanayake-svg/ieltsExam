@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Payment Gateway</title>
+    <link rel="stylesheet" href="styles.css?v=20260226" />
+    <style>
+      .payment-page-wrap {
+        width: min(560px, 100%);
+      }
+
+      .payment-gateway-card {
+        max-width: 100%;
+        border: 1px solid #9ec3f6;
+        border-radius: 14px;
+        background: #edf3fb;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
+        padding: 20px 20px 18px;
+      }
+
+      .payment-gateway-card .packages-back {
+        display: inline-flex;
+        margin-bottom: 14px;
+      }
+
+      .payment-summary-title {
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 800;
+        color: #0f172a;
+      }
+
+      .payment-separator {
+        border: none;
+        border-top: 1px solid #a9c8f2;
+        margin: 14px 0;
+      }
+
+      .payment-item-row,
+      .payment-total-row,
+      .payment-billed-row {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .payment-item-title,
+      .payment-total-title,
+      .payment-billed-title {
+        margin: 0;
+        color: #0f172a;
+      }
+
+      .payment-item-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+      }
+
+      .payment-item-meta,
+      .payment-item-qty,
+      .payment-tax-note,
+      .payment-next-charge,
+      .payment-billed-note {
+        margin: 0;
+        font-size: 0.95rem;
+        color: #475569;
+      }
+
+      .payment-link {
+        display: inline-block;
+        margin: 2px 0;
+        color: #0b63d1;
+        font-weight: 500;
+        text-decoration: none;
+      }
+
+      .payment-link:hover {
+        text-decoration: underline;
+      }
+
+      .payment-total-title,
+      .payment-billed-title {
+        font-size: 2.05rem;
+        font-weight: 800;
+      }
+
+      .payment-amount-main {
+        margin: 0;
+        font-size: 2.15rem;
+        font-weight: 800;
+        color: #0f172a;
+        text-align: right;
+      }
+
+      .payment-amount-sub {
+        margin: 4px 0 0;
+        font-size: 0.95rem;
+        color: #64748b;
+        text-align: right;
+      }
+
+      .payment-checkout-btn {
+        margin-top: 10px;
+        width: 100%;
+        border-radius: 12px;
+        font-size: 1.75rem;
+        font-weight: 700;
+        padding-top: 11px;
+        padding-bottom: 11px;
+        background: #1f6fd2;
+        box-shadow: none;
+      }
+
+      .payment-checkout-btn:hover {
+        background: #165bb0;
+        box-shadow: none;
+      }
+
+      .payment-checkout-btn:active {
+        box-shadow: none;
+      }
+
+      .payment-secure-note {
+        margin: 10px 0 0;
+        text-align: center;
+        font-size: 0.95rem;
+        color: #334155;
+      }
+
+      .payment-billed-row {
+        margin-top: 4px;
+      }
+
+      .payment-billed-title {
+        font-size: 1.35rem;
+      }
+
+      .payment-billed-amount {
+        margin: 0;
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #0f172a;
+        text-align: right;
+      }
+
+      @media (max-width: 640px) {
+        .payment-gateway-card {
+          padding: 16px 14px;
+        }
+
+        .payment-summary-title {
+          font-size: 1.5rem;
+        }
+
+        .payment-total-title {
+          font-size: 1.45rem;
+        }
+
+        .payment-amount-main {
+          font-size: 1.5rem;
+        }
+
+        .payment-checkout-btn {
+          font-size: 1.2rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="portal-page" aria-label="Payment Gateway">
+      <div class="payment-page-wrap">
+        <section class="portal-card payment-gateway-card" aria-label="Payment gateway">
+          <a class="packages-back" href="packages.html">← Back to Mock Test Packages</a>
+          <h1 class="payment-summary-title">Order summary</h1>
+          <hr class="payment-separator" />
+
+          <div class="payment-item-row">
+            <div>
+              <p class="payment-item-title" id="payment-package-line">Mock Package</p>
+              <p class="payment-item-qty" id="payment-qty-line">1 user x $0.00</p>
+            </div>
+            <p class="payment-item-title" id="payment-item-price-line">$0.00</p>
+          </div>
+
+          <hr class="payment-separator" />
+
+          <div class="payment-total-row">
+            <p class="payment-total-title">Today's total</p>
+            <div>
+              <p class="payment-amount-main" id="payment-amount-line">$0.00</p>
+              <p class="payment-amount-sub">Plus applicable taxes</p>
+            </div>
+          </div>
+
+          <form class="portal-form" id="payment-card-form" autocomplete="off">
+            <button class="portal-submit payment-checkout-btn" type="submit" id="payment-submit-btn">Pay Now</button>
+            <p class="payment-secure-note">&#128274; Secure checkout</p>
+            <hr class="payment-separator" />
+
+            <div class="payment-billed-row">
+              <div>
+                <p class="payment-billed-title">Total billed</p>
+                <p class="payment-billed-note">Plus applicable taxes</p>
+              </div>
+              <p class="payment-billed-amount" id="payment-billed-amount-line">$0.00</p>
+            </div>
+
+            <p class="portal-small-note" id="payment-card-note"></p>
+          </form>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      (function () {
+        function setNote(el, text, kind) {
+          if (!el) return;
+          el.textContent = String(text || '');
+          if (kind === 'success') {
+            el.style.color = '#16a34a';
+          } else if (kind === 'error') {
+            el.style.color = '#dc2626';
+          } else {
+            el.style.color = '#475569';
+          }
+        }
+
+        function writeStorage(key, value) {
+          var k = String(key || '').trim();
+          if (!k) return;
+          var v = String(value == null ? '' : value);
+          try { window.localStorage.setItem(k, v); } catch (_) {}
+          try { window.sessionStorage.setItem(k, v); } catch (_) {}
+        }
+
+        function readStorage(key) {
+          var k = String(key || '').trim();
+          if (!k) return '';
+          try {
+            var localValue = String(window.localStorage.getItem(k) || '').trim();
+            if (localValue) return localValue;
+          } catch (_) {}
+          try {
+            return String(window.sessionStorage.getItem(k) || '').trim();
+          } catch (_) {
+            return '';
+          }
+        }
+
+        function normalizeCountryCode(value) {
+          var input = String(value || '').trim().toLowerCase();
+          if (!input) return '';
+          if (input === 'lk' || input === 'lka' || input.indexOf('sri lanka') !== -1) return 'LK';
+          if (input === 'th' || input === 'tha' || input.indexOf('thailand') !== -1 || input.indexOf('thai') !== -1) return 'TH';
+          return '';
+        }
+
+        function readCountryFromProfile() {
+          try {
+            var profile = JSON.parse(readStorage('ieltsPortalProfile') || 'null');
+            if (!profile || typeof profile !== 'object') return '';
+            return normalizeCountryCode(profile.country || profile.nationality || profile.location || profile.region);
+          } catch (_) {
+            return '';
+          }
+        }
+
+        function resolveCandidateCountry(params) {
+          var fromQuery = normalizeCountryCode(params && params.get('country'));
+          if (fromQuery) return fromQuery;
+
+          var fromStorage = normalizeCountryCode(
+            readStorage('ieltsPortalCountry')
+            || readStorage('ieltsCountry')
+            || readStorage('candidateCountry')
+          );
+          if (fromStorage) return fromStorage;
+
+          var fromProfile = readCountryFromProfile();
+          if (fromProfile) return fromProfile;
+
+          try {
+            var timezone = String((Intl.DateTimeFormat().resolvedOptions() || {}).timeZone || '').toLowerCase();
+            if (timezone.indexOf('colombo') !== -1) return 'LK';
+            if (timezone.indexOf('bangkok') !== -1) return 'TH';
+          } catch (_) {}
+
+          return '';
+        }
+
+        function readUsdRateCache() {
+          try {
+            var raw = String(readStorage('ieltsUsdRateCacheV1') || '').trim();
+            if (!raw) return null;
+            var parsed = JSON.parse(raw);
+            if (!parsed || typeof parsed !== 'object') return null;
+            var fetchedAt = Number(parsed.fetchedAt) || 0;
+            var rates = parsed.rates || {};
+            return {
+              fetchedAt: fetchedAt,
+              rates: {
+                LKR: Number(rates.LKR) || 0,
+                THB: Number(rates.THB) || 0,
+              },
+            };
+          } catch (_) {
+            return null;
+          }
+        }
+
+        function writeUsdRateCache(rates) {
+          var payload = {
+            fetchedAt: Date.now(),
+            rates: {
+              LKR: Number((rates && rates.LKR) || 0) || 0,
+              THB: Number((rates && rates.THB) || 0) || 0,
+            },
+          };
+          writeStorage('ieltsUsdRateCacheV1', JSON.stringify(payload));
+        }
+
+        async function fetchLiveUsdRates() {
+          var CACHE_TTL_MS = 15 * 60 * 1000;
+          var cached = readUsdRateCache();
+          var now = Date.now();
+
+          if (cached && cached.fetchedAt > 0 && (now - cached.fetchedAt) < CACHE_TTL_MS) {
+            return cached.rates;
+          }
+
+          try {
+            var response = await fetch('https://open.er-api.com/v6/latest/USD', { cache: 'no-store' });
+            var data = await response.json().catch(function () { return {}; });
+            var rates = data && data.rates ? data.rates : {};
+            var liveRates = {
+              LKR: Number(rates.LKR) || 0,
+              THB: Number(rates.THB) || 0,
+            };
+
+            if (liveRates.LKR > 0 || liveRates.THB > 0) {
+              writeUsdRateCache(liveRates);
+              return liveRates;
+            }
+          } catch (_) {}
+
+          return cached && cached.rates ? cached.rates : { LKR: 0, THB: 0 };
+        }
+
+        function formatLocalAmount(usdAmount, countryCode, liveRates) {
+          var mappedRates = {
+            LK: Number((liveRates && liveRates.LKR) || 0),
+            TH: Number((liveRates && liveRates.THB) || 0),
+          };
+
+          var currencyByCountry = {
+            LK: 'LKR',
+            TH: 'THB',
+          };
+
+          var localeByCountry = {
+            LK: 'en-LK',
+            TH: 'th-TH',
+          };
+
+          var rate = Number(mappedRates[countryCode] || 0);
+          if (!rate || !Number.isFinite(usdAmount)) return '';
+
+          var localAmount = usdAmount * rate;
+          var currency = String(currencyByCountry[countryCode] || '').trim();
+          var locale = String(localeByCountry[countryCode] || 'en-US').trim();
+          if (!currency) return '';
+
+          try {
+            return new Intl.NumberFormat(locale, {
+              style: 'currency',
+              currency: currency,
+              maximumFractionDigits: 2,
+            }).format(localAmount);
+          } catch (_) {
+            return currency + ' ' + localAmount.toFixed(2);
+          }
+        }
+
+        var params = new URLSearchParams(window.location.search || '');
+        var packageName = String(params.get('package') || readStorage('ieltsMockPackage') || 'Mock Package').trim();
+        var amount = Number(params.get('amount') || readStorage('ieltsPendingPaymentAmount') || 0) || 0;
+        var candidateCountry = resolveCandidateCountry(params);
+        var authBridge = String(params.get('auth') || '').trim();
+        var profileBridge = String(params.get('profile') || '').trim();
+
+        var packageLine = document.getElementById('payment-package-line');
+        var qtyLine = document.getElementById('payment-qty-line');
+        var itemPriceLine = document.getElementById('payment-item-price-line');
+        var amountLine = document.getElementById('payment-amount-line');
+        var billedAmountLine = document.getElementById('payment-billed-amount-line');
+        if (packageLine) packageLine.textContent = packageName;
+
+        var usdText = '$' + amount.toFixed(2);
+        if (qtyLine) qtyLine.textContent = '1 user x ' + usdText;
+        if (itemPriceLine) itemPriceLine.textContent = usdText;
+        if (amountLine) amountLine.textContent = usdText;
+        if (billedAmountLine) billedAmountLine.textContent = usdText;
+
+        if (candidateCountry === 'LK' || candidateCountry === 'TH') {
+          if (amountLine) amountLine.textContent = usdText + ' (updating live rate...)';
+          fetchLiveUsdRates().then(function (liveRates) {
+            var localText = formatLocalAmount(amount, candidateCountry, liveRates);
+            var finalText = usdText + (localText ? ' (' + localText + ')' : '');
+            if (amountLine) amountLine.textContent = finalText;
+            if (billedAmountLine) billedAmountLine.textContent = finalText;
+            if (itemPriceLine) itemPriceLine.textContent = finalText;
+          });
+        }
+
+        writeStorage('ieltsMockPackage', packageName);
+        writeStorage('ieltsPendingPaymentAmount', String(amount));
+
+        var cardForm = document.getElementById('payment-card-form');
+        var cardNote = document.getElementById('payment-card-note');
+        var submitBtn = document.getElementById('payment-submit-btn');
+
+        if (cardForm) {
+          cardForm.addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            if (submitBtn) submitBtn.disabled = true;
+            setNote(cardNote, 'Opening payment gateway...', 'info');
+
+            writeStorage('ieltsLastPaymentPackage', packageName);
+            writeStorage('ieltsLastPaymentAmount', String(amount));
+            writeStorage('ieltsPortalCountry', candidateCountry || '');
+
+            var gatewayUrl = 'payment-gateway.html'
+              + '?package=' + encodeURIComponent(packageName)
+              + '&amount=' + encodeURIComponent(String(amount || 0));
+
+            if (candidateCountry) {
+              gatewayUrl += '&country=' + encodeURIComponent(candidateCountry);
+            }
+            if (authBridge) gatewayUrl += '&auth=' + encodeURIComponent(authBridge);
+            if (profileBridge) gatewayUrl += '&profile=' + encodeURIComponent(profileBridge);
+
+            window.location.href = gatewayUrl;
+          });
+        }
+      })();
+    </script>
+  </body>
+</html>

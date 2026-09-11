@@ -57,7 +57,7 @@
                 <path d="M4 21a8 8 0 0 1 16 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
               </svg>
             </span>
-            <span>Candidate Number:217575</span>
+            <span id="soundcheckCandidateNumber">Candidate Number:-</span>
           </div>
 
           <div class="soundcheck-volume" aria-label="Volume">
@@ -108,10 +108,80 @@
         var playBtn = document.getElementById('playSound');
         var continueBtn = document.getElementById('continueBtn');
         var volumeEl = document.getElementById('volume');
+        var candidateEl = document.getElementById('soundcheckCandidateNumber');
         var voiceAudio = null;
         var audioCtx = null;
         var gainNode = null;
         var mediaSource = null;
+
+        function readPortalValue(key) {
+          try {
+            var localValue = String(window.localStorage.getItem(key) || '').trim();
+            if (localValue) return localValue;
+          } catch (_) {}
+          try {
+            return String(window.sessionStorage.getItem(key) || '').trim();
+          } catch (_) {
+            return '';
+          }
+        }
+
+        function writePortalValue(key, value) {
+          var k = String(key || '').trim();
+          if (!k) return;
+          var v = String(value == null ? '' : value).trim();
+          if (!v) return;
+          try { window.localStorage.setItem(k, v); } catch (_) {}
+          try { window.sessionStorage.setItem(k, v); } catch (_) {}
+        }
+
+        function sanitizeCandidateNumber(value) {
+          var raw = String(value == null ? '' : value).trim();
+          if (!raw) return '';
+          var numeric = Number(raw);
+          if (!(numeric > 0)) return '';
+          return String(Math.trunc(numeric));
+        }
+
+        function setCandidateText(value) {
+          if (!candidateEl) return;
+          var candidate = sanitizeCandidateNumber(value);
+          candidateEl.textContent = 'Candidate Number:' + (candidate || '-');
+        }
+
+        function hydrateCandidateFromBackend() {
+          var authEmail = String(readPortalValue('ieltsPortalEmail') || '').trim();
+          var authHash = String(readPortalValue('ieltsPortalPasswordHash') || '').trim();
+          if (!authEmail || !authHash) return Promise.resolve('');
+
+          return fetch('/api/users/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: authEmail, passwordHash: authHash }),
+          })
+            .then(function (response) {
+              return response.json().catch(function () { return {}; }).then(function (data) {
+                return { ok: response.ok, data: data };
+              });
+            })
+            .then(function (result) {
+              if (!result.ok || !result.data || !result.data.user) return '';
+              var candidate = sanitizeCandidateNumber(result.data.user.candidateNumber);
+              if (candidate) writePortalValue('ieltsPortalCandidateNumber', candidate);
+              return candidate;
+            })
+            .catch(function () {
+              return '';
+            });
+        }
+
+        var storedCandidate = sanitizeCandidateNumber(readPortalValue('ieltsPortalCandidateNumber'));
+        setCandidateText(storedCandidate);
+        if (!storedCandidate) {
+          hydrateCandidateFromBackend().then(function (candidate) {
+            setCandidateText(candidate);
+          });
+        }
 
         function syncVolumeSliderUi() {
           try {

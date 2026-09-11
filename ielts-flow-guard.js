@@ -4,14 +4,11 @@
     stageUrlPrefix: 'ieltsStageUrl_',
   };
 
-  const isLocalHost = () => {
-    const host = String(window.location.hostname || '');
-    return host === 'localhost' || host === '127.0.0.1' || host === '::1';
-  };
+  const usesHtmlRoutes = () => /\.html$/i.test(String(window.location.pathname || ''));
 
   const toPageUrl = (pageId) => {
     if (!pageId) return '';
-    return isLocalHost() ? `${pageId}.html` : pageId;
+    return usesHtmlRoutes() ? `${pageId}.html` : pageId;
   };
 
   const PRE_TEST_PAGES = new Set(['free-mock-test', 'ielts-academic']);
@@ -76,6 +73,97 @@
     }
     return 0;
   };
+
+  const installClipboardGuard = (fileName) => {
+    if (!/^ielts-/i.test(String(fileName || ''))) return;
+    if (window.__ieltsClipboardGuardInstalled === true) return;
+    window.__ieltsClipboardGuardInstalled = true;
+
+    const stopClipboardAction = (event) => {
+      if (!event) return;
+      try {
+        event.preventDefault();
+      } catch {
+        // ignore
+      }
+      try {
+        event.stopPropagation();
+      } catch {
+        // ignore
+      }
+    };
+
+    // Keep selection/highlight available but block all clipboard transfer.
+    document.addEventListener('copy', stopClipboardAction, true);
+    document.addEventListener('cut', stopClipboardAction, true);
+    document.addEventListener('paste', stopClipboardAction, true);
+
+    document.addEventListener(
+      'beforeinput',
+      (event) => {
+        const inputType = String((event && event.inputType) || '');
+        if (inputType === 'insertFromPaste' || inputType === 'insertFromDrop') {
+          stopClipboardAction(event);
+        }
+      },
+      true
+    );
+
+    document.addEventListener(
+      'keydown',
+      (event) => {
+        if (!event) return;
+        const key = String(event.key || '').toLowerCase();
+        const isCtrlOrMeta = !!event.ctrlKey || !!event.metaKey;
+        const isCopyCutPasteShortcut = isCtrlOrMeta && (key === 'c' || key === 'x' || key === 'v');
+        const isShiftInsert = !!event.shiftKey && key === 'insert';
+        if (isCopyCutPasteShortcut || isShiftInsert) {
+          stopClipboardAction(event);
+        }
+      },
+      true
+    );
+  };
+
+  const getPortalEmail = () => {
+    try {
+      const email = String(window.localStorage.getItem('ieltsPortalEmail') || '').trim();
+      return email;
+    } catch {
+      return '';
+    }
+  };
+
+  const logActivity = (type, meta) => {
+    try {
+      const email = getPortalEmail();
+      if (!email) return;
+      const payload = {
+        email,
+        type: String(type || '').trim(),
+        meta: meta && typeof meta === 'object' ? meta : {},
+      };
+      if (!payload.type) return;
+      fetch('/api/activity/log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      }).catch(() => {
+        // ignore
+      });
+    } catch {
+      // ignore
+    }
+  };
+
+  // Basic page-view logging (enough to power the admin activity viewer).
+  try {
+    const pageId = getFileName();
+    const stageId = getStageIdForPage(pageId);
+    logActivity('page_view', { page: pageId, stageId });
+  } catch {
+    // ignore
+  }
 
   const clearProgress = () => {
     try {
@@ -293,6 +381,8 @@
   const enforce = () => {
     const fileName = getFileName();
     if (!fileName) return;
+
+    installClipboardGuard(fileName);
 
     const hasRestartFlag = () => {
       try {

@@ -16,22 +16,22 @@
             Sign in or create an account to access mock tests and practice materials.
           </p>
 
-          <form class="portal-form" autocomplete="on" id="portal-login-form" aria-label="Login form" style="margin-top:18px;">
+          <form class="portal-form" autocomplete="off" id="portal-login-form" aria-label="Login form" style="margin-top:18px;">
             <p class="portal-card-intro" style="margin:0 0 6px;">Already have an account? Log in</p>
 
             <label class="portal-field">
               <span class="portal-label">Email</span>
-              <input class="portal-input" type="email" name="email" required placeholder="you@example.com" />
+              <input class="portal-input" type="email" name="email" autocomplete="off" autocapitalize="off" spellcheck="false" required placeholder="you@example.com" />
             </label>
 
             <label class="portal-field">
               <span class="portal-label">Password</span>
-              <input class="portal-input" type="password" id="portal-login-password" name="password" placeholder="Your password" />
+              <input class="portal-input" type="password" id="portal-login-password" name="password" autocomplete="new-password" placeholder="Your password" />
               <div class="portal-password-toggle">
                 <input class="portal-checkbox" type="checkbox" id="portal-login-show" data-toggle-password="portal-login-password" />
                 <label for="portal-login-show">Show password</label>
               </div>
-              <button class="portal-forgot" type="button">Forgotten Password?</button>
+              <button class="portal-forgot" id="portal-open-reset-btn" type="button">Forgotten Password?</button>
             </label>
 
             <button class="portal-submit" type="submit">Sign in</button>
@@ -45,25 +45,35 @@
           <h2 class="portal-card-title" style="font-weight: 800;">Sign Up | Create an Account</h2>
           <p class="portal-card-intro">Enter your details to create an account.</p>
 
-          <form class="portal-form" autocomplete="on" id="portal-register-form">
+          <form class="portal-form" autocomplete="off" id="portal-register-form">
             <label class="portal-field">
               <span class="portal-label">Full name</span>
-              <input class="portal-input" type="text" name="name" required placeholder="Your full name" />
+              <input class="portal-input" type="text" name="name" autocomplete="off" required placeholder="Your full name" />
             </label>
 
             <label class="portal-field">
               <span class="portal-label">Email</span>
-              <input class="portal-input" type="email" name="email" required placeholder="you@example.com" />
+              <input class="portal-input" type="email" name="email" autocomplete="off" autocapitalize="off" spellcheck="false" required placeholder="you@example.com" />
             </label>
 
             <label class="portal-field">
               <span class="portal-label">WhatsApp number</span>
-              <input class="portal-input" type="tel" name="whatsapp" required placeholder="e.g. +44 7123 456789" />
+              <input class="portal-input" type="tel" name="whatsapp" autocomplete="off" required placeholder="e.g. +44 7123 456789" />
+            </label>
+
+            <label class="portal-field">
+              <span class="portal-label">Date of Birth</span>
+              <input class="portal-input" type="date" name="dob" autocomplete="bday" required />
+            </label>
+
+            <label class="portal-field">
+              <span class="portal-label">Target Band Score</span>
+              <input class="portal-input" type="number" name="targetBandScore" min="0" max="9" step="0.5" required placeholder="e.g. 7.5" />
             </label>
 
             <label class="portal-field">
               <span class="portal-label">Password</span>
-              <input class="portal-input" type="password" id="portal-register-password" name="password" placeholder="Create a password (optional)" />
+              <input class="portal-input" type="password" id="portal-register-password" name="password" autocomplete="new-password" placeholder="Create a password (optional)" />
               <div class="portal-password-toggle">
                 <input class="portal-checkbox" type="checkbox" id="portal-register-show" data-toggle-password="portal-register-password" />
                 <label for="portal-register-show">Show password</label>
@@ -107,6 +117,62 @@
       </div>
     </div>
 
+    <div class="portal-modal" id="portal-reset-modal" role="dialog" aria-modal="true" aria-label="Forgotten password" hidden>
+      <div class="portal-modal-card" role="document">
+        <h2 class="portal-card-title" style="margin:0;">Forgotten Password</h2>
+        <p class="portal-card-intro" style="margin:6px 0 8px;">Use OTP sent to your email to recover your account.</p>
+
+        <form class="portal-form" autocomplete="off" id="portal-reset-form" style="gap:12px;margin-top:2px;">
+          <label class="portal-field">
+            <span class="portal-label">Email</span>
+            <input
+              class="portal-input"
+              type="email"
+              id="portal-reset-email"
+              name="email"
+              autocomplete="off"
+              autocapitalize="off"
+              spellcheck="false"
+              placeholder="you@example.com"
+              required
+            />
+          </label>
+
+          <button class="portal-submit" type="button" id="portal-reset-send">Send OTP</button>
+
+          <label class="portal-field">
+            <span class="portal-label">OTP code</span>
+            <input
+              class="portal-input"
+              type="text"
+              id="portal-reset-code"
+              name="code"
+              inputmode="numeric"
+              autocomplete="one-time-code"
+              placeholder="Enter 6-digit OTP"
+              pattern="[0-9]{6}"
+              maxlength="6"
+              required
+            />
+          </label>
+
+          <label class="portal-field">
+            <span class="portal-label">New password</span>
+            <input class="portal-input" type="password" id="portal-reset-password" name="password" autocomplete="new-password" placeholder="Enter your new password" required />
+            <div class="portal-password-toggle">
+              <input class="portal-checkbox" type="checkbox" id="portal-reset-show" data-toggle-password="portal-reset-password" />
+              <label for="portal-reset-show">Show password</label>
+            </div>
+          </label>
+
+          <button class="portal-submit" type="submit" id="portal-reset-submit">Reset Password</button>
+          <button class="portal-submit" type="button" id="portal-reset-close">Close</button>
+
+          <p class="portal-small-note" id="portal-reset-note" style="margin:0;">Your OTP expires after 10 minutes.</p>
+        </form>
+      </div>
+    </div>
+
     <script>
       (function () {
         (function bindBackToHome() {
@@ -135,6 +201,16 @@
         var verifyNote = document.getElementById('portal-verify-note');
         var verifySubmitBtn = document.getElementById('portal-verify-submit');
         var verifyResendBtn = document.getElementById('portal-verify-resend');
+        var resetModal = document.getElementById('portal-reset-modal');
+        var resetForm = document.getElementById('portal-reset-form');
+        var resetEmailInput = document.getElementById('portal-reset-email');
+        var resetCodeInput = document.getElementById('portal-reset-code');
+        var resetPasswordInput = document.getElementById('portal-reset-password');
+        var resetSendBtn = document.getElementById('portal-reset-send');
+        var resetSubmitBtn = document.getElementById('portal-reset-submit');
+        var resetCloseBtn = document.getElementById('portal-reset-close');
+        var resetNote = document.getElementById('portal-reset-note');
+        var openResetBtn = document.getElementById('portal-open-reset-btn');
 
         var registerSubmitButton = registerForm.querySelector('button[type="submit"]');
 
@@ -154,6 +230,61 @@
           return simpleHash(e + ':' + p);
         }
 
+        function writePortalValue(key, value) {
+          var normalizedKey = String(key || '').trim();
+          if (!normalizedKey) return false;
+          var normalizedValue = String(value == null ? '' : value);
+          var wrote = false;
+          try {
+            window.localStorage.setItem(normalizedKey, normalizedValue);
+            wrote = true;
+          } catch (_) {}
+          try {
+            window.sessionStorage.setItem(normalizedKey, normalizedValue);
+            wrote = true;
+          } catch (_) {}
+          return wrote;
+        }
+
+        function readPortalValue(key) {
+          var normalizedKey = String(key || '').trim();
+          if (!normalizedKey) return '';
+          try {
+            var localValue = String(window.localStorage.getItem(normalizedKey) || '');
+            if (localValue) return localValue;
+          } catch (_) {}
+          try {
+            return String(window.sessionStorage.getItem(normalizedKey) || '');
+          } catch (_) {
+            return '';
+          }
+        }
+
+        function clearPortalFormValues() {
+          try {
+            if (loginForm) loginForm.reset();
+            if (registerForm) registerForm.reset();
+            if (verifyForm) verifyForm.reset();
+            if (resetForm) resetForm.reset();
+
+            var sensitiveInputs = document.querySelectorAll(
+              '#portal-login-form input, #portal-register-form input, #portal-reset-form input'
+            );
+            for (var i = 0; i < sensitiveInputs.length; i++) {
+              var input = sensitiveInputs[i];
+              if (!input || input.type === 'checkbox') continue;
+              input.value = '';
+            }
+          } catch (_) {}
+        }
+
+        clearPortalFormValues();
+        window.addEventListener('pageshow', function () {
+          clearPortalFormValues();
+          window.setTimeout(clearPortalFormValues, 120);
+        });
+        window.setTimeout(clearPortalFormValues, 120);
+
         (function bindShowPasswordToggles() {
           var toggles = document.querySelectorAll('input[type="checkbox"][data-toggle-password]');
           for (var i = 0; i < toggles.length; i++) {
@@ -172,60 +303,233 @@
           }
         })();
 
-        function isLocalHost() {
-          return (
-            window.location.hostname === 'localhost' ||
-            window.location.hostname === '127.0.0.1' ||
-            window.location.hostname === '::1'
-          );
+        function usesHtmlRoutes() {
+          return /\.html$/i.test(window.location.pathname || '');
         }
 
         function directorPanelUrl() {
-          return isLocalHost() ? 'director-panel.html' : 'director-panel';
-        }
-
-        function isDirectorCredentials(email, password) {
-          var e = String(email || '').trim().toLowerCase();
-          var p = String(password || '');
-          return e === 'sujit.dissanayake@gmail.com' && p === '1428Aws#pkR';
+          return usesHtmlRoutes() ? 'director-panel.html' : 'director-panel';
         }
 
         var target = null;
+        var bypass = false;
+        var encodedAuth = '';
+        var encodedProfile = '';
+        var paidPackage = '';
+        var paidSessionId = '';
         try {
           var params = new URLSearchParams(window.location.search || '');
           target = params.get('target');
+          bypass = params.has('bypass') && params.get('bypass') !== '0' && params.get('bypass') !== 'false';
+          encodedAuth = String(params.get('auth') || '').trim();
+          encodedProfile = String(params.get('profile') || '').trim();
+          paidPackage = String(params.get('package') || '').trim();
+          paidSessionId = String(params.get('session_id') || params.get('sessionId') || '').trim();
+          if (!paidSessionId) {
+            paidSessionId = String(readPortalValue('ieltsStripeSessionId') || '').trim();
+          }
         } catch (_) {
           target = null;
+          bypass = false;
+          encodedAuth = '';
+          encodedProfile = '';
+          paidPackage = '';
+          paidSessionId = '';
         }
 
-        function sanitizeSameOriginTarget(raw) {
-          if (!raw) return '';
-          var value = String(raw).trim();
-          if (!value) return '';
-          if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(value)) return '';
+        function normalizePaidPackageName(value) {
+          var raw = String(value || '').trim();
+          return /^(Lite|Basic|Standard|Pro)$/i.test(raw) ? (raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase()) : '';
+        }
+
+        function resolvePaidPackage() {
+          var fromQuery = normalizePaidPackageName(paidPackage);
+          if (fromQuery) return fromQuery;
+          var fromLastPayment = normalizePaidPackageName(readPortalValue('ieltsLastPaymentPackage'));
+          if (fromLastPayment) return fromLastPayment;
+          return normalizePaidPackageName(readPortalValue('ieltsMockPackage'));
+        }
+
+        function applyPurchasedPackageContext() {
+          var pkg = resolvePaidPackage();
+          if (!pkg) return '';
+          writePortalValue('ieltsLastPaymentPackage', pkg);
+          writePortalValue('ieltsMockPackage', pkg);
+          writePortalValue('ieltsHasPaidMock', 'true');
+          writePortalValue('ieltsTestMode', 'mock');
+          return pkg;
+        }
+
+        (function hydratePortalProfileFromQuery() {
+          if (!encodedProfile) return;
           try {
-            var url = new URL(value, window.location.origin);
-            if (url.origin !== window.location.origin) return '';
-            if (/\/\.\.(\/|$)/.test(url.pathname)) return '';
-            if (/\.\./.test(url.pathname)) return '';
-            return url.pathname + url.search + url.hash;
+            var profile = JSON.parse(decodeURIComponent(encodedProfile));
+            if (!profile || typeof profile !== 'object') return;
+            if (profile.name) writePortalValue('ieltsPortalName', profile.name);
+            if (profile.email) writePortalValue('ieltsPortalEmail', profile.email);
+            if (profile.whatsapp) writePortalValue('ieltsPortalWhatsApp', profile.whatsapp);
+            if (profile.dob) {
+              writePortalValue('ieltsPortalDob', profile.dob);
+              writePortalValue('ieltsPortalDOB', profile.dob);
+            }
+            if (profile.candidateNumber) writePortalValue('ieltsPortalCandidateNumber', profile.candidateNumber);
+            if (profile.targetBandScore) writePortalValue('ieltsPortalTargetBandScore', profile.targetBandScore);
+            writePortalValue('ieltsPortalProfile', JSON.stringify(profile));
+          } catch (_) {}
+        })();
+
+        function decodeBridgeAuth() {
+          if (!encodedAuth) return null;
+          try {
+            var decodedAuth = window.atob(decodeURIComponent(encodedAuth));
+            var parsed = JSON.parse(decodedAuth);
+            var email = String((parsed && parsed.email) || '').trim();
+            var passwordHash = String((parsed && parsed.passwordHash) || '').trim();
+            if (!email || !passwordHash) return null;
+
+            writePortalValue('ieltsPortalEmail', email);
+            writePortalValue('ieltsPortalPasswordHash', passwordHash);
+            return { email: email, passwordHash: passwordHash };
+          } catch (_) {
+            return null;
+          }
+        }
+
+        var bridgeAuthFromQuery = decodeBridgeAuth();
+
+        function testTakerPortalUrl() {
+          var host = String(window.location.hostname || '').toLowerCase();
+          var isLocalHost = host === 'localhost' || host === '127.0.0.1';
+          if (usesHtmlRoutes() && isLocalHost) {
+            return 'https://student-portal-next-lilac.vercel.app/dashboard';
+          }
+          return '/dashboard';
+        }
+
+        function buildDashboardAuthPayload(authOverride) {
+          var source = authOverride && typeof authOverride === 'object' ? authOverride : {};
+          var email = String(source.email || readPortalValue('ieltsPortalEmail') || '').trim();
+          var passwordHash = String(source.passwordHash || readPortalValue('ieltsPortalPasswordHash') || '').trim();
+          if (!email || !passwordHash) return null;
+          return { email: email, passwordHash: passwordHash };
+        }
+
+        function buildDashboardProfilePayload() {
+          try {
+            var storedRaw = readPortalValue('ieltsPortalProfile');
+            if (storedRaw) {
+              var parsed = JSON.parse(storedRaw);
+              if (parsed && typeof parsed === 'object') {
+                return parsed;
+              }
+            }
+          } catch (_) {}
+
+          var fallback = {
+            id: '',
+            name: String(readPortalValue('ieltsPortalName') || '').trim(),
+            email: String(readPortalValue('ieltsPortalEmail') || '').trim(),
+            whatsapp: String(readPortalValue('ieltsPortalWhatsApp') || '').trim(),
+            dob: String(readPortalValue('ieltsPortalDob') || readPortalValue('ieltsPortalDOB') || '').trim(),
+            candidateNumber: Number(readPortalValue('ieltsPortalCandidateNumber') || 0) || 0,
+            targetBandScore: Number(readPortalValue('ieltsPortalTargetBandScore') || 0) || 0,
+            createdAt: '',
+          };
+
+          if (!fallback.name && !fallback.email && !fallback.candidateNumber) return null;
+          return fallback;
+        }
+
+        function encodeBridgeAuth(authPayload) {
+          if (!authPayload) return '';
+          try {
+            return encodeURIComponent(window.btoa(JSON.stringify(authPayload)));
           } catch (_) {
             return '';
           }
         }
 
-        function defaultFreeMockTarget() {
-          return isLocalHost() ? 'ielts-academic.html' : 'ielts-academic';
+        function encodeBridgeProfile(profilePayload) {
+          if (!profilePayload) return '';
+          try {
+            return encodeURIComponent(JSON.stringify(profilePayload));
+          } catch (_) {
+            return '';
+          }
         }
 
-        function goToTargetIfProvided() {
-          var safeTarget = sanitizeSameOriginTarget(target);
-          var dest = safeTarget || defaultFreeMockTarget();
+        function appendDashboardBridgeFragment(url, authPayload, profilePayload, purchasePayload) {
+          var authEncoded = encodeBridgeAuth(authPayload);
+          var profileEncoded = encodeBridgeProfile(profilePayload);
+          var purchase = purchasePayload && typeof purchasePayload === 'object' ? purchasePayload : {};
+          var purchasePackage = String(purchase.package || '').trim();
+          var purchaseSessionId = String(purchase.sessionId || '').trim();
+          if (!authEncoded && !profileEncoded && !purchasePackage && !purchaseSessionId) return String(url || '');
+
+          var hashParams = new URLSearchParams();
+          if (authEncoded) hashParams.set('auth', authEncoded);
+          if (profileEncoded) hashParams.set('profile', profileEncoded);
+          if (purchasePackage) hashParams.set('package', purchasePackage);
+          if (purchaseSessionId) hashParams.set('session_id', purchaseSessionId);
+
+          var hash = hashParams.toString();
+          if (!hash) return String(url || '');
+          return String(url || '').replace(/#.*$/, '') + '#' + hash;
+        }
+
+        function syncPurchasedPaymentForUser(authPayload) {
+          var auth = authPayload && typeof authPayload === 'object' ? authPayload : null;
+          if (!auth || !auth.email || !auth.passwordHash) return Promise.resolve(null);
+
+          var pkg = resolvePaidPackage();
+          if (!pkg) return Promise.resolve(null);
+
+          return postJson('/api/users/sync-purchased-payment', {
+            email: String(auth.email || '').trim(),
+            passwordHash: String(auth.passwordHash || '').trim(),
+            package: pkg,
+            sessionId: paidSessionId,
+            source: 'speaking-booking',
+          }).catch(function () {
+            return null;
+          });
+        }
+
+        (function autoSyncForReturningUser() {
+          if (bypass) return;
+          if (!bridgeAuthFromQuery) return;
+
+          var pkg = resolvePaidPackage();
+          if (!pkg) return;
+
+          syncPurchasedPaymentForUser(bridgeAuthFromQuery).finally(function () {
+            goToTargetIfProvided(bridgeAuthFromQuery);
+          });
+        })();
+
+        (function bypassPortalIfRequested() {
+          if (!bypass) return;
           try {
-            window.location.href = dest;
+            window.localStorage.setItem('ieltsPortalRegistered', 'true');
+          } catch (_) {}
+          applyPurchasedPackageContext();
+          goToTargetIfProvided();
+        })();
+
+        function goToTargetIfProvided(authOverride) {
+          applyPurchasedPackageContext();
+          try {
+            var authPayload = buildDashboardAuthPayload(authOverride);
+            var profilePayload = buildDashboardProfilePayload();
+            var destination = appendDashboardBridgeFragment(testTakerPortalUrl(), authPayload, profilePayload, {
+              package: resolvePaidPackage(),
+              sessionId: paidSessionId,
+            });
+            window.location.href = destination;
           } catch (_) {
-            // ignore
+            return false;
           }
+          return true;
         }
 
         function setNote(el, text, kind) {
@@ -284,8 +588,114 @@
           if (verifyNote && noteText) setNote(verifyNote, noteText, kind || 'info');
         }
 
+        function openResetModal(prefillEmail) {
+          if (!resetModal || !resetForm || !resetNote) return;
+
+          var fallbackEmail = '';
+          if (loginForm && loginForm.elements['email']) {
+            fallbackEmail = String(loginForm.elements['email'].value || '').trim();
+          }
+          var suggestedEmail = String(prefillEmail || fallbackEmail || readPortalValue('ieltsPortalEmail') || '').trim();
+
+          if (resetEmailInput) resetEmailInput.value = suggestedEmail;
+          if (resetCodeInput) resetCodeInput.value = '';
+          if (resetPasswordInput) {
+            resetPasswordInput.value = '';
+            try { resetPasswordInput.type = 'password'; } catch (_) {}
+          }
+          if (resetSubmitBtn) resetSubmitBtn.disabled = true;
+
+          currentResetToken = '';
+          currentResetEmail = suggestedEmail.toLowerCase();
+
+          setNote(resetNote, 'Enter your email and click Send OTP.', 'info');
+
+          resetModal.hidden = false;
+          resetModal.classList.add('is-visible');
+          try {
+            document.documentElement.classList.add('is-modal-open');
+          } catch (_) {}
+
+          try {
+            if (resetEmailInput) resetEmailInput.focus();
+          } catch (_) {}
+        }
+
+        function closeResetModal() {
+          if (!resetModal) return;
+          resetModal.hidden = true;
+          resetModal.classList.remove('is-visible');
+          try {
+            document.documentElement.classList.remove('is-modal-open');
+          } catch (_) {}
+        }
+
+        function setResetBusy(isBusy, noteText, kind) {
+          if (resetSendBtn) resetSendBtn.disabled = !!isBusy;
+          if (resetSubmitBtn) resetSubmitBtn.disabled = !!isBusy || !currentResetToken;
+          if (resetCloseBtn) resetCloseBtn.disabled = !!isBusy;
+          if (resetNote && noteText) setNote(resetNote, noteText, kind || 'info');
+        }
+
+        function requestPasswordResetOtp(email) {
+          var normalizedEmail = String(email || '').trim();
+          if (!normalizedEmail) {
+            setNote(resetNote, 'Please enter your email address.', 'error');
+            return;
+          }
+
+          setResetBusy(true, 'Sending OTP to ' + normalizedEmail + '...', 'info');
+          postJson('/api/users/request-password-reset', { email: normalizedEmail })
+            .then(function (result) {
+              if (!result.ok) {
+                var msg = (result.data && (result.data.error || result.data.message)) || 'Unable to send OTP.';
+                throw new Error(msg);
+              }
+
+              var token = result.data && result.data.token ? String(result.data.token) : '';
+              if (!token) throw new Error('Reset token missing.');
+
+              currentResetToken = token;
+              currentResetEmail = normalizedEmail.toLowerCase();
+              if (resetSubmitBtn) resetSubmitBtn.disabled = false;
+              setNote(resetNote, 'OTP sent. Enter the 6-digit code and your new password.', 'success');
+              try {
+                if (resetCodeInput) resetCodeInput.focus();
+              } catch (_) {}
+            })
+            .catch(function (err) {
+              currentResetToken = '';
+              if (resetSubmitBtn) resetSubmitBtn.disabled = true;
+              setNote(resetNote, err && err.message ? err.message : 'Unable to send OTP.', 'error');
+            })
+            .finally(function () {
+              setResetBusy(false);
+            });
+        }
+
+        function resolveApiUrl(path) {
+          var normalized = String(path || '').trim();
+          if (!normalized) return normalized;
+          if (/^https?:\/\//i.test(normalized)) return normalized;
+
+          var normalizedPath = normalized.charAt(0) === '/' ? normalized : ('/' + normalized);
+          var isFileProtocol = String(window.location.protocol || '').toLowerCase() === 'file:';
+          if (!isFileProtocol) return normalizedPath;
+
+          var configuredOrigin = '';
+          try {
+            configuredOrigin = String(window.localStorage.getItem('ieltsApiOrigin') || '').trim();
+          } catch (_) {
+            configuredOrigin = '';
+          }
+
+          var apiOrigin = configuredOrigin || 'http://127.0.0.1:5500';
+          return apiOrigin.replace(/\/+$/, '') + normalizedPath;
+        }
+
         function postJson(url, payload) {
-          return fetch(url, {
+          var endpoint = resolveApiUrl(url);
+          return fetch(endpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload || {}),
@@ -301,9 +711,51 @@
           });
         }
 
-        var currentVerificationToken = '';
+        function defaultPostVerifyTarget() {
+          return testTakerPortalUrl();
+        }
 
-        function sendVerificationCode(name, email) {
+        function sanitizePostVerifyTarget(value) {
+          var raw = String(value || '').trim();
+          if (!raw) return defaultPostVerifyTarget();
+          try {
+            var url = new URL(raw, window.location.origin);
+            if (url.origin !== window.location.origin) return defaultPostVerifyTarget();
+            if (/\/\.\.(\/|$)/.test(url.pathname)) return defaultPostVerifyTarget();
+            if (/\.\./.test(url.pathname)) return defaultPostVerifyTarget();
+            return url.pathname + url.search + url.hash;
+          } catch (_) {
+            return defaultPostVerifyTarget();
+          }
+        }
+
+        function buildVerifyEmailUrl(options) {
+          var opts = options && typeof options === 'object' ? options : {};
+          var token = String(opts.token || '').trim();
+          var email = String(opts.email || '').trim();
+          var name = String(opts.name || '').trim();
+          var targetPath = sanitizePostVerifyTarget(opts.target);
+          var selectedPackage = String(opts.package || '').trim();
+
+          var query = new URLSearchParams();
+          if (token) query.set('token', token);
+          if (email) query.set('email', email);
+          if (name) query.set('name', name);
+          if (targetPath) query.set('target', targetPath);
+          if (selectedPackage) query.set('package', selectedPackage);
+
+          var base = usesHtmlRoutes() ? 'verify-email.html' : '/verify-email';
+          var q = query.toString();
+          return q ? (base + '?' + q) : base;
+        }
+
+        var currentVerificationToken = '';
+        var currentResetToken = '';
+        var currentResetEmail = '';
+
+        function sendVerificationCode(name, email, options) {
+          var opts = options && typeof options === 'object' ? options : {};
+          var openModal = opts.openModal !== false;
           if (!registerSubmitButton) return Promise.reject(new Error('Missing submit button'));
           registerSubmitButton.disabled = true;
           setNote(registerNote, 'Sending verification code to ' + email + '...', 'info');
@@ -321,26 +773,35 @@
             if (!token) throw new Error('Verification token missing.');
 
             currentVerificationToken = token;
-            openVerifyModal(email);
+            if (openModal) {
+              openVerifyModal(email);
+            }
+            return token;
           });
         }
 
         function persistRegistrationDraft(payload) {
-          try {
-            window.localStorage.setItem('ieltsPortalProfile', JSON.stringify(payload || {}));
-            if (payload && payload.email) window.localStorage.setItem('ieltsPortalEmail', String(payload.email));
-            if (payload && payload.name) window.localStorage.setItem('ieltsPortalName', String(payload.name));
-            if (payload && payload.whatsapp) window.localStorage.setItem('ieltsPortalWhatsApp', String(payload.whatsapp));
-            if (payload && payload.email && payload.passwordHash) {
-              window.localStorage.setItem('ieltsPortalPasswordHash', String(payload.passwordHash));
-            }
-          } catch (_) {}
+          var data = payload && typeof payload === 'object' ? payload : {};
+          writePortalValue('ieltsPortalProfile', JSON.stringify(data));
+          if (data.email) writePortalValue('ieltsPortalEmail', data.email);
+          if (data.name) writePortalValue('ieltsPortalName', data.name);
+          if (data.whatsapp) writePortalValue('ieltsPortalWhatsApp', data.whatsapp);
+          if (data.dob) {
+            writePortalValue('ieltsPortalDob', data.dob);
+            writePortalValue('ieltsPortalDOB', data.dob);
+          }
+          if (data.targetBandScore) writePortalValue('ieltsPortalTargetBandScore', data.targetBandScore);
+          if (data.candidateNumber) writePortalValue('ieltsPortalCandidateNumber', data.candidateNumber);
+          if (data.passwordHash && data.email) writePortalValue('ieltsPortalPasswordHash', data.passwordHash);
         }
 
         function getRegisterFormValues() {
           var name = ((registerForm.elements['name'] && registerForm.elements['name'].value) || '').trim();
           var email = ((registerForm.elements['email'] && registerForm.elements['email'].value) || '').trim();
           var whatsapp = ((registerForm.elements['whatsapp'] && registerForm.elements['whatsapp'].value) || '').trim();
+          var dob = ((registerForm.elements['dob'] && registerForm.elements['dob'].value) || '').trim();
+          var targetBandRaw = ((registerForm.elements['targetBandScore'] && registerForm.elements['targetBandScore'].value) || '').trim();
+          var targetBandScore = Number(targetBandRaw);
 
           var password = ((registerForm.elements['password'] && registerForm.elements['password'].value) || '');
           var passwordHash = passwordHashFor(email, password);
@@ -349,6 +810,8 @@
             name: name,
             email: email,
             whatsapp: whatsapp,
+            dob: dob,
+            targetBandScore: Number.isFinite(targetBandScore) ? targetBandScore : 0,
             passwordHash: passwordHash,
             createdAt: new Date().toISOString(),
           };
@@ -359,18 +822,230 @@
           var values = getRegisterFormValues();
           var name = values.name;
           var email = values.email;
+          var whatsapp = values.whatsapp;
+          var dob = values.dob;
+          var targetBandScore = Number(values.targetBandScore || 0);
 
           persistRegistrationDraft(values);
+          applyPurchasedPackageContext();
 
           if (!email) {
             setNote(registerNote, 'Please enter your email address.', 'error');
             return;
           }
 
-          sendVerificationCode(name, email).catch(function (err) {
-            setNote(registerNote, err && err.message ? err.message : 'Unable to send verification code.', 'error');
-          });
+          if (!(targetBandScore >= 0 && targetBandScore <= 9)) {
+            setNote(registerNote, 'Please enter a target band score between 0 and 9.', 'error');
+            return;
+          }
+
+          if (registerSubmitButton) registerSubmitButton.disabled = true;
+          setNote(registerNote, 'Creating your account...', 'info');
+
+          postJson('/api/users/register', {
+            name: name,
+            email: email,
+            whatsapp: whatsapp,
+            dob: dob,
+            targetBandScore: targetBandScore,
+            passwordHash: (values && values.passwordHash) ? String(values.passwordHash) : '',
+          })
+            .then(function (registerResult) {
+              if (!registerResult || !registerResult.ok || !registerResult.data || !registerResult.data.user) {
+                var registerCode = String(registerResult && registerResult.data && registerResult.data.code || '').trim();
+                if (registerResult && registerResult.status === 409 && registerCode === 'EMAIL_EXISTS') {
+                  if (loginForm && loginForm.elements['email']) {
+                    loginForm.elements['email'].value = email;
+                  }
+                  setNote(registerNote, 'You already have an account. Use Forgotten Password to recover it.', 'error');
+                  openResetModal(email);
+                  return;
+                }
+                var saveMsg = (registerResult && registerResult.data && (registerResult.data.error || registerResult.data.message)) || 'Unable to save your account.';
+                throw new Error(saveMsg);
+              }
+
+              var savedUser = registerResult.data.user;
+              writePortalValue('ieltsPortalRegistered', 'true');
+              writePortalValue('ieltsPortalEmail', email);
+              if (values && values.passwordHash) writePortalValue('ieltsPortalPasswordHash', String(values.passwordHash));
+
+              persistRegistrationDraft({
+                id: savedUser.id || '',
+                name: savedUser.name || name,
+                email: savedUser.email || email,
+                whatsapp: savedUser.whatsapp || whatsapp,
+                dob: savedUser.dob || dob,
+                targetBandScore: Number(savedUser.targetBandScore || targetBandScore || 0) || 0,
+                role: savedUser.role || 'student',
+                candidateNumber: savedUser.candidateNumber || 0,
+                createdAt: savedUser.createdAt || values.createdAt,
+                passwordHash: (values && values.passwordHash) ? String(values.passwordHash) : '',
+              });
+
+              try {
+                postJson('/api/activity/log', { email: email, type: 'register', meta: { source: 'free-mock-portal' } });
+              } catch (_) {}
+
+              setNote(registerNote, 'Registration complete. Redirecting to email verification...', 'success');
+              var selectedPackage = resolvePaidPackage();
+              var registerAuth = buildDashboardAuthPayload({ email: email, passwordHash: String((values && values.passwordHash) || '') });
+              var registerProfile = buildDashboardProfilePayload();
+              var verifyTarget = appendDashboardBridgeFragment(
+                sanitizePostVerifyTarget(target || testTakerPortalUrl()),
+                registerAuth,
+                registerProfile,
+                {
+                  package: selectedPackage,
+                  sessionId: paidSessionId,
+                }
+              );
+              sendVerificationCode(name, email, { openModal: false })
+                .then(function (token) {
+                  var verifyUrl = buildVerifyEmailUrl({
+                    token: token,
+                    email: email,
+                    name: name,
+                    target: verifyTarget,
+                    package: selectedPackage,
+                  });
+                  window.location.href = verifyUrl;
+                })
+                .catch(function (err) {
+                  setNote(registerNote, err && err.message ? err.message : 'Unable to send verification code.', 'error');
+                });
+            })
+            .catch(function (err) {
+              setNote(registerNote, err && err.message ? err.message : 'Unable to complete registration.', 'error');
+            })
+            .finally(function () {
+              if (registerSubmitButton) registerSubmitButton.disabled = false;
+            });
         });
+
+        if (openResetBtn) {
+          openResetBtn.addEventListener('click', function () {
+            var prefillEmail = '';
+            if (loginForm && loginForm.elements['email']) {
+              prefillEmail = String(loginForm.elements['email'].value || '').trim();
+            }
+            openResetModal(prefillEmail);
+          });
+        }
+
+        if (resetCloseBtn) {
+          resetCloseBtn.addEventListener('click', function () {
+            closeResetModal();
+          });
+        }
+
+        if (resetModal) {
+          resetModal.addEventListener('click', function (event) {
+            if (event && event.target === resetModal) {
+              closeResetModal();
+            }
+          });
+        }
+
+        if (resetSendBtn) {
+          resetSendBtn.addEventListener('click', function () {
+            var resetEmail = String((resetEmailInput && resetEmailInput.value) || '').trim();
+            requestPasswordResetOtp(resetEmail);
+          });
+        }
+
+        if (resetForm && resetNote) {
+          resetForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            var email = String((resetEmailInput && resetEmailInput.value) || '').trim();
+            var code = String((resetCodeInput && resetCodeInput.value) || '').trim();
+            var nextPassword = String((resetPasswordInput && resetPasswordInput.value) || '');
+
+            if (!email) {
+              setNote(resetNote, 'Please enter your email address.', 'error');
+              return;
+            }
+
+            if (!currentResetToken) {
+              setNote(resetNote, 'Please click Send OTP first.', 'error');
+              return;
+            }
+
+            if (currentResetEmail && email.toLowerCase() !== currentResetEmail) {
+              setNote(resetNote, 'Email changed after OTP was issued. Please send OTP again.', 'error');
+              return;
+            }
+
+            if (!/^[0-9]{6}$/.test(code)) {
+              setNote(resetNote, 'Enter the 6-digit OTP sent to your email.', 'error');
+              return;
+            }
+
+            if (!nextPassword || nextPassword.length < 4) {
+              setNote(resetNote, 'Please enter a new password.', 'error');
+              return;
+            }
+
+            var nextHash = passwordHashFor(email, nextPassword);
+            if (!nextHash) {
+              setNote(resetNote, 'Unable to prepare password reset. Check your email and password.', 'error');
+              return;
+            }
+
+            setResetBusy(true, 'Resetting password...', 'info');
+            postJson('/api/users/reset-password', {
+              token: currentResetToken,
+              code: code,
+              email: email,
+              passwordHash: nextHash,
+            })
+              .then(function (result) {
+                if (!result.ok || !result.data || !result.data.user) {
+                  var msg = (result.data && (result.data.error || result.data.message)) || 'Unable to reset password.';
+                  throw new Error(msg);
+                }
+
+                var user = result.data.user;
+                writePortalValue('ieltsPortalRegistered', 'true');
+                writePortalValue('ieltsPortalEmail', user.email || email);
+                writePortalValue('ieltsPortalPasswordHash', nextHash);
+
+                persistRegistrationDraft({
+                  id: user.id || '',
+                  name: user.name || '',
+                  email: user.email || email,
+                  whatsapp: user.whatsapp || '',
+                  dob: user.dob || '',
+                  targetBandScore: Number(user.targetBandScore || 0) || 0,
+                  role: user.role || 'student',
+                  candidateNumber: user.candidateNumber || 0,
+                  createdAt: user.createdAt || '',
+                  passwordHash: nextHash,
+                });
+
+                if (loginForm) {
+                  if (loginForm.elements['email']) loginForm.elements['email'].value = String(user.email || email);
+                  if (loginForm.elements['password']) loginForm.elements['password'].value = nextPassword;
+                }
+
+                if (loginNote) {
+                  setNote(loginNote, 'Password reset successful. You can sign in now.', 'success');
+                }
+                setNote(resetNote, 'Password reset successful.', 'success');
+
+                setTimeout(function () {
+                  closeResetModal();
+                }, 700);
+              })
+              .catch(function (err) {
+                setNote(resetNote, err && err.message ? err.message : 'Unable to reset password.', 'error');
+              })
+              .finally(function () {
+                setResetBusy(false);
+              });
+          });
+        }
 
         if (verifyForm && verifyModal && verifyNote && verifySubmitBtn && verifyResendBtn) {
           verifyResendBtn.addEventListener('click', function () {
@@ -410,6 +1085,8 @@
             var name = values.name;
             var email = values.email;
             var whatsapp = values.whatsapp;
+            var dob = values.dob;
+            var targetBandScore = Number(values.targetBandScore || 0);
 
             var code = String((verifyForm.elements['code'] && verifyForm.elements['code'].value) || '').trim();
             if (!/^[0-9]{6}$/.test(code)) {
@@ -430,20 +1107,63 @@
                   throw new Error(msg);
                 }
 
-                try {
-                  window.localStorage.setItem('ieltsPortalRegistered', 'true');
-                  window.localStorage.setItem('ieltsPortalEmail', email);
-                  if (name) window.localStorage.setItem('ieltsPortalName', name);
-                  if (whatsapp) window.localStorage.setItem('ieltsPortalWhatsApp', whatsapp);
-                  if (values && values.passwordHash) window.localStorage.setItem('ieltsPortalPasswordHash', String(values.passwordHash));
-                } catch (_) {}
+                writePortalValue('ieltsPortalRegistered', 'true');
+                writePortalValue('ieltsPortalEmail', email);
+                if (name) writePortalValue('ieltsPortalName', name);
+                if (whatsapp) writePortalValue('ieltsPortalWhatsApp', whatsapp);
+                if (dob) {
+                  writePortalValue('ieltsPortalDob', dob);
+                  writePortalValue('ieltsPortalDOB', dob);
+                }
+                if (targetBandScore) writePortalValue('ieltsPortalTargetBandScore', targetBandScore);
+                if (values && values.passwordHash) writePortalValue('ieltsPortalPasswordHash', String(values.passwordHash));
 
-                setNote(verifyNote, 'Email verified. Redirecting...', 'success');
+                persistRegistrationDraft(values);
 
-                setTimeout(function () {
-                  closeVerifyModal();
-                  goToTargetIfProvided();
-                }, 700);
+                setVerifyBusy(true, 'Saving your account...', 'info');
+                return postJson('/api/users/register', {
+                  name: name,
+                  email: email,
+                  whatsapp: whatsapp,
+                  dob: dob,
+                  targetBandScore: targetBandScore,
+                  passwordHash: (values && values.passwordHash) ? String(values.passwordHash) : '',
+                }).then(function (registerResult) {
+                  if (!registerResult || !registerResult.ok || !registerResult.data || !registerResult.data.user) {
+                    var saveMsg = (registerResult && registerResult.data && (registerResult.data.error || registerResult.data.message)) || 'Unable to save your account.';
+                    throw new Error(saveMsg);
+                  }
+
+                  var savedUser = registerResult.data.user;
+                  persistRegistrationDraft({
+                    id: savedUser.id || '',
+                    name: savedUser.name || name,
+                    email: savedUser.email || email,
+                    whatsapp: savedUser.whatsapp || whatsapp,
+                    dob: savedUser.dob || dob,
+                    targetBandScore: Number(savedUser.targetBandScore || targetBandScore || 0) || 0,
+                    role: savedUser.role || 'student',
+                    candidateNumber: savedUser.candidateNumber || 0,
+                    createdAt: savedUser.createdAt || values.createdAt,
+                    passwordHash: (values && values.passwordHash) ? String(values.passwordHash) : '',
+                  });
+
+                  try {
+                    postJson('/api/activity/log', { email: email, type: 'register', meta: { source: 'free-mock-portal' } });
+                  } catch (_) {}
+
+                  setNote(verifyNote, 'Email verified. Registration complete.', 'success');
+                  var verifyAuth = buildDashboardAuthPayload({ email: email, passwordHash: String((values && values.passwordHash) || '') });
+
+                  setTimeout(function () {
+                    closeVerifyModal();
+                    syncPurchasedPaymentForUser(verifyAuth).finally(function () {
+                      if (!goToTargetIfProvided(verifyAuth)) {
+                        setNote(registerNote, 'Registration complete.', 'success');
+                      }
+                    });
+                  }, 700);
+                });
               })
               .catch(function (err) {
                 setNote(verifyNote, err && err.message ? err.message : 'Incorrect or expired code.', 'error');
@@ -460,14 +1180,6 @@
             var email = ((loginForm.elements['email'] && loginForm.elements['email'].value) || '').trim();
             var password = ((loginForm.elements['password'] && loginForm.elements['password'].value) || '');
 
-            if (isDirectorCredentials(email, password)) {
-              try {
-                window.sessionStorage.setItem('ieltsDirectorAuthed', 'true');
-              } catch (_) {}
-              window.location.href = directorPanelUrl();
-              return;
-            }
-
             if (!email) {
               setNote(loginNote, 'Please enter your email address.', 'error');
               return;
@@ -477,35 +1189,60 @@
               return;
             }
 
-            var storedEmail = '';
-            var storedHash = '';
-            try {
-              storedEmail = String(window.localStorage.getItem('ieltsPortalEmail') || '').trim();
-              storedHash = String(window.localStorage.getItem('ieltsPortalPasswordHash') || '').trim();
-            } catch (_) {
-              storedEmail = '';
-              storedHash = '';
+            function doStudentLogin() {
+              var providedHash = passwordHashFor(email, password);
+              if (!providedHash) {
+                setNote(loginNote, 'Please enter your password.', 'error');
+                return;
+              }
+
+              postJson('/api/users/login', { email: email, passwordHash: providedHash })
+                .then(function (result) {
+                  if (!result || !result.ok || !result.data || !result.data.user) {
+                    var msg = (result && result.data && (result.data.error || result.data.message)) || 'Invalid credentials.';
+                    throw new Error(msg);
+                  }
+
+                  var user = result.data.user || {};
+                  writePortalValue('ieltsPortalRegistered', 'true');
+                  persistRegistrationDraft({
+                    id: user.id || '',
+                    name: user.name || '',
+                    email: user.email || email,
+                    whatsapp: user.whatsapp || '',
+                    dob: user.dob || '',
+                    targetBandScore: Number(user.targetBandScore || 0) || 0,
+                    role: user.role || 'student',
+                    candidateNumber: user.candidateNumber || 0,
+                    createdAt: user.createdAt || '',
+                    passwordHash: providedHash,
+                  });
+
+                  applyPurchasedPackageContext();
+
+                  setNote(loginNote, 'Signed in successfully. Redirecting to Test Taker Portal...', 'success');
+                  var loginAuth = buildDashboardAuthPayload({ email: email, passwordHash: providedHash });
+                  setTimeout(function () {
+                    syncPurchasedPaymentForUser(loginAuth).finally(function () {
+                      goToTargetIfProvided(loginAuth);
+                    });
+                  }, 600);
+                })
+                .catch(function (err) {
+                  var fallback = 'Invalid credentials.';
+                  var isFileProtocol = String(window.location.protocol || '').toLowerCase() === 'file:';
+                  var message = err && err.message ? String(err.message) : '';
+                  if (isFileProtocol && (!message || /failed to fetch|networkerror|load failed/i.test(message))) {
+                    fallback = 'Cannot reach local API. Start the dev server with npm run dev and open http://127.0.0.1:5500/free-mock-portal.html';
+                  } else if (message) {
+                    fallback = message;
+                  }
+                  setNote(loginNote, fallback, 'error');
+                });
             }
 
-            if (!storedEmail || storedEmail.toLowerCase() !== email.toLowerCase()) {
-              setNote(loginNote, 'No account found for this email on this browser. Please sign up first.', 'error');
-              return;
-            }
-
-            var providedHash = passwordHashFor(email, password);
-            if (!storedHash || !providedHash || storedHash !== providedHash) {
-              setNote(loginNote, 'Incorrect password. Please try again.', 'error');
-              return;
-            }
-
-            try {
-              window.localStorage.setItem('ieltsPortalRegistered', 'true');
-            } catch (_) {}
-
-            setNote(loginNote, 'Signed in successfully.', 'success');
-            setTimeout(function () {
-              goToTargetIfProvided();
-            }, 600);
+            setNote(loginNote, 'Signing in...', 'info');
+            doStudentLogin();
           });
         }
       })();

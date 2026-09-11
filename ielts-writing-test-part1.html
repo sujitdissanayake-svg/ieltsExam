@@ -4,8 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IELTS Writing Test - Part 1</title>
-    <link rel="stylesheet" href="styles.css?v=20260308" />
+    <link rel="stylesheet" href="styles.css?v=20260613-7" />
     <script src="ielts-flow-guard.js?v=20260310-3" defer></script>
+    <script src="topbar-candidate.js?v=20260612-1" defer></script>
   </head>
   <body class="writing-test">
     <header class="listening-topbar" aria-label="Writing test header">
@@ -17,6 +18,7 @@
 
           <div class="listening-id-block" aria-label="Candidate information">
             <div class="listening-id-title">Test Taker ID</div>
+            <div class="listening-id-candidate" data-candidate-number>Candidate Number: -</div>
           </div>
         </div>
 
@@ -118,11 +120,13 @@
       </div>
     </nav>
 
+    <script src="writing-score.js?v=20260609-1"></script>
     <script>
       (function () {
         var timerMinutesEl = document.getElementById('writingTimerMinutes');
         var timerValueEl = document.getElementById('writingTimerValue');
         var timerEl = document.getElementById('writingTimer');
+        var topbarEl = document.querySelector('.listening-topbar, .academic-topbar');
         var blinkTimeout = null;
 
         var ensureWritingTimes = function () {
@@ -193,6 +197,7 @@
           // Overall Writing countdown: 60 minutes total.
           var remainingMs = times.endAt - Date.now();
           if (!Number.isFinite(remainingMs)) remainingMs = 0;
+          if (topbarEl) topbarEl.classList.toggle('topbar-last-minute', remainingMs <= 60 * 1000 && remainingMs > 0);
 
           var minutesLeft = Math.max(0, Math.ceil(remainingMs / 60000));
           timerMinutesEl.textContent = String(minutesLeft);
@@ -227,6 +232,7 @@
           if (minutesLeft === 1) warn('ieltsWritingWarn1Shown');
 
           if (remainingMs <= 0) {
+            if (topbarEl) topbarEl.classList.remove('topbar-last-minute');
             try {
               window.location.replace('ielts-writing-ended.html');
             } catch (_) {
@@ -349,6 +355,54 @@
         var wordsEl = document.getElementById('writingWords');
         var maxWords = 1000;
 
+        var blockPasteIntoAnswer = function (el) {
+          if (!el) return;
+
+          var lastWarningAt = 0;
+          var showCheatingWarning = function () {
+            var now = Date.now();
+            if (now - lastWarningAt < 1500) return;
+            lastWarningAt = now;
+            try {
+              window.alert('Cheating is punishable.');
+            } catch (_) {
+              // ignore
+            }
+          };
+
+          var stopInsertion = function (e) {
+            if (!e) return;
+            try {
+              e.preventDefault();
+            } catch (_) {
+              // ignore
+            }
+            showCheatingWarning();
+          };
+
+          el.addEventListener('paste', stopInsertion);
+          el.addEventListener('drop', stopInsertion);
+
+          el.addEventListener('beforeinput', function (e) {
+            if (!e) return;
+            var inputType = String(e.inputType || '');
+            if (inputType === 'insertFromPaste' || inputType === 'insertFromDrop') {
+              stopInsertion(e);
+            }
+          });
+
+          el.addEventListener('keydown', function (e) {
+            if (!e) return;
+            var key = String(e.key || '').toLowerCase();
+            var isCtrlOrMeta = !!e.ctrlKey || !!e.metaKey;
+            var isPasteShortcut = isCtrlOrMeta && key === 'v';
+            var isShiftInsert = !!e.shiftKey && key === 'insert';
+            if (isPasteShortcut || isShiftInsert) {
+              stopInsertion(e);
+            }
+          });
+        };
+
         var getWords = function (text) {
           var t = String(text || '').trim();
           if (!t) return [];
@@ -366,6 +420,7 @@
         };
 
         if (answerEl) answerEl.addEventListener('input', render);
+        blockPasteIntoAnswer(answerEl);
         render();
 
         // Best-effort: discourage common third-party grammar overlays.

@@ -6,6 +6,7 @@
     <title>IELTS Academic Reading</title>
     <link rel="stylesheet" href="styles.css?v=20260304" />
     <script src="ielts-flow-guard.js?v=20260310-2" defer></script>
+    <script src="listening-score.js?v=20260615-1"></script>
   </head>
   <body class="listening-soundcheck listening-instructions">
     <header class="academic-topbar" aria-label="IELTS top bar">
@@ -72,17 +73,44 @@
 
     <script>
       (function () {
+        try {
+          if (window.__ieltsListeningScore && typeof window.__ieltsListeningScore.submitListeningResult === 'function') {
+            // Fallback: if listening end-page submit was interrupted, retry here.
+            window.__ieltsListeningScore.submitListeningResult().catch(function () {});
+          }
+        } catch (_) {}
+
         var startBtn = document.getElementById('readingInstructionsConfirm');
         if (!startBtn) return;
 
         var autoRedirectId = null;
 
-        function isLocalHost() {
-          return (
-            window.location.hostname === 'localhost' ||
-            window.location.hostname === '127.0.0.1' ||
-            window.location.hostname === '::1'
-          );
+        function usesHtmlRoutes() {
+          return /\.html$/i.test(window.location.pathname || '');
+        }
+
+        function readValue(key) {
+          try {
+            var localValue = String(window.localStorage.getItem(key) || '').trim();
+            if (localValue) return localValue;
+          } catch (_) {}
+          try {
+            return String(window.sessionStorage.getItem(key) || '').trim();
+          } catch (_) {
+            return '';
+          }
+        }
+
+        function normalizePackage(value) {
+          var raw = String(value || '').trim();
+          return /^(Lite|Basic|Standard|Pro)$/i.test(raw) ? (raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase()) : '';
+        }
+
+        function isLitePaperOneContext() {
+          var mode = String(readValue('ieltsTestMode') || 'free').toLowerCase();
+          var pkg = normalizePackage(readValue('ieltsMockPackage'));
+          var paper = String(readValue('ieltsMockPaper') || '').trim();
+          return mode === 'mock' && pkg === 'Lite' && paper === '1';
         }
 
         function startReadingTimer() {
@@ -92,17 +120,26 @@
             var WARN_30_KEY = 'ieltsReadingWarn30Shown';
             var WARN_10_KEY = 'ieltsReadingWarn10Shown';
             var WARN_5_KEY = 'ieltsReadingWarn5Shown';
+            var ANSWERS_KEY = 'ieltsReadingAnswersV1';
+            var SUBMISSION_FLAG_KEY = 'ieltsReadingResultSubmittedV1';
+            var ATTEMPT_ID_KEY = 'ieltsReadingAttemptId';
             var DURATION_MS = 60 * 60 * 1000;
             window.localStorage.setItem(END_AT_KEY, String(Date.now() + DURATION_MS));
             window.localStorage.removeItem(WARN_30_KEY);
             window.localStorage.removeItem(WARN_10_KEY);
             window.localStorage.removeItem(WARN_5_KEY);
+            window.localStorage.removeItem(ANSWERS_KEY);
+            window.localStorage.removeItem(SUBMISSION_FLAG_KEY);
+            window.localStorage.setItem(ATTEMPT_ID_KEY, String(Date.now()));
           } catch (_) {}
         }
 
         function goToReadingTest() {
-          var isLocal = isLocalHost();
-          window.location.href = isLocal ? 'ielts-reading-test.html' : 'ielts-reading-test';
+          var usesHtml = usesHtmlRoutes();
+          var target = isLitePaperOneContext()
+            ? (usesHtml ? 'ielts-reading-test-lite-paper1.html' : 'ielts-reading-test-lite-paper1')
+            : (usesHtml ? 'ielts-reading-test.html' : 'ielts-reading-test');
+          window.location.href = target;
         }
 
         function startAndGo() {

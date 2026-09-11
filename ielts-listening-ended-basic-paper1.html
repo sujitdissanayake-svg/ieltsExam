@@ -1,0 +1,46 @@
+﻿<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test ended</title>
+    <link rel="stylesheet" href="styles.css?v=20260304" />
+    <script src="ielts-flow-guard.js?v=20260310-2" defer></script>
+  </head>
+  <body class="listening-ended">
+    <main class="listening-ended-main" aria-label="Test ended">
+      <div class="listening-ended-wrap">
+        <div class="listening-ended-titleRow">
+          <span class="listening-ended-icon" aria-hidden="true">
+            <span class="listening-ended-iconDisc"></span>
+            <span class="listening-ended-iconClock" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 21a9 9 0 1 0-9-9 9 9 0 0 0 9 9Z" stroke="currentColor" stroke-width="2" />
+                <path d="M12 7v5l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </span>
+          </span>
+          <h1 class="listening-ended-title">Test ended</h1>
+        </div>
+
+        <section class="listening-ended-card" role="status" aria-live="polite">
+          <div class="listening-ended-body">
+            <p>Your test has finished.</p>
+            <p>All of your answers have been stored.</p>
+            <p>Please wait for further instructions.</p>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      (function () {
+        // After a short pause, move to the next module (Reading).
+        window.setTimeout(function () {
+          window.location.href = 'ielts-reading-instructions-basic-paper1.html';
+        }, 3000);
+      })();
+    </script>
+  </body>
+</html>
+

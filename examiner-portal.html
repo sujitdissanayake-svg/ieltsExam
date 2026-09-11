@@ -1,0 +1,1894 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Examiner Portal (Speaking)</title>
+    <link rel="stylesheet" href="styles.css?v=20260226" />
+    <style>
+      .portal-page {
+        position: relative;
+        overflow: visible;
+        display: block;
+        align-items: stretch;
+        padding: 28px 20px;
+        background:
+          radial-gradient(circle at 10% 12%, rgba(132, 200, 255, 0.4), transparent 28%),
+          radial-gradient(circle at 88% 18%, rgba(80, 144, 255, 0.28), transparent 24%),
+          radial-gradient(circle at 72% 82%, rgba(104, 167, 255, 0.24), transparent 22%),
+          linear-gradient(180deg, #eff7ff 0%, #dfeeff 48%, #edf6ff 100%);
+      }
+
+      .portal-page::before,
+      .portal-page::after {
+        content: '';
+        position: fixed;
+        pointer-events: none;
+        inset: auto;
+        border-radius: 999px;
+        filter: blur(0px);
+        opacity: 0.78;
+      }
+
+      .portal-page::before {
+        top: -140px;
+        left: -120px;
+        width: 380px;
+        height: 380px;
+        background: radial-gradient(circle, rgba(102, 196, 255, 0.38) 0%, rgba(102, 196, 255, 0) 70%);
+      }
+
+      .portal-page::after {
+        right: -120px;
+        bottom: -160px;
+        width: 460px;
+        height: 460px;
+        background: radial-gradient(circle, rgba(44, 121, 255, 0.24) 0%, rgba(44, 121, 255, 0) 72%);
+      }
+
+      .examiner-page-shell {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 18px;
+        width: min(1640px, 100%);
+        max-width: 100%;
+        margin: 0 auto;
+        box-sizing: border-box;
+      }
+
+      .examiner-panel,
+      .examiner-main {
+        border-radius: 28px;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(243, 249, 255, 0.98));
+        border: 1px solid rgba(114, 173, 246, 0.22);
+        box-shadow: 0 28px 80px rgba(66, 116, 180, 0.14);
+        backdrop-filter: blur(12px);
+        color: #133056;
+        min-width: 0;
+      }
+
+      .examiner-panel {
+        padding: 30px 24px;
+        position: relative;
+        top: auto;
+        align-self: stretch;
+        overflow: hidden;
+      }
+
+      .examiner-panel::before,
+      .examiner-main::before {
+        content: '';
+        position: absolute;
+        inset: auto;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .examiner-panel > *,
+      .examiner-main > * {
+        position: relative;
+        z-index: 1;
+      }
+
+      .examiner-panel::before {
+        top: -80px;
+        right: -60px;
+        width: 220px;
+        height: 220px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(116, 185, 255, 0.26) 0%, rgba(116, 185, 255, 0) 72%);
+      }
+
+      .examiner-main::before {
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 140px;
+        background: linear-gradient(180deg, rgba(108, 174, 255, 0.12), rgba(108, 174, 255, 0));
+        pointer-events: none;
+      }
+
+      .examiner-kicker {
+        margin: 0 0 12px;
+        font-size: 0.8rem;
+        letter-spacing: 0.28em;
+        text-transform: uppercase;
+        color: #2f78d8;
+        font-weight: 800;
+      }
+
+      .examiner-panel-title {
+        margin: 0;
+        font-size: clamp(2rem, 3vw, 2.6rem);
+        line-height: 1.02;
+        letter-spacing: -0.04em;
+        max-width: 8ch;
+      }
+
+      .examiner-panel-copy {
+        margin: 18px 0 0;
+        color: #4a6285;
+        line-height: 1.7;
+        max-width: 34ch;
+      }
+
+      .examiner-panel-band {
+        margin-top: 24px;
+        padding: 18px 20px;
+        border-radius: 22px;
+        background: linear-gradient(180deg, rgba(120, 186, 255, 0.2), rgba(255, 255, 255, 0.86));
+        border: 1px solid rgba(121, 185, 255, 0.28);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+      }
+
+      .examiner-panel-band strong {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 0.88rem;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: #2e73cb;
+      }
+
+      .examiner-main {
+        position: relative;
+        padding: 24px;
+      }
+
+      .examiner-main-header {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 14px;
+        align-items: start;
+        margin-bottom: 14px;
+      }
+
+      .examiner-main-header h2 {
+        margin: 0;
+        font-size: clamp(1.5rem, 1.7vw, 2rem);
+        line-height: 1.25;
+        color: #10325d;
+      }
+
+      .examiner-main-header p {
+        margin: 8px 0 0;
+        font-size: 0.95rem;
+        line-height: 1.45;
+        color: #557095;
+      }
+
+      .examiner-filter-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: end;
+        justify-content: flex-end;
+        padding: 10px;
+        border-radius: 16px;
+        background: linear-gradient(180deg, rgba(142, 200, 255, 0.24), rgba(255, 255, 255, 0.88));
+        border: 1px solid rgba(121, 185, 255, 0.2);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.84);
+        max-width: 100%;
+      }
+
+      .examiner-filter-bar label,
+      .examiner-create-grid label {
+        display: grid;
+        gap: 4px;
+        min-width: 108px;
+      }
+
+      .examiner-filter-bar span,
+      .examiner-create-grid span {
+        font-size: 0.72rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #6080a9;
+        font-weight: 700;
+      }
+
+      .examiner-mini-input,
+      .examiner-create-grid input,
+      .examiner-create-grid select {
+        min-height: 40px;
+        border-radius: 12px;
+        border: 1px solid rgba(121, 185, 255, 0.28);
+        background: rgba(255, 255, 255, 0.96);
+        color: #14365f;
+        padding: 0 12px;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.84);
+      }
+
+      .examiner-filter-btn,
+      .examiner-primary-btn,
+      .examiner-secondary-btn,
+      .examiner-cell-btn {
+        border: 0;
+        border-radius: 12px;
+        min-height: 40px;
+        padding: 0 14px;
+        font-size: 0.84rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.18s ease, opacity 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+      }
+
+      .examiner-filter-btn:hover,
+      .examiner-primary-btn:hover,
+      .examiner-secondary-btn:hover,
+      .examiner-cell-btn:hover {
+        transform: translateY(-1px);
+      }
+
+      .examiner-filter-btn,
+      .examiner-secondary-btn {
+        background: linear-gradient(180deg, rgba(141, 196, 255, 0.34), rgba(255, 255, 255, 0.98));
+        color: #1a4e8d;
+        border: 1px solid rgba(121, 185, 255, 0.22);
+      }
+
+      .examiner-primary-btn {
+        background: linear-gradient(135deg, #53a8ff, #2452dc);
+        color: #fff;
+        box-shadow: 0 12px 28px rgba(36, 82, 220, 0.34);
+      }
+
+      .examiner-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+
+      .examiner-stat {
+        position: relative;
+        padding: 14px 16px 16px;
+        border-radius: 18px;
+        background: linear-gradient(180deg, rgba(223, 240, 255, 0.98), rgba(255, 255, 255, 0.96));
+        border: 1px solid rgba(121, 185, 255, 0.22);
+        box-shadow: 0 10px 24px rgba(97, 154, 216, 0.1);
+        overflow: hidden;
+        animation: examinerRise 0.5s ease both;
+      }
+
+      .examiner-stat::before {
+        content: '';
+        position: absolute;
+        inset: 0 0 auto;
+        height: 4px;
+        background: linear-gradient(90deg, #68bdff, #2d70ef);
+      }
+
+      .examiner-stat:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 20px 44px rgba(97, 154, 216, 0.18);
+      }
+
+      .examiner-stat-label {
+        font-size: 0.72rem;
+        letter-spacing: 0.13em;
+        text-transform: uppercase;
+        color: #6484ad;
+        font-weight: 800;
+      }
+
+      .examiner-stat-value {
+        margin-top: 6px;
+        font-size: 1.7rem;
+        font-weight: 800;
+        color: #10325d;
+        letter-spacing: -0.04em;
+      }
+
+      .examiner-section {
+        margin-top: 18px;
+        padding: 18px;
+        border-radius: 24px;
+        background: linear-gradient(180deg, rgba(247, 251, 255, 0.98), rgba(234, 244, 255, 0.96));
+        border: 1px solid rgba(121, 185, 255, 0.18);
+        box-shadow: 0 18px 36px rgba(97, 154, 216, 0.1);
+        animation: examinerRise 0.55s ease both;
+      }
+
+      .examiner-section-create {
+        position: relative;
+        background:
+          radial-gradient(circle at top right, rgba(255, 210, 166, 0.3), transparent 28%),
+          linear-gradient(180deg, rgba(255, 249, 239, 0.98), rgba(255, 238, 220, 0.96));
+        border-color: rgba(227, 165, 111, 0.26);
+        box-shadow: 0 20px 38px rgba(196, 132, 74, 0.14);
+      }
+
+      .examiner-section-create::before {
+        content: '';
+        position: absolute;
+        inset: 0 auto auto 0;
+        width: 100%;
+        height: 4px;
+        border-radius: 24px 24px 0 0;
+        background: linear-gradient(90deg, #ff9f5a, #e06d3c);
+      }
+
+      .examiner-section.examiner-section-create h3 {
+        color: #8c3d1d;
+      }
+
+      .examiner-section.examiner-section-create p {
+        color: #916046;
+      }
+
+      .examiner-section-create .examiner-create-grid span {
+        color: #9d6648;
+      }
+
+      .examiner-section-create .examiner-create-grid input,
+      .examiner-section-create .examiner-create-grid select {
+        border-color: rgba(219, 158, 108, 0.28);
+        background: rgba(255, 253, 249, 0.96);
+        color: #7d4328;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.92);
+      }
+
+      .examiner-section-create .examiner-create-grid input::placeholder {
+        color: #c09175;
+      }
+
+      .examiner-section-create .examiner-create-grid input:focus,
+      .examiner-section-create .examiner-create-grid select:focus {
+        border-color: #f08c4f;
+        box-shadow: 0 0 0 4px rgba(240, 140, 79, 0.16);
+      }
+
+      .examiner-section-create .examiner-primary-btn {
+        background: linear-gradient(135deg, #f08f4b, #d65b2d);
+        box-shadow: 0 14px 30px rgba(214, 91, 45, 0.26);
+      }
+
+      .examiner-section-create .examiner-secondary-btn {
+        background: linear-gradient(180deg, rgba(255, 229, 205, 0.9), rgba(255, 248, 241, 0.98));
+        color: #8a4d30;
+        border-color: rgba(221, 157, 108, 0.24);
+      }
+
+      .examiner-section-create .portal-small-note {
+        color: #9c6346;
+      }
+
+      .examiner-section h3 {
+        margin: 0;
+        font-size: 1.15rem;
+        color: #10325d;
+      }
+
+      .examiner-section p {
+        margin: 8px 0 0;
+        color: #5b7699;
+      }
+
+      .examiner-schedule-wrap {
+        margin-top: 16px;
+        overflow-x: auto;
+        border-radius: 18px;
+        border: 1px solid rgba(121, 185, 255, 0.18);
+        background: rgba(255, 255, 255, 0.76);
+      }
+
+      .examiner-schedule-table,
+      .examiner-summary-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .examiner-schedule-table {
+        table-layout: fixed;
+      }
+
+      .examiner-schedule-table th,
+      .examiner-schedule-table td,
+      .examiner-summary-table th,
+      .examiner-summary-table td {
+        border: 1px solid rgba(121, 185, 255, 0.14);
+        vertical-align: top;
+      }
+
+      .examiner-schedule-table th {
+        padding: 10px 12px;
+        background: linear-gradient(180deg, rgba(164, 211, 255, 0.46), rgba(255, 255, 255, 0.95));
+        text-align: left;
+        white-space: nowrap;
+        color: #18457d;
+      }
+
+      .examiner-schedule-table thead th:first-child {
+        width: 128px;
+      }
+
+      .examiner-schedule-table thead th:not(:first-child) {
+        width: calc((100% - 128px) / 6);
+        min-width: 92px;
+      }
+
+      .examiner-schedule-table tbody th {
+        width: 128px;
+        min-width: 128px;
+        white-space: normal;
+        line-height: 1.3;
+      }
+
+      .examiner-date-line {
+        display: block;
+      }
+
+      .examiner-schedule-table td {
+        min-width: 0;
+        padding: 6px;
+        background: rgba(255, 255, 255, 0.94);
+        transition: background 0.18s ease;
+      }
+
+      .examiner-schedule-table td:hover {
+        background: rgba(239, 247, 255, 0.98);
+      }
+
+      .examiner-slot-card {
+        display: grid;
+        gap: 6px;
+        min-height: 80px;
+        padding: 8px;
+        justify-items: center;
+        border-radius: 16px;
+        background: linear-gradient(180deg, rgba(243, 249, 255, 0.98), rgba(231, 243, 255, 0.92));
+        border: 1px solid rgba(121, 185, 255, 0.16);
+        box-shadow: 0 10px 22px rgba(86, 145, 210, 0.08);
+        transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+        animation: examinerRise 0.45s ease both;
+      }
+
+      .examiner-slot-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 18px 34px rgba(86, 145, 210, 0.14);
+        border-color: rgba(59, 135, 235, 0.3);
+      }
+
+      .examiner-slot-time {
+        font-weight: 800;
+        font-size: 0.86rem;
+        line-height: 1.25;
+        color: #123560;
+        text-align: center;
+      }
+
+      .examiner-slot-duration {
+        font-size: 0.74rem;
+        line-height: 1.1;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        font-weight: 800;
+        color: #5f7fa7;
+        text-align: center;
+      }
+
+      .examiner-slot-status {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 30px;
+        width: 100%;
+        padding: 0 10px;
+        border-radius: 999px;
+        font-size: 0.72rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        font-weight: 800;
+        border: 1px solid transparent;
+        background: rgba(219, 235, 255, 0.88);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+      }
+
+      .examiner-slot-status.pending {
+        color: #2f78d8;
+        background: linear-gradient(180deg, rgba(199, 228, 255, 0.96), rgba(236, 247, 255, 0.98));
+        border-color: rgba(90, 159, 236, 0.28);
+      }
+
+      .examiner-slot-status.approved {
+        color: #0f5f4f;
+        background: linear-gradient(180deg, rgba(173, 245, 224, 0.98), rgba(227, 255, 246, 0.98));
+        border-color: rgba(68, 182, 145, 0.3);
+        box-shadow: 0 8px 16px rgba(78, 186, 152, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.78);
+      }
+
+      .examiner-slot-status.booked {
+        color: #8f1d1d;
+        background: linear-gradient(180deg, rgba(254, 205, 211, 0.98), rgba(255, 241, 242, 0.98));
+        border-color: rgba(248, 113, 113, 0.42);
+        box-shadow: 0 8px 16px rgba(239, 68, 68, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.78);
+      }
+
+      .examiner-slot-status.blocked {
+        color: #a14a35;
+        background: linear-gradient(180deg, rgba(255, 218, 205, 0.96), rgba(255, 242, 238, 0.98));
+        border-color: rgba(226, 132, 102, 0.3);
+      }
+
+      .examiner-slot-status.completed {
+        color: #215f9b;
+        background: linear-gradient(180deg, rgba(210, 232, 255, 0.96), rgba(239, 247, 255, 0.98));
+        border-color: rgba(102, 157, 224, 0.28);
+      }
+
+      .examiner-slot-note {
+        color: #5c7597;
+        font-size: 0.82rem;
+        line-height: 1.45;
+      }
+
+      .examiner-slot-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+        width: 100%;
+      }
+
+      .examiner-cell-btn {
+        min-height: 30px;
+        padding: 0 10px;
+        width: 100%;
+        background: linear-gradient(180deg, rgba(141, 196, 255, 0.28), rgba(255, 255, 255, 0.98));
+        color: #1a4e8d;
+        border: 1px solid rgba(121, 185, 255, 0.22);
+        font-size: 0.72rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        box-shadow: 0 10px 18px rgba(90, 150, 222, 0.12);
+      }
+
+      .examiner-cell-btn.is-start {
+        background: linear-gradient(135deg, #58b8ff, #2b6df3);
+        color: #ffffff;
+      }
+
+      .examiner-cell-btn.is-add-link {
+        background: linear-gradient(180deg, rgba(160, 214, 255, 0.34), rgba(255, 255, 255, 0.98));
+        color: #1a4e8d;
+      }
+
+      .examiner-cell-btn.is-complete {
+        background: linear-gradient(135deg, #7fd8ff, #2d88ff);
+        color: #04111f;
+      }
+
+      .examiner-cell-btn.is-done,
+      .examiner-cell-btn:disabled {
+        cursor: default;
+        opacity: 0.76;
+      }
+
+      .examiner-empty-cell {
+        min-height: 80px;
+        border-radius: 12px;
+        background: linear-gradient(180deg, rgba(212, 233, 255, 0.5), rgba(255, 255, 255, 0.76));
+      }
+
+      .examiner-create-grid {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(120px, 1fr));
+        gap: 12px;
+        margin-top: 16px;
+      }
+
+      .examiner-create-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .examiner-summary-filter {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: end;
+        margin-top: 14px;
+        margin-bottom: 14px;
+        padding: 12px;
+        border-radius: 18px;
+        background: linear-gradient(180deg, rgba(224, 239, 255, 0.72), rgba(255, 255, 255, 0.92));
+        border: 1px solid rgba(121, 185, 255, 0.18);
+      }
+
+      .examiner-summary-filter label {
+        display: grid;
+        gap: 6px;
+        min-width: 150px;
+      }
+
+      .examiner-summary-filter span {
+        font-size: 0.78rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #6080a9;
+        font-weight: 700;
+      }
+
+      .examiner-summary-table th,
+      .examiner-summary-table td {
+        padding: 12px;
+      }
+
+      .examiner-summary-table th {
+        background: linear-gradient(180deg, rgba(164, 211, 255, 0.46), rgba(255, 255, 255, 0.95));
+        text-align: left;
+        color: #18457d;
+      }
+
+      .examiner-inline-note {
+        margin-top: 12px;
+        color: #5b7699;
+      }
+
+      .examiner-link-editor {
+        margin-top: 12px;
+        padding: 12px;
+        border-radius: 14px;
+        border: 1px solid rgba(121, 185, 255, 0.2);
+        background: linear-gradient(180deg, rgba(227, 241, 255, 0.62), rgba(255, 255, 255, 0.95));
+      }
+
+      .examiner-link-editor label {
+        display: grid;
+        gap: 6px;
+      }
+
+      .examiner-link-editor span {
+        font-size: 0.72rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        font-weight: 800;
+        color: #5e7da5;
+      }
+
+      .examiner-link-editor input {
+        min-height: 40px;
+        border-radius: 12px;
+        border: 1px solid rgba(121, 185, 255, 0.28);
+        background: rgba(255, 255, 255, 0.98);
+        padding: 0 12px;
+        color: #14365f;
+      }
+
+      .examiner-link-editor-actions {
+        margin-top: 10px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .examiner-panel .portal-form {
+        margin-top: 26px;
+        padding: 20px;
+        border-radius: 24px;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(235, 245, 255, 0.96));
+        border: 1px solid rgba(121, 185, 255, 0.2);
+        box-shadow: 0 16px 34px rgba(97, 154, 216, 0.12);
+      }
+
+      .examiner-panel .portal-card-intro {
+        color: #2f78d8;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-weight: 800;
+      }
+
+      .examiner-panel .portal-label {
+        color: #557095;
+        font-weight: 700;
+      }
+
+      .examiner-panel .portal-input {
+        min-height: 48px;
+        border-radius: 14px;
+        border: 1px solid rgba(121, 185, 255, 0.24);
+        background: rgba(255, 255, 255, 0.98);
+        color: #14365f;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.84);
+      }
+
+      .examiner-panel .portal-input::placeholder {
+        color: #88a4c6;
+      }
+
+      .examiner-panel .portal-input:focus,
+      .examiner-mini-input:focus,
+      .examiner-create-grid input:focus,
+      .examiner-create-grid select:focus {
+        outline: none;
+        border-color: #4b98f6;
+        box-shadow: 0 0 0 4px rgba(104, 189, 255, 0.18);
+      }
+
+      .examiner-panel .portal-submit {
+        min-height: 48px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, #57b0ff, #2a68ef);
+        box-shadow: 0 14px 30px rgba(41, 107, 239, 0.28);
+      }
+
+      #examiner-logout {
+        margin: 0 !important;
+        min-height: 40px;
+        padding: 0 16px;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        box-shadow: 0 10px 20px rgba(41, 107, 239, 0.2);
+        align-self: flex-start;
+        z-index: 2;
+        pointer-events: auto;
+        transition: box-shadow 0.15s ease, filter 0.15s ease;
+      }
+
+      #examiner-logout:hover,
+      #examiner-logout:active {
+        transform: none;
+      }
+
+      .examiner-panel #examiner-profile-band {
+        margin-top: 12px;
+        padding: 14px;
+        border-radius: 16px;
+      }
+
+      .examiner-profile-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 8px;
+      }
+
+      .examiner-panel #examiner-profile-band .examiner-profile-head strong {
+        margin: 0;
+        font-size: 0.76rem;
+        letter-spacing: 0.12em;
+      }
+
+      .examiner-panel .portal-small-note {
+        color: #6a87aa;
+      }
+
+      .examiner-profile-name {
+        font-size: 1rem;
+        line-height: 1.25;
+        font-weight: 800;
+        color: #14365f;
+      }
+
+      .examiner-profile-email {
+        margin-top: 2px;
+        font-size: 0.9rem;
+        line-height: 1.35;
+        color: #6782a4;
+      }
+
+      @keyframes examinerRise {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-width: 1120px) {
+        .portal-page {
+          padding-left: 12px;
+          padding-right: 12px;
+        }
+
+        .examiner-page-shell {
+          grid-template-columns: 1fr;
+          width: 100%;
+        }
+
+        .examiner-panel {
+          position: relative;
+          top: auto;
+        }
+
+        .examiner-create-grid {
+          grid-template-columns: repeat(2, minmax(140px, 1fr));
+        }
+
+        .examiner-main-header {
+          grid-template-columns: 1fr;
+        }
+
+        .examiner-schedule-table {
+          table-layout: auto;
+        }
+
+        .examiner-schedule-table thead th:first-child,
+        .examiner-schedule-table tbody th {
+          width: 120px;
+          min-width: 120px;
+        }
+
+        .examiner-schedule-table thead th:not(:first-child) {
+          width: auto;
+          min-width: 88px;
+        }
+
+        .examiner-schedule-table th,
+        .examiner-schedule-table td {
+          padding: 8px 9px;
+        }
+
+        .examiner-cell-btn {
+          font-size: 0.68rem;
+          letter-spacing: 0.1em;
+          padding: 0 8px;
+        }
+      }
+
+      @media (max-width: 720px) {
+        .examiner-main,
+        .examiner-panel {
+          padding: 18px;
+          border-radius: 20px;
+        }
+
+        .examiner-panel #examiner-profile-band {
+          padding: 12px;
+        }
+
+        .examiner-profile-head {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .examiner-main-header {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .examiner-filter-bar,
+        .examiner-create-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .examiner-schedule-table thead th:first-child,
+        .examiner-schedule-table tbody th {
+          width: 104px;
+          min-width: 104px;
+        }
+
+        .examiner-schedule-table thead th:not(:first-child) {
+          min-width: 78px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="portal-page" aria-label="Examiner Portal">
+      <div class="examiner-page-shell">
+        <section class="examiner-panel" aria-label="Examiner access and status">
+          <p class="examiner-kicker">Examiner portal</p>
+
+          <form class="portal-form" autocomplete="off" id="examiner-login-form" aria-label="Examiner login" style="margin-top:22px;">
+            <p class="portal-card-intro" style="margin:0 0 6px;">Login</p>
+
+            <label class="portal-field">
+              <span class="portal-label">Email</span>
+              <input class="portal-input" type="email" name="email" autocomplete="off" required placeholder="you@example.com" />
+            </label>
+
+            <label class="portal-field">
+              <span class="portal-label">Password</span>
+              <input class="portal-input" type="password" name="password" autocomplete="new-password" required placeholder="Your password" />
+            </label>
+
+            <button class="portal-submit" type="submit">Sign in</button>
+            <p class="portal-small-note" id="examiner-login-note"></p>
+          </form>
+
+          <div id="examiner-profile-band" class="examiner-panel-band" style="display:none;">
+            <div class="examiner-profile-head">
+              <strong>Signed in examiner</strong>
+              <button class="portal-submit" type="button" id="examiner-logout" style="display:none;">Sign out</button>
+            </div>
+            <div id="examiner-profile-name" class="examiner-profile-name"></div>
+            <div id="examiner-profile-email" class="examiner-profile-email"></div>
+          </div>
+        </section>
+
+        <section class="examiner-main" aria-label="Examiner dashboard" id="examiner-availability" style="display:none;">
+          <div class="examiner-main-header">
+            <div>
+              <p class="examiner-kicker" style="margin-bottom:10px;">Created sessions</p>
+              <h2 id="examiner-range-title">Showing sessions</h2>
+              <p>Use the horizontal layout below to review daily session blocks and move a live session to completed.</p>
+            </div>
+
+            <form class="examiner-filter-bar" id="examiner-filter-form">
+              <label>
+                <span>From</span>
+                <input class="examiner-mini-input" type="date" id="examiner-filter-from" />
+              </label>
+              <label>
+                <span>To</span>
+                <input class="examiner-mini-input" type="date" id="examiner-filter-to" />
+              </label>
+              <button class="examiner-filter-btn" type="submit">Apply filter</button>
+              <button class="examiner-filter-btn" type="button" id="examiner-filter-reset">Reset 10 days</button>
+            </form>
+          </div>
+
+          <div class="examiner-stats" id="examiner-stats"></div>
+
+          <section class="examiner-section">
+            <h3>Created Sessions</h3>
+            <p>Each row is one date. Start a session from its card, then mark it completed after you finish with the candidate.</p>
+            <div class="examiner-schedule-wrap">
+              <table class="examiner-schedule-table">
+                <thead>
+                  <tr id="examiner-schedule-head"></tr>
+                </thead>
+                <tbody id="examiner-schedule-body"></tbody>
+              </table>
+            </div>
+            <p class="examiner-inline-note" id="examiner-board-note"></p>
+            <div class="examiner-link-editor" id="examiner-link-editor" style="display:none;">
+              <label>
+                <span>Meeting link</span>
+                <input type="url" id="examiner-link-input" placeholder="https://zoom.us/j/..." />
+              </label>
+              <div class="examiner-link-editor-actions">
+                <button class="examiner-primary-btn" type="button" id="examiner-link-save">Save link</button>
+                <button class="examiner-secondary-btn" type="button" id="examiner-link-cancel">Cancel</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="examiner-section examiner-section-create">
+            <h3>Create sessions</h3>
+            <p>Create one session or generate a full day horizontally. New sessions appear immediately in your board and can be started right away.</p>
+
+            <form id="examiner-slot-form">
+              <div class="examiner-create-grid">
+                <label>
+                  <span>Date</span>
+                  <input type="date" name="date" required />
+                </label>
+
+                <label>
+                  <span>Start time</span>
+                  <input type="time" name="time" required />
+                </label>
+
+                <label>
+                  <span>Duration</span>
+                  <select name="duration" required>
+                    <option value="10">10 minutes</option>
+                    <option value="11">11 minutes</option>
+                    <option value="12" selected>12 minutes</option>
+                    <option value="13">13 minutes</option>
+                  </select>
+                </label>
+
+                <label>
+                  <span>Daily count</span>
+                  <input type="number" name="sessionCount" min="1" max="24" step="1" value="24" />
+                </label>
+
+                <label>
+                  <span>Gap minutes</span>
+                  <input type="number" name="gapMinutes" min="0" max="30" step="1" value="0" />
+                </label>
+
+                <label>
+                  <span>Zoom link</span>
+                  <input type="url" name="zoomLink" placeholder="https://zoom.us/j/..." />
+                </label>
+
+                <label style="grid-column: span 6;">
+                  <span>Session note</span>
+                  <input type="text" name="sessionNote" placeholder="Optional note for admin review or candidate instruction" />
+                </label>
+              </div>
+
+              <div class="examiner-create-actions">
+                <button class="examiner-primary-btn" type="submit">Create one session</button>
+                <button class="examiner-secondary-btn" type="button" id="examiner-bulk-slot-btn">Create full day plan</button>
+              </div>
+              <p class="portal-small-note" id="examiner-slot-note" style="margin:12px 0 0;"></p>
+            </form>
+          </section>
+
+          <section class="examiner-section">
+            <h3>Summary | Filter</h3>
+            <p>This summary uses the current date window above.</p>
+            <form class="examiner-summary-filter" id="examiner-summary-filter-form">
+              <label>
+                <span>From</span>
+                <input class="examiner-mini-input" type="date" id="examiner-summary-from" />
+              </label>
+              <label>
+                <span>To</span>
+                <input class="examiner-mini-input" type="date" id="examiner-summary-to" />
+              </label>
+              <button class="examiner-filter-btn" type="submit">Apply filter</button>
+              <button class="examiner-filter-btn" type="button" id="examiner-summary-reset">Reset 10 days</button>
+            </form>
+            <table class="examiner-summary-table">
+              <thead>
+                <tr>
+                  <th>Session type</th>
+                  <th>From</th>
+                  <th>To</th>
+                  <th>Number</th>
+                </tr>
+              </thead>
+              <tbody id="examiner-summary-body"></tbody>
+            </table>
+          </section>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      (function () {
+        var TOKEN_KEY = 'ieltsExaminerToken';
+        var EXAMINER_PROFILE_KEY = 'ieltsExaminerProfile';
+        var STARTED_SESSION_KEY = 'ieltsExaminerStartedSessions';
+
+        var loginForm = document.getElementById('examiner-login-form');
+        var loginNote = document.getElementById('examiner-login-note');
+        var logoutBtn = document.getElementById('examiner-logout');
+        var availabilityWrap = document.getElementById('examiner-availability');
+        var slotForm = document.getElementById('examiner-slot-form');
+        var slotNote = document.getElementById('examiner-slot-note');
+        var bulkSlotButton = document.getElementById('examiner-bulk-slot-btn');
+        var profileBand = document.getElementById('examiner-profile-band');
+        var profileName = document.getElementById('examiner-profile-name');
+        var profileEmail = document.getElementById('examiner-profile-email');
+        var rangeTitle = document.getElementById('examiner-range-title');
+        var filterForm = document.getElementById('examiner-filter-form');
+        var filterFrom = document.getElementById('examiner-filter-from');
+        var filterTo = document.getElementById('examiner-filter-to');
+        var filterReset = document.getElementById('examiner-filter-reset');
+        var summaryFilterForm = document.getElementById('examiner-summary-filter-form');
+        var summaryFilterFrom = document.getElementById('examiner-summary-from');
+        var summaryFilterTo = document.getElementById('examiner-summary-to');
+        var summaryFilterReset = document.getElementById('examiner-summary-reset');
+        var statsWrap = document.getElementById('examiner-stats');
+        var scheduleHead = document.getElementById('examiner-schedule-head');
+        var scheduleBody = document.getElementById('examiner-schedule-body');
+        var boardNote = document.getElementById('examiner-board-note');
+        var linkEditor = document.getElementById('examiner-link-editor');
+        var linkEditorInput = document.getElementById('examiner-link-input');
+        var linkEditorSave = document.getElementById('examiner-link-save');
+        var linkEditorCancel = document.getElementById('examiner-link-cancel');
+        var summaryBody = document.getElementById('examiner-summary-body');
+        var allSessions = [];
+        var startedSessions = {};
+        var editingLinkSlotId = '';
+
+        function setNote(el, text, kind) {
+          if (!el) return;
+          el.textContent = String(text || '');
+          el.classList.remove('is-error', 'is-success', 'is-info');
+          if (kind === 'error') el.classList.add('is-error');
+          if (kind === 'success') el.classList.add('is-success');
+          if (kind === 'info') el.classList.add('is-info');
+        }
+
+        function getToken() {
+          try {
+            return String(window.sessionStorage.getItem(TOKEN_KEY) || '').trim();
+          } catch (_) {
+            return '';
+          }
+        }
+
+        function setToken(token) {
+          try {
+            if (!token) window.sessionStorage.removeItem(TOKEN_KEY);
+            else window.sessionStorage.setItem(TOKEN_KEY, String(token));
+          } catch (_) {}
+        }
+
+        function getProfile() {
+          try {
+            return JSON.parse(window.sessionStorage.getItem(EXAMINER_PROFILE_KEY) || 'null') || null;
+          } catch (_) {
+            return null;
+          }
+        }
+
+        function setProfile(profile) {
+          try {
+            if (!profile) window.sessionStorage.removeItem(EXAMINER_PROFILE_KEY);
+            else window.sessionStorage.setItem(EXAMINER_PROFILE_KEY, JSON.stringify(profile));
+          } catch (_) {}
+        }
+
+        function getStartedSessions() {
+          try {
+            return JSON.parse(window.sessionStorage.getItem(STARTED_SESSION_KEY) || '{}') || {};
+          } catch (_) {
+            return {};
+          }
+        }
+
+        function setStartedSessions(map) {
+          startedSessions = map && typeof map === 'object' ? map : {};
+          try {
+            window.sessionStorage.setItem(STARTED_SESSION_KEY, JSON.stringify(startedSessions));
+          } catch (_) {}
+        }
+
+        function clearLoginForm() {
+          if (!loginForm) return;
+          try {
+            if (loginForm.elements.email) loginForm.elements.email.value = '';
+            if (loginForm.elements.password) loginForm.elements.password.value = '';
+          } catch (_) {}
+        }
+
+        function postJson(url, payload, token) {
+          var headers = { 'Content-Type': 'application/json' };
+          if (token) headers['Authorization'] = 'Bearer ' + token;
+          return fetch(url, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(payload || {}),
+          }).then(function (res) {
+            return res.json().catch(function () { return {}; }).then(function (data) {
+              return { ok: res.ok, status: res.status, data: data };
+            });
+          });
+        }
+
+        function getJson(url, token) {
+          var headers = {};
+          if (token) headers.Authorization = 'Bearer ' + token;
+          return fetch(url, { method: 'GET', headers: headers }).then(function (res) {
+            return res.json().catch(function () { return {}; }).then(function (data) {
+              return { ok: res.ok, status: res.status, data: data };
+            });
+          });
+        }
+
+        function pad2(value) {
+          return String(value).padStart(2, '0');
+        }
+
+        function toDateInputValue(date) {
+          return date.getFullYear() + '-' + pad2(date.getMonth() + 1) + '-' + pad2(date.getDate());
+        }
+
+        function addDays(date, days) {
+          return new Date(date.getFullYear(), date.getMonth(), date.getDate() + days);
+        }
+
+        function parseDateInput(value) {
+          var parts = String(value || '').split('-');
+          if (parts.length !== 3) return null;
+          var year = Number(parts[0]);
+          var month = Number(parts[1]) - 1;
+          var day = Number(parts[2]);
+          var dt = new Date(year, month, day);
+          return Number.isNaN(dt.valueOf()) ? null : dt;
+        }
+
+        function setFilterValues(fromValue, toValue) {
+          if (filterFrom) filterFrom.value = String(fromValue || '');
+          if (filterTo) filterTo.value = String(toValue || '');
+          if (summaryFilterFrom) summaryFilterFrom.value = String(fromValue || '');
+          if (summaryFilterTo) summaryFilterTo.value = String(toValue || '');
+        }
+
+        function syncFilterValuesFrom(source) {
+          if (source === 'summary') {
+            setFilterValues(
+              summaryFilterFrom ? summaryFilterFrom.value : '',
+              summaryFilterTo ? summaryFilterTo.value : ''
+            );
+            return;
+          }
+          setFilterValues(
+            filterFrom ? filterFrom.value : '',
+            filterTo ? filterTo.value : ''
+          );
+        }
+
+        function sameDay(a, b) {
+          return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+        }
+
+        function formatLocalDateTime(value) {
+          if (!value) return 'Not scheduled';
+          var dt = new Date(value);
+          if (Number.isNaN(dt.valueOf())) return String(value);
+          return dt.toLocaleString([], {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+          });
+        }
+
+        function formatRowDate(date) {
+          var firstLine = pad2(date.getDate()) + ' ' + date.toLocaleDateString([], { weekday: 'long', month: 'long' }) + ',';
+          var secondLine = String(date.getFullYear());
+          return '<span class="examiner-date-line">' + escapeHtml(firstLine) + '</span><span class="examiner-date-line">' + escapeHtml(secondLine) + '</span>';
+        }
+
+        function formatRangeLabel(from, to) {
+          return 'Created Sessions | Showing from ' + from.toLocaleDateString([], { day: '2-digit', month: 'long', year: 'numeric' }) + ' to ' + to.toLocaleDateString([], { day: '2-digit', month: 'long', year: 'numeric' });
+        }
+
+        function formatTimeLabel(value) {
+          var dt = new Date(value);
+          if (Number.isNaN(dt.valueOf())) return '—';
+          return dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }).replace(':', '.');
+        }
+
+        function formatTimeRange(start, end) {
+          return formatTimeLabel(start) + ' - ' + formatTimeLabel(end);
+        }
+
+        function escapeHtml(text) {
+          return String(text || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+        }
+
+        function getFilterRange() {
+          var from = parseDateInput(filterFrom && filterFrom.value);
+          var to = parseDateInput(filterTo && filterTo.value);
+          if (!from || !to || to < from) {
+            var today = new Date();
+            from = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+            to = addDays(from, 9);
+          }
+          return { from: from, to: to };
+        }
+
+        function initializeRange(slots, forceReset) {
+          if (!filterFrom || !filterTo) return;
+          if (!forceReset && filterFrom.value && filterTo.value) return;
+
+          var sourceDate = null;
+          if (Array.isArray(slots) && slots.length) {
+            var sorted = slots.slice().sort(function (a, b) { return String(a.start || '').localeCompare(String(b.start || '')); });
+            sourceDate = new Date(sorted[0].start || '');
+          }
+          if (!sourceDate || Number.isNaN(sourceDate.valueOf())) {
+            var today = new Date();
+            sourceDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+          }
+          var start = new Date(sourceDate.getFullYear(), sourceDate.getMonth(), sourceDate.getDate());
+          setFilterValues(toDateInputValue(start), toDateInputValue(addDays(start, 9)));
+          if (slotForm && slotForm.elements.date && !slotForm.elements.date.value) {
+            slotForm.elements.date.value = toDateInputValue(start);
+          }
+        }
+
+        function filteredSessions() {
+          var range = getFilterRange();
+          return allSessions.filter(function (slot) {
+            var start = new Date(String(slot.start || ''));
+            if (Number.isNaN(start.valueOf())) return false;
+            var day = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+            return day >= range.from && day <= range.to;
+          });
+        }
+
+        function buildRangeDays(from, to) {
+          var days = [];
+          var cursor = new Date(from.getFullYear(), from.getMonth(), from.getDate());
+          while (cursor <= to) {
+            days.push(new Date(cursor.getFullYear(), cursor.getMonth(), cursor.getDate()));
+            cursor = addDays(cursor, 1);
+          }
+          return days;
+        }
+
+        function renderStats(filtered) {
+          if (!statsWrap) return;
+          var completed = filtered.filter(function (slot) { return String(slot.status || '').toLowerCase() === 'completed'; }).length;
+          var remaining = filtered.length - completed;
+          var readyToStart = filtered.filter(function (slot) {
+            var status = String(slot.status || '').toLowerCase();
+            return status !== 'completed' && !!slot.zoomLink;
+          }).length;
+          var withLinks = filtered.filter(function (slot) { return !!slot.zoomLink; }).length;
+          var cards = [
+            { label: 'Created sessions', value: filtered.length },
+            { label: 'Completed sessions', value: completed },
+            { label: 'Remaining sessions', value: remaining },
+            { label: 'Start-ready sessions', value: readyToStart },
+            { label: 'Join-ready sessions', value: withLinks }
+          ];
+          statsWrap.innerHTML = cards.map(function (card) {
+            return '<div class="examiner-stat"><div class="examiner-stat-label">' + escapeHtml(card.label) + '</div><div class="examiner-stat-value">' + escapeHtml(card.value) + '</div></div>';
+          }).join('');
+        }
+
+        function renderSummary(filtered, range) {
+          if (!summaryBody) return;
+          var completed = filtered.filter(function (slot) { return String(slot.status || '').toLowerCase() === 'completed'; }).length;
+          var remaining = filtered.length - completed;
+          var fromLabel = range.from.toLocaleDateString([], { day: '2-digit', month: 'short', year: 'numeric' });
+          var toLabel = range.to.toLocaleDateString([], { day: '2-digit', month: 'short', year: 'numeric' });
+          summaryBody.innerHTML = [
+            '<tr><td>Completed sessions</td><td>' + escapeHtml(fromLabel) + '</td><td>' + escapeHtml(toLabel) + '</td><td>' + escapeHtml(completed) + '</td></tr>',
+            '<tr><td>Remaining sessions</td><td>' + escapeHtml(fromLabel) + '</td><td>' + escapeHtml(toLabel) + '</td><td>' + escapeHtml(remaining) + '</td></tr>'
+          ].join('');
+        }
+
+        function renderSchedule(filtered, range) {
+          if (!scheduleHead || !scheduleBody) return;
+          function getStatusBadgeLabel(status) {
+            if (status === 'approved') return 'Available';
+            if (status === 'booked') return 'Booked';
+            if (status === 'completed') return 'Completed';
+            if (status === 'blocked') return 'Blocked';
+            return 'Pending';
+          }
+
+          var columnsPerRow = 6;
+          var minRowGroups = 3;
+          var maxSessionsPerDay = 24;
+          var maxRowGroups = Math.ceil(maxSessionsPerDay / columnsPerRow);
+          var days = buildRangeDays(range.from, range.to);
+          var buckets = days.map(function (day) {
+            return filtered.filter(function (slot) {
+              var start = new Date(String(slot.start || ''));
+              if (Number.isNaN(start.valueOf())) return false;
+              return sameDay(start, day);
+            }).sort(function (a, b) { return String(a.start || '').localeCompare(String(b.start || '')); });
+          });
+          scheduleHead.innerHTML = '<th>Date</th>' + new Array(columnsPerRow).fill(0).map(function (_, index) {
+            return '<th>Session ' + (index + 1) + '</th>';
+          }).join('');
+
+          scheduleBody.innerHTML = days.map(function (day, rowIndex) {
+            var slots = buckets[rowIndex].slice(0, maxSessionsPerDay);
+            var rowGroups = Math.max(minRowGroups, Math.ceil(slots.length / columnsPerRow));
+            rowGroups = Math.min(maxRowGroups, rowGroups);
+            var dayRows = [];
+
+            for (var row = 0; row < rowGroups; row++) {
+              var cells = [];
+              for (var column = 0; column < columnsPerRow; column++) {
+                var slotIndex = row * columnsPerRow + column;
+                var slot = slots[slotIndex];
+                if (!slot) {
+                  cells.push('<td><div class="examiner-empty-cell"></div></td>');
+                  continue;
+                }
+
+                var status = String(slot.status || 'pending').toLowerCase();
+                var statusLabel = getStatusBadgeLabel(status);
+                var actionHtml = '';
+                if (status === 'completed') {
+                  actionHtml = '<button class="examiner-cell-btn is-done" type="button" disabled>Completed</button>';
+                } else if (startedSessions[slot.id]) {
+                  actionHtml = '<button class="examiner-cell-btn is-complete" type="button" data-complete-slot="' + escapeHtml(slot.id) + '">Complete</button>';
+                } else {
+                  var hasZoomLink = !!String(slot.zoomLink || '').trim();
+                  var addLinkLabel = hasZoomLink ? 'Linked' : 'Add link';
+                  actionHtml = [
+                    '<div class="examiner-slot-status ' + escapeHtml(status) + '">' + escapeHtml(statusLabel) + '</div>',
+                    '<div class="examiner-slot-actions">',
+                    '<button class="examiner-cell-btn is-start" type="button" data-start-slot="' + escapeHtml(slot.id) + '" ' + (hasZoomLink ? '' : 'disabled') + '>Start</button>',
+                    '<button class="examiner-cell-btn is-add-link" type="button" data-add-link-slot="' + escapeHtml(slot.id) + '">' + addLinkLabel + '</button>',
+                    '</div>'
+                  ].join('');
+                }
+
+                cells.push([
+                  '<td>',
+                  '<div class="examiner-slot-card">',
+                  '<div class="examiner-slot-time">' + escapeHtml(formatTimeRange(slot.start, slot.end)) + '</div>',
+                  '<div class="examiner-slot-duration">' + escapeHtml((slot.durationMinutes || '—') + ' min') + '</div>',
+                  actionHtml,
+                  '</div>',
+                  '</td>'
+                ].join(''));
+              }
+
+              dayRows.push('<tr>' + (row === 0 ? '<th rowspan="' + rowGroups + '">' + formatRowDate(day) + '</th>' : '') + cells.join('') + '</tr>');
+            }
+
+            return dayRows.join('');
+          }).join('');
+
+          if (boardNote) {
+            boardNote.textContent = filtered.length
+              ? 'Each day is grouped into compact strips of six sessions, with support for up to 24 sessions per day. Add link first to save the meeting URL, then Start session opens it, and Complete session closes the workflow.'
+              : 'No created sessions in this date range yet.';
+          }
+        }
+
+        function renderDashboard() {
+          var range = getFilterRange();
+          var filtered = filteredSessions();
+          if (rangeTitle) rangeTitle.textContent = formatRangeLabel(range.from, range.to);
+          renderStats(filtered);
+          renderSchedule(filtered, range);
+          renderSummary(filtered, range);
+        }
+
+        function refreshDashboard(forceResetRange) {
+          var token = getToken();
+          if (!token) {
+            allSessions = [];
+            renderDashboard();
+            return Promise.resolve();
+          }
+
+          return getJson('/api/examiner/availability?limit=200', token)
+            .then(function (r) {
+              if (!r.ok) throw new Error((r.data && r.data.error) || 'Unable to load dashboard.');
+              allSessions = r.data && r.data.slots ? r.data.slots.slice() : [];
+              allSessions.sort(function (a, b) { return String(a.start || '').localeCompare(String(b.start || '')); });
+              initializeRange(allSessions, !!forceResetRange);
+              renderDashboard();
+            })
+            .catch(function (err) {
+              if (boardNote) boardNote.textContent = err && err.message ? err.message : 'Unable to load dashboard.';
+            });
+        }
+
+        function showAuthedUi() {
+          if (availabilityWrap) availabilityWrap.style.display = '';
+          if (logoutBtn) logoutBtn.style.display = '';
+          if (loginForm) loginForm.style.display = 'none';
+          if (profileBand) profileBand.style.display = '';
+          var profile = getProfile();
+          if (profileName) profileName.textContent = profile && profile.name ? profile.name : 'Examiner';
+          if (profileEmail) profileEmail.textContent = profile && profile.email ? profile.email : '';
+          refreshDashboard();
+        }
+
+        function showLoggedOutUi() {
+          if (availabilityWrap) availabilityWrap.style.display = 'none';
+          if (logoutBtn) logoutBtn.style.display = 'none';
+          if (loginForm) loginForm.style.display = '';
+          if (profileBand) profileBand.style.display = 'none';
+          hideLinkEditor();
+          allSessions = [];
+          renderDashboard();
+          clearLoginForm();
+        }
+
+        function buildDailySlots(date, time, duration, sessionCount, gapMinutes, zoomLink, sessionNote) {
+          var start = new Date(date + 'T' + time + ':00');
+          if (Number.isNaN(start.valueOf())) throw new Error('Invalid date/time.');
+
+          var count = Math.max(1, Math.min(24, Number(sessionCount) || 24));
+          var minutes = Math.max(10, Math.min(13, Number(duration) || 12));
+          var gap = Math.max(0, Math.min(30, Number(gapMinutes) || 0));
+          var slots = [];
+
+          for (var i = 0; i < count; i++) {
+            var slotStart = new Date(start.valueOf() + i * (minutes + gap) * 60 * 1000);
+            var slotEnd = new Date(slotStart.valueOf() + minutes * 60 * 1000);
+            slots.push({
+              start: slotStart.toISOString(),
+              end: slotEnd.toISOString(),
+              zoomLink: zoomLink,
+              sessionNote: sessionNote,
+            });
+          }
+
+          return slots;
+        }
+
+        function getSlotFormInput() {
+          var date = String((slotForm.elements['date'] && slotForm.elements['date'].value) || '').trim();
+          var time = String((slotForm.elements['time'] && slotForm.elements['time'].value) || '').trim();
+          var duration = Number((slotForm.elements['duration'] && slotForm.elements['duration'].value) || '12');
+          var zoomLink = String((slotForm.elements['zoomLink'] && slotForm.elements['zoomLink'].value) || '').trim();
+          var sessionNote = String((slotForm.elements['sessionNote'] && slotForm.elements['sessionNote'].value) || '').trim();
+          var sessionCount = Number((slotForm.elements['sessionCount'] && slotForm.elements['sessionCount'].value) || '24');
+          var gapMinutes = Number((slotForm.elements['gapMinutes'] && slotForm.elements['gapMinutes'].value) || '0');
+
+          if (!date || !time) throw new Error('Date and time are required.');
+          if (duration < 10 || duration > 13) duration = 12;
+
+          return {
+            date: date,
+            time: time,
+            duration: duration,
+            zoomLink: zoomLink,
+            sessionNote: sessionNote,
+            sessionCount: sessionCount,
+            gapMinutes: gapMinutes,
+          };
+        }
+
+        function saveSlots(slots, date, successText) {
+          var token = getToken();
+          if (!token) {
+            setNote(slotNote, 'Please sign in first.', 'error');
+            return;
+          }
+
+          setNote(slotNote, 'Saving slot(s)...', 'info');
+          postJson('/api/examiner/availability', { slots: slots }, token)
+            .then(function (r) {
+              if (!r.ok) throw new Error((r.data && r.data.error) || 'Unable to save slot.');
+              setNote(slotNote, successText, 'success');
+              if (filterFrom && filterTo) {
+                var slotDate = parseDateInput(date);
+                var range = getFilterRange();
+                if (slotDate && (slotDate < range.from || slotDate > range.to)) {
+                  setFilterValues(date, toDateInputValue(addDays(slotDate, 9)));
+                }
+              }
+              refreshDashboard();
+            })
+            .catch(function (err) {
+              setNote(slotNote, err && err.message ? err.message : 'Unable to save slot.', 'error');
+            });
+        }
+
+        function startSession(slotId) {
+          var slot = allSessions.find(function (item) { return String(item.id || '') === String(slotId || ''); });
+          if (!slot) return;
+          if (!slot.zoomLink) {
+            setNote(slotNote, 'Add a meeting link before starting this session.', 'error');
+            return;
+          }
+          startedSessions[String(slot.id)] = true;
+          setStartedSessions(startedSessions);
+          try {
+            window.open(String(slot.zoomLink), '_blank', 'noopener');
+          } catch (_) {
+            window.location.href = String(slot.zoomLink);
+          }
+          renderDashboard();
+        }
+
+        function applyUpdatedSlot(updatedSlot) {
+          if (!updatedSlot) return;
+          for (var i = 0; i < allSessions.length; i++) {
+            if (String(allSessions[i].id || '') === String(updatedSlot.id || '')) {
+              allSessions[i] = {
+                id: updatedSlot.id,
+                examinerId: updatedSlot.examinerId,
+                start: updatedSlot.startTs || updatedSlot.start,
+                end: updatedSlot.endTs || updatedSlot.end,
+                durationMinutes: updatedSlot.durationMinutes,
+                status: updatedSlot.status,
+                zoomLink: updatedSlot.zoomLink,
+                sessionNote: updatedSlot.sessionNote,
+                adminNote: updatedSlot.adminNote,
+                approvedAt: updatedSlot.approvedAt,
+                approvedBy: updatedSlot.approvedBy,
+                createdAt: updatedSlot.createdAt || ''
+              };
+              return;
+            }
+          }
+        }
+
+        function hideLinkEditor() {
+          editingLinkSlotId = '';
+          if (linkEditorInput) linkEditorInput.value = '';
+          if (linkEditor) linkEditor.style.display = 'none';
+        }
+
+        function saveSessionLink(slotId, nextLink) {
+          var token = getToken();
+          if (!token) return;
+
+          var slot = allSessions.find(function (item) { return String(item.id || '') === String(slotId || ''); });
+          if (!slot) {
+            setNote(slotNote, 'Unable to find this session.', 'error');
+            return;
+          }
+
+          setNote(slotNote, 'Saving meeting link...', 'info');
+          postJson('/api/examiner/availability', {
+            slotId: slotId,
+            status: String(slot.status || 'approved'),
+            zoomLink: nextLink
+          }, token)
+            .then(function (r) {
+              if (!r.ok || !r.data || !r.data.slot) {
+                throw new Error((r.data && r.data.error) || 'Unable to save meeting link.');
+              }
+              applyUpdatedSlot(r.data.slot);
+              hideLinkEditor();
+              setNote(slotNote, 'Meeting link saved for this session.', 'success');
+              renderDashboard();
+            })
+            .catch(function (err) {
+              setNote(slotNote, err && err.message ? err.message : 'Unable to save meeting link.', 'error');
+            });
+        }
+
+        function addSessionLink(slotId) {
+          var slot = allSessions.find(function (item) { return String(item.id || '') === String(slotId || ''); });
+          if (!slot) {
+            setNote(slotNote, 'Unable to find this session.', 'error');
+            return;
+          }
+
+          editingLinkSlotId = String(slot.id || '');
+          if (linkEditorInput) {
+            linkEditorInput.value = String(slot.zoomLink || '').trim();
+            linkEditorInput.focus();
+          }
+          if (linkEditor) {
+            linkEditor.style.display = '';
+          }
+          setNote(slotNote, 'Add or update the meeting link for this session, then click Save link.', 'info');
+        }
+
+        function completeSession(slotId) {
+          var token = getToken();
+          if (!token) return;
+          setNote(slotNote, 'Marking session completed...', 'info');
+          postJson('/api/examiner/availability', { slotId: slotId, status: 'completed' }, token)
+            .then(function (r) {
+              if (!r.ok) throw new Error((r.data && r.data.error) || 'Unable to complete session.');
+              applyUpdatedSlot(r.data && r.data.slot ? r.data.slot : null);
+              delete startedSessions[String(slotId)];
+              setStartedSessions(startedSessions);
+              setNote(slotNote, 'Session marked completed.', 'success');
+              renderDashboard();
+            })
+            .catch(function (err) {
+              setNote(slotNote, err && err.message ? err.message : 'Unable to complete session.', 'error');
+            });
+        }
+
+        function handleLogout() {
+          setToken('');
+          setProfile(null);
+          setStartedSessions({});
+          showLoggedOutUi();
+          setNote(loginNote, 'Signed out.', 'info');
+        }
+
+        if (logoutBtn) {
+          logoutBtn.addEventListener('click', function (event) {
+            if (event) event.preventDefault();
+            handleLogout();
+          });
+
+          // Fallback for browsers/devices where click dispatch on styled buttons can be inconsistent.
+          logoutBtn.addEventListener('pointerup', function (event) {
+            if (!event || event.button !== 0) return;
+            if (event) event.preventDefault();
+            handleLogout();
+          });
+
+          logoutBtn.addEventListener('keydown', function (event) {
+            var key = event && event.key ? String(event.key) : '';
+            if (key !== 'Enter' && key !== ' ') return;
+            if (event) event.preventDefault();
+            handleLogout();
+          });
+        }
+
+        if (loginForm) {
+          loginForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            var email = String((loginForm.elements['email'] && loginForm.elements['email'].value) || '').trim();
+            var password = String((loginForm.elements['password'] && loginForm.elements['password'].value) || '');
+
+            if (!email || !password) {
+              setNote(loginNote, 'Email and password are required.', 'error');
+              return;
+            }
+
+            setNote(loginNote, 'Signing in...', 'info');
+            postJson('/api/examiner/login', { email: email, password: password })
+              .then(function (r) {
+                if (!r.ok) throw new Error((r.data && r.data.error) || 'Invalid login.');
+                var token = r.data && r.data.token ? String(r.data.token) : '';
+                var examiner = r.data && r.data.examiner ? r.data.examiner : null;
+                if (!token || !examiner || !examiner.id) throw new Error('Login failed.');
+                setToken(token);
+                setProfile({ id: String(examiner.id), email: String(examiner.email || ''), name: String(examiner.name || 'Examiner') });
+                startedSessions = getStartedSessions();
+                showAuthedUi();
+                setNote(loginNote, 'Signed in.', 'success');
+              })
+              .catch(function (err) {
+                setToken('');
+                setProfile(null);
+                setNote(loginNote, err && err.message ? err.message : 'Invalid login.', 'error');
+                showLoggedOutUi();
+              });
+          });
+        }
+
+        if (slotForm) {
+          slotForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            try {
+              var values = getSlotFormInput();
+              var start = new Date(values.date + 'T' + values.time + ':00');
+              if (Number.isNaN(start.valueOf())) throw new Error('Invalid date/time.');
+              var end = new Date(start.valueOf() + values.duration * 60 * 1000);
+              saveSlots(
+                [{ start: start.toISOString(), end: end.toISOString(), zoomLink: values.zoomLink, sessionNote: values.sessionNote }],
+                values.date,
+                'Slot saved. You can start the session from the board.'
+              );
+            } catch (err) {
+              setNote(slotNote, err && err.message ? err.message : 'Unable to save slot.', 'error');
+            }
+          });
+
+          if (bulkSlotButton) {
+            bulkSlotButton.addEventListener('click', function () {
+              try {
+                var values = getSlotFormInput();
+                var slots = buildDailySlots(
+                  values.date,
+                  values.time,
+                  values.duration,
+                  values.sessionCount,
+                  values.gapMinutes,
+                  values.zoomLink,
+                  values.sessionNote
+                );
+                saveSlots(
+                  slots,
+                  values.date,
+                  String(slots.length) + ' sessions saved. You can start them from the board.'
+                );
+              } catch (err) {
+                setNote(slotNote, err && err.message ? err.message : 'Unable to create daily sessions.', 'error');
+              }
+            });
+          }
+
+          availabilityWrap.addEventListener('click', function (event) {
+            var startButton = event.target.closest('[data-start-slot]');
+            var completeButton = event.target.closest('[data-complete-slot]');
+            var addLinkButton = event.target.closest('[data-add-link-slot]');
+            if (startButton) {
+              startSession(String(startButton.getAttribute('data-start-slot') || ''));
+            }
+            if (completeButton) {
+              completeSession(String(completeButton.getAttribute('data-complete-slot') || ''));
+            }
+            if (addLinkButton) {
+              addSessionLink(String(addLinkButton.getAttribute('data-add-link-slot') || ''));
+            }
+          });
+
+          if (linkEditorSave) {
+            linkEditorSave.addEventListener('click', function () {
+              if (!editingLinkSlotId) {
+                setNote(slotNote, 'Select a session first.', 'error');
+                return;
+              }
+
+              var nextLink = String((linkEditorInput && linkEditorInput.value) || '').trim();
+              if (!nextLink) {
+                setNote(slotNote, 'Meeting link is required.', 'error');
+                return;
+              }
+
+              if (!/^https?:\/\//i.test(nextLink)) {
+                setNote(slotNote, 'Meeting link must start with http:// or https://', 'error');
+                return;
+              }
+
+              saveSessionLink(editingLinkSlotId, nextLink);
+            });
+          }
+
+          if (linkEditorCancel) {
+            linkEditorCancel.addEventListener('click', function () {
+              hideLinkEditor();
+              setNote(slotNote, 'Meeting link edit cancelled.', 'info');
+            });
+          }
+        }
+
+        if (filterForm) {
+          filterForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+            syncFilterValuesFrom('header');
+            renderDashboard();
+          });
+        }
+
+        if (summaryFilterForm) {
+          summaryFilterForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+            syncFilterValuesFrom('summary');
+            renderDashboard();
+          });
+        }
+
+        if (filterFrom) {
+          filterFrom.addEventListener('change', function () {
+            syncFilterValuesFrom('header');
+          });
+        }
+
+        if (filterTo) {
+          filterTo.addEventListener('change', function () {
+            syncFilterValuesFrom('header');
+          });
+        }
+
+        if (summaryFilterFrom) {
+          summaryFilterFrom.addEventListener('change', function () {
+            syncFilterValuesFrom('summary');
+          });
+        }
+
+        if (summaryFilterTo) {
+          summaryFilterTo.addEventListener('change', function () {
+            syncFilterValuesFrom('summary');
+          });
+        }
+
+        if (filterReset) {
+          filterReset.addEventListener('click', function () {
+            initializeRange(allSessions, true);
+            renderDashboard();
+          });
+        }
+
+        if (summaryFilterReset) {
+          summaryFilterReset.addEventListener('click', function () {
+            initializeRange(allSessions, true);
+            renderDashboard();
+          });
+        }
+
+        // Restore session
+        window.addEventListener('load', clearLoginForm);
+        window.addEventListener('pageshow', clearLoginForm);
+
+        startedSessions = getStartedSessions();
+        if (getToken() && getProfile() && getProfile().id) {
+          showAuthedUi();
+        } else {
+          showLoggedOutUi();
+        }
+      })();
+    </script>
+  </body>
+</html>

@@ -1,11 +1,19 @@
 const crypto = require('crypto');
-const { sha256Hex, verifyToken, readJsonBody } = require('./_shared');
+const { sha256Hex, verifyToken, readJsonBody, requireVerificationTokenSecret } = require('./_shared');
+const { sendJson, enforceRateLimit } = require('./_http');
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
-    res.statusCode = 405;
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify({ error: 'Method not allowed.' }));
+    sendJson(res, 405, { error: 'Method not allowed.' });
+    return;
+  }
+
+  if (await enforceRateLimit(req, res, {
+    key: 'verify-code',
+    limit: 25,
+    windowMs: 10 * 60 * 1000,
+    message: 'Too many verification attempts. Please wait and try again.',
+  })) {
     return;
   }
 
@@ -13,9 +21,7 @@ module.exports = async function handler(req, res) {
   try {
     body = await readJsonBody(req);
   } catch (err) {
-    res.statusCode = 400;
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify({ error: err && err.message ? err.message : 'Invalid request.' }));
+    sendJson(res, 400, { error: err && err.message ? err.message : 'Invalid request.' });
     return;
   }
 
@@ -23,24 +29,20 @@ module.exports = async function handler(req, res) {
   const code = String(body.code || '').trim();
 
   if (!token) {
-    res.statusCode = 400;
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify({ error: 'Missing token.' }));
+    sendJson(res, 400, { error: 'Missing token.' });
     return;
   }
 
   if (!/^[0-9]{6}$/.test(code)) {
-    res.statusCode = 400;
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify({ error: 'Enter a valid 6-digit code.' }));
+    sendJson(res, 400, { error: 'Enter a valid 6-digit code.' });
     return;
   }
 
-  const tokenSecret = process.env.VERIFICATION_TOKEN_SECRET;
-  if (!tokenSecret) {
-    res.statusCode = 500;
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify({ error: 'Server not configured (missing VERIFICATION_TOKEN_SECRET).' }));
+  let tokenSecret;
+  try {
+    tokenSecret = requireVerificationTokenSecret();
+  } catch (err) {
+    sendJson(res, 500, { error: err && err.message ? err.message : 'Server not configured.' });
     return;
   }
 
@@ -48,9 +50,7 @@ module.exports = async function handler(req, res) {
   try {
     payload = verifyToken(token, tokenSecret);
   } catch (err) {
-    res.statusCode = 400;
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify({ error: err && err.message ? err.message : 'Invalid token.' }));
+    sendJson(res, 400, { error: err && err.message ? err.message : 'Invalid token.' });
     return;
   }
 
@@ -62,13 +62,9 @@ module.exports = async function handler(req, res) {
   const ok = a.length === b.length && a.length > 0 && crypto.timingSafeEqual(a, b);
 
   if (!ok) {
-    res.statusCode = 400;
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify({ error: 'Incorrect or expired code.' }));
+    sendJson(res, 400, { error: 'Incorrect or expired code.' });
     return;
   }
 
-  res.statusCode = 200;
-  res.setHeader('Content-Type', 'application/json');
-  res.end(JSON.stringify({ ok: true, email: payload.email }));
+  sendJson(res, 200, { ok: true, email: payload.email });
 };

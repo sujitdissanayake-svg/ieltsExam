@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Free Mock - Confirm Details</title>
+    <link rel="stylesheet" href="styles.css?v=20260226c" />
+  </head>
+  <body class="academic-confirm">
+    <header class="academic-topbar" aria-label="IELTS top bar">
+      <div class="academic-topbar-inner">
+        <img
+          class="academic-topbar-ielts"
+          src="assets/IELTS%20Exam%20logo%202-trim.png?v=20260226b"
+          alt="IELTS"
+        />
+
+        <div class="academic-topbar-partners" aria-label="IELTS partners">
+          <img class="academic-topbar-partner" src="assets/british-council-trim-no-official.png?v=20260226" alt="British Council" loading="lazy" />
+          <img class="academic-topbar-partner" src="assets/IDP-trim-no-official.png?v=20260226" alt="IDP" loading="lazy" />
+          <span class="academic-topbar-cambridge" aria-label="Cambridge Assessment English">Cambridge Assessment English</span>
+        </div>
+      </div>
+      <div class="academic-topbar-under" aria-hidden="true"></div>
+    </header>
+
+    <main class="academic-confirm-main" aria-label="Confirm your details">
+      <section class="academic-confirm-panel" aria-label="Confirmation panel">
+        <div class="academic-confirm-titleRow">
+          <img class="academic-confirm-icon" src="assets/Confirm%20your%20details.jpg?v=20260226" alt="" aria-hidden="true" />
+          <h1 class="academic-confirm-title">Confirm your details</h1>
+        </div>
+
+        <div class="academic-confirm-box" aria-label="Details">
+          <p class="academic-confirm-line"><span class="academic-confirm-label">Name:</span> <span id="confirm-name">Guest User</span></p>
+          <p class="academic-confirm-line"><span class="academic-confirm-label">Date of birth:</span> <span id="confirm-dob">-</span></p>
+          <p class="academic-confirm-line"><span class="academic-confirm-label">Candidate number:</span> <span id="confirm-candidate">123456</span></p>
+
+          <p class="academic-confirm-note">
+            <span class="academic-confirm-infoIcon" aria-hidden="true">i</span>
+            <span>If your details are not correct, please go back and update your profile.</span>
+          </p>
+
+          <div class="academic-confirm-actions" aria-label="Actions">
+            <button class="academic-confirm-btn" type="button">My details are correct</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      (function () {
+        function usesHtmlRoutes() {
+          return /\.html$/i.test(window.location.pathname || '');
+        }
+
+        function normalizeTargetUrl(value) {
+          return String(value || '').trim().replace(/\/+$/, '');
+        }
+
+        function defaultMockTarget() {
+          return usesHtmlRoutes() ? 'mock-test-run.html' : '/dashboard';
+        }
+
+        function sanitizeNextTarget(value) {
+          var target = String(value || '').trim();
+          if (!target) return defaultMockTarget();
+          try {
+            var url = new URL(target, window.location.origin);
+            if (url.origin !== window.location.origin) return defaultMockTarget();
+            if (/\/\.\.(\/|$)/.test(url.pathname)) return defaultMockTarget();
+            if (/\.\./.test(url.pathname)) return defaultMockTarget();
+            return url.pathname + url.search + url.hash;
+          } catch (_) {
+            return defaultMockTarget();
+          }
+        }
+
+        function readParams() {
+          try {
+            return new URLSearchParams(window.location.search || '');
+          } catch (_) {
+            return new URLSearchParams('');
+          }
+        }
+
+        function readPortalValue(key) {
+          try {
+            var localValue = String(window.localStorage.getItem(key) || '').trim();
+            if (localValue) return localValue;
+          } catch (_) {}
+          try {
+            return String(window.sessionStorage.getItem(key) || '').trim();
+          } catch (_) {
+            return '';
+          }
+        }
+
+        function writePortalValue(key, value) {
+          var k = String(key || '').trim();
+          if (!k) return;
+          var v = String(value == null ? '' : value).trim();
+          if (!v) return;
+          try { window.localStorage.setItem(k, v); } catch (_) {}
+          try { window.sessionStorage.setItem(k, v); } catch (_) {}
+        }
+
+        function sanitizeCandidateNumber(value) {
+          var raw = String(value == null ? '' : value).trim();
+          if (!raw) return '';
+          var numeric = Number(raw);
+          if (!(numeric > 0)) return '';
+          return String(Math.trunc(numeric));
+        }
+
+        var params = readParams();
+        var nextTarget = sanitizeNextTarget(params.get('next'));
+
+        var nameEl = document.getElementById('confirm-name');
+        var dobEl = document.getElementById('confirm-dob');
+        var candidateEl = document.getElementById('confirm-candidate');
+        var confirmBtn = document.querySelector('.academic-confirm-btn');
+
+        var name = '';
+        var email = '';
+        var dob = '';
+        var candidateNumber = '';
+        var hasSignedInPortal = false;
+
+        try {
+          name = readPortalValue('ieltsPortalName');
+          email = readPortalValue('ieltsPortalEmail');
+          candidateNumber = sanitizeCandidateNumber(readPortalValue('ieltsPortalCandidateNumber'));
+          dob = String(readPortalValue('ieltsPortalDob') || readPortalValue('ieltsPortalDOB') || '').trim();
+          hasSignedInPortal = readPortalValue('ieltsPortalRegistered') === 'true';
+        } catch (_) {
+          name = '';
+          email = '';
+          dob = '';
+        }
+
+        (function hydrateFromProfileQuery() {
+          try {
+            var encodedProfile = String(params.get('profile') || '').trim();
+            if (!encodedProfile) return;
+
+            var parsed = JSON.parse(decodeURIComponent(encodedProfile));
+            if (!parsed || typeof parsed !== 'object') return;
+
+            var profileName = String(parsed.name || '').trim();
+            var profileEmail = String(parsed.email || '').trim();
+            var profileDob = String(parsed.dob || parsed.DOB || '').trim();
+            var profileCandidate = sanitizeCandidateNumber(parsed.candidateNumber);
+
+            if (profileName) {
+              name = profileName;
+              writePortalValue('ieltsPortalName', profileName);
+            }
+            if (profileEmail) {
+              email = profileEmail;
+              writePortalValue('ieltsPortalEmail', profileEmail);
+            }
+            if (profileDob) {
+              dob = profileDob;
+              writePortalValue('ieltsPortalDob', profileDob);
+              writePortalValue('ieltsPortalDOB', profileDob);
+            }
+            if (profileCandidate) {
+              candidateNumber = profileCandidate;
+              writePortalValue('ieltsPortalCandidateNumber', profileCandidate);
+            }
+
+            writePortalValue('ieltsPortalRegistered', 'true');
+            writePortalValue('ieltsPortalProfile', JSON.stringify(parsed));
+            hasSignedInPortal = true;
+          } catch (_) {}
+        })();
+
+        (function hydrateFromAuthQuery() {
+          try {
+            var encodedAuth = String(params.get('auth') || '').trim();
+            if (!encodedAuth) return;
+            var parsed = JSON.parse(window.atob(decodeURIComponent(encodedAuth)));
+            var authEmail = String((parsed && parsed.email) || '').trim();
+            var authHash = String((parsed && parsed.passwordHash) || '').trim();
+            if (authEmail) {
+              email = email || authEmail;
+              writePortalValue('ieltsPortalEmail', authEmail);
+            }
+            if (authHash) {
+              writePortalValue('ieltsPortalPasswordHash', authHash);
+            }
+          } catch (_) {}
+        })();
+
+        if (!name || !email) {
+          try {
+            var profile = JSON.parse(readPortalValue('ieltsPortalProfile') || 'null');
+            if (!name && profile && profile.name) name = String(profile.name).trim();
+            if (!email && profile && profile.email) email = String(profile.email).trim();
+            if (!candidateNumber && profile && profile.candidateNumber) candidateNumber = sanitizeCandidateNumber(profile.candidateNumber);
+            if (!dob && profile && (profile.dob || profile.DOB)) dob = String(profile.dob || profile.DOB).trim();
+            if (profile && typeof profile === 'object') hasSignedInPortal = true;
+          } catch (_) {}
+        }
+
+        if (nameEl && name) nameEl.textContent = name;
+        if (dobEl) dobEl.textContent = dob || '-';
+
+        (function setCandidateNumber() {
+          if (!candidateEl) return;
+          if (candidateNumber) {
+            candidateEl.textContent = candidateNumber;
+            return;
+          }
+          candidateEl.textContent = '-';
+        })();
+
+        function hydrateCandidateFromBackend() {
+          var authEmail = String(readPortalValue('ieltsPortalEmail') || email || '').trim();
+          var authHash = String(readPortalValue('ieltsPortalPasswordHash') || '').trim();
+          if (!authEmail || !authHash) return Promise.resolve(false);
+
+          return fetch('/api/users/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: authEmail, passwordHash: authHash }),
+          })
+            .then(function (response) {
+              return response.json().catch(function () { return {}; }).then(function (data) {
+                return { ok: response.ok, data: data };
+              });
+            })
+            .then(function (result) {
+              if (!result.ok || !result.data || !result.data.user) return false;
+              var user = result.data.user || {};
+
+              var resolvedCandidate = sanitizeCandidateNumber(user.candidateNumber);
+              if (resolvedCandidate) {
+                candidateNumber = resolvedCandidate;
+                writePortalValue('ieltsPortalCandidateNumber', resolvedCandidate);
+                if (candidateEl) candidateEl.textContent = resolvedCandidate;
+              }
+
+              var resolvedName = String(user.name || '').trim();
+              if (resolvedName && !name) {
+                name = resolvedName;
+                if (nameEl) nameEl.textContent = resolvedName;
+                writePortalValue('ieltsPortalName', resolvedName);
+              }
+
+              var resolvedDob = String(user.dob || '').trim();
+              if (resolvedDob && !dob) {
+                dob = resolvedDob;
+                if (dobEl) dobEl.textContent = resolvedDob;
+                writePortalValue('ieltsPortalDob', resolvedDob);
+                writePortalValue('ieltsPortalDOB', resolvedDob);
+              }
+
+              return !!resolvedCandidate;
+            })
+            .catch(function () {
+              return false;
+            });
+        }
+
+        function hydrateCandidateFromRegisterFallback() {
+          var fallbackEmail = String(readPortalValue('ieltsPortalEmail') || email || '').trim();
+          if (!fallbackEmail) return Promise.resolve(false);
+
+          var fallbackName = String(readPortalValue('ieltsPortalName') || name || '').trim();
+          var fallbackDob = String(readPortalValue('ieltsPortalDob') || readPortalValue('ieltsPortalDOB') || dob || '').trim();
+          var fallbackWhatsApp = String(readPortalValue('ieltsPortalWhatsApp') || '').trim();
+          var fallbackBand = Number(readPortalValue('ieltsPortalTargetBandScore') || 0) || 0;
+          var fallbackHash = String(readPortalValue('ieltsPortalPasswordHash') || '').trim();
+
+          return fetch('/api/users/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: fallbackEmail,
+              name: fallbackName,
+              dob: fallbackDob,
+              whatsapp: fallbackWhatsApp,
+              targetBandScore: fallbackBand,
+              passwordHash: fallbackHash,
+            }),
+          })
+            .then(function (response) {
+              return response.json().catch(function () { return {}; }).then(function (data) {
+                return { ok: response.ok, data: data };
+              });
+            })
+            .then(function (result) {
+              if (!result.ok || !result.data || !result.data.user) return false;
+              var user = result.data.user || {};
+
+              var resolvedCandidate = sanitizeCandidateNumber(user.candidateNumber);
+              if (resolvedCandidate) {
+                candidateNumber = resolvedCandidate;
+                writePortalValue('ieltsPortalCandidateNumber', resolvedCandidate);
+                if (candidateEl) candidateEl.textContent = resolvedCandidate;
+              }
+
+              var resolvedName = String(user.name || '').trim();
+              if (resolvedName) {
+                name = resolvedName;
+                if (nameEl) nameEl.textContent = resolvedName;
+                writePortalValue('ieltsPortalName', resolvedName);
+              }
+
+              var resolvedDob = String(user.dob || '').trim();
+              if (resolvedDob) {
+                dob = resolvedDob;
+                if (dobEl) dobEl.textContent = resolvedDob;
+                writePortalValue('ieltsPortalDob', resolvedDob);
+                writePortalValue('ieltsPortalDOB', resolvedDob);
+              }
+
+              return !!resolvedCandidate;
+            })
+            .catch(function () {
+              return false;
+            });
+        }
+
+        if (!candidateNumber && (hasSignedInPortal || email)) {
+          hydrateCandidateFromBackend()
+            .then(function (resolved) {
+              if (resolved) return true;
+              return hydrateCandidateFromRegisterFallback();
+            })
+            .finally(function () {
+              if (!candidateNumber && candidateEl) candidateEl.textContent = '-';
+            });
+        }
+
+        if (confirmBtn) {
+          confirmBtn.addEventListener('click', function () {
+            try {
+              window.location.replace(nextTarget);
+            } catch (_) {
+              window.location.href = nextTarget;
+            }
+          });
+        }
+      })();
+    </script>
+  </body>
+</html>

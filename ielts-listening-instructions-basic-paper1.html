@@ -1,0 +1,279 @@
+﻿<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IELTS Listening</title>
+    <link rel="stylesheet" href="styles.css?v=20260309-4" />
+    <script src="ielts-flow-guard.js?v=20260310-2" defer></script>
+  </head>
+  <body class="listening-soundcheck listening-instructions">
+    <header class="academic-topbar" aria-label="IELTS top bar">
+      <div class="academic-topbar-inner">
+        <img
+          class="academic-topbar-ielts"
+          src="assets/IELTS%20Exam%20logo%202-trim.png?v=20260226b"
+          alt="IELTS"
+        />
+
+        <div class="academic-topbar-right" aria-label="Header actions">
+          <div class="academic-topbar-partners" aria-label="IELTS partners">
+            <img class="academic-topbar-partner" src="assets/british-council-trim-no-official.png?v=20260226" alt="British Council" loading="lazy" />
+            <img class="academic-topbar-partner" src="assets/IDP-trim-no-official.png?v=20260226" alt="IDP" loading="lazy" />
+            <span class="academic-topbar-cambridge" aria-label="Cambridge Assessment English">Cambridge Assessment English</span>
+          </div>
+
+          <div class="listening-topbar-actions" aria-label="Header icons">
+            <button class="listening-topbar-icon" type="button" aria-label="Connection status">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M2.5 9.5a14 14 0 0 1 19 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                <path d="M5.5 12.5a10 10 0 0 1 13 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                <path d="M8.5 15.5a6 6 0 0 1 7 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                <path d="M12 19h0" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+              </svg>
+            </button>
+            <button class="listening-topbar-icon" type="button" aria-label="Notifications">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M12 22a2.5 2.5 0 0 0 2.4-2h-4.8A2.5 2.5 0 0 0 12 22Z" fill="currentColor" opacity="0.9" />
+                <path d="M18 10a6 6 0 1 0-12 0c0 7-2.5 7-2.5 7h17S18 17 18 10Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+              </svg>
+            </button>
+            <button class="header__optionsButton___1BF6Z" type="button" aria-label="Options">
+              <span class="header__icon___1ECrT">
+                <span class="sr-only">Options</span>
+                <i class="fa fa-bars fa-3" aria-hidden="true"></i>
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="academic-topbar-under" aria-label="Audio volume">
+        <div class="soundcheck-underbar">
+          <div class="soundcheck-candidate" aria-label="Candidate number">
+            <span class="soundcheck-candidate-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z" fill="currentColor" opacity="0.9" />
+                <path d="M4 21a8 8 0 0 1 16 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              </svg>
+            </span>
+            <span id="instructionsCandidateNumber">Candidate Number:-</span>
+          </div>
+
+          <div class="soundcheck-volume" aria-label="Volume">
+            <span class="soundcheck-volume-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M11 5L7 9H4v6h3l4 4V5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+                <path d="M15.5 8.5a4 4 0 0 1 0 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              </svg>
+            </span>
+            <input id="volume" class="soundcheck-volume-range" type="range" min="0" max="100" value="70" aria-label="Volume" />
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="soundcheck-main" aria-label="IELTS Listening instructions">
+      <div xmlns="http://www.w3.org/1999/xhtml" xmlns:connect="http://connect.ucles.org.uk/ns/ConnectDeliveryEngine" connect:class="container" class="container">
+        <div connect:class="instructions" class="instructions">
+          <h1>IELTS Listening</h1>
+
+          <div class="preTestInfo">
+            <p>Time: Approximately 30 minutes</p>
+
+            <h2>INSTRUCTIONS TO CANDIDATES</h2>
+            <ul>
+              <li>Answer <b>all</b> the questions.</li>
+              <li>You can change your answers at any time during the test.</li>
+            </ul>
+
+            <h2>INFORMATION FOR CANDIDATES</h2>
+            <ul>
+              <li>There are 40 questions in this test.</li>
+              <li>Each question carries one mark.</li>
+              <li>There are four parts to the test.</li>
+              <li>You will hear each part once.</li>
+              <li>
+                For each part of the test there will be time for you to look through the questions and time for you to
+                check your answers.
+              </li>
+            </ul>
+          </div>
+
+          <div class="textCentre">
+            <p class="info central">Do not click 'Start test' until you are told to do so.</p>
+            <input type="submit" id="instructionsConfirm" value="Start test" class="button green" />
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      (function () {
+        var volumeEl = document.getElementById('volume');
+        var startBtn = document.getElementById('instructionsConfirm');
+        var candidateEl = document.getElementById('instructionsCandidateNumber');
+        var AUTO_START_SECONDS = 40;
+        var autoStartTimerId = null;
+        var countdownTimerId = null;
+        var hasStarted = false;
+
+        function readPortalValue(key) {
+          try {
+            var localValue = String(window.localStorage.getItem(key) || '').trim();
+            if (localValue) return localValue;
+          } catch (_) {}
+          try {
+            return String(window.sessionStorage.getItem(key) || '').trim();
+          } catch (_) {
+            return '';
+          }
+        }
+
+        function normalizePaidPackageName(value) {
+          var raw = String(value || '').trim();
+          return /^(Lite|Basic|Standard|Pro)$/i.test(raw) ? (raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase()) : '';
+        }
+
+        function writePortalValue(key, value) {
+          var k = String(key || '').trim();
+          if (!k) return;
+          var v = String(value == null ? '' : value).trim();
+          if (!v) return;
+          try { window.localStorage.setItem(k, v); } catch (_) {}
+          try { window.sessionStorage.setItem(k, v); } catch (_) {}
+        }
+
+        function sanitizeCandidateNumber(value) {
+          var raw = String(value == null ? '' : value).trim();
+          if (!raw) return '';
+          var numeric = Number(raw);
+          if (!(numeric > 0)) return '';
+          return String(Math.trunc(numeric));
+        }
+
+        function setCandidateText(value) {
+          if (!candidateEl) return;
+          var candidate = sanitizeCandidateNumber(value);
+          candidateEl.textContent = 'Candidate Number:' + (candidate || '-');
+        }
+
+        function hydrateCandidateFromBackend() {
+          var authEmail = String(readPortalValue('ieltsPortalEmail') || '').trim();
+          var authHash = String(readPortalValue('ieltsPortalPasswordHash') || '').trim();
+          if (!authEmail || !authHash) return Promise.resolve('');
+
+          return fetch('/api/users/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: authEmail, passwordHash: authHash }),
+          })
+            .then(function (response) {
+              return response.json().catch(function () { return {}; }).then(function (data) {
+                return { ok: response.ok, data: data };
+              });
+            })
+            .then(function (result) {
+              if (!result.ok || !result.data || !result.data.user) return '';
+              var candidate = sanitizeCandidateNumber(result.data.user.candidateNumber);
+              if (candidate) writePortalValue('ieltsPortalCandidateNumber', candidate);
+              return candidate;
+            })
+            .catch(function () {
+              return '';
+            });
+        }
+
+        function syncVolumeSliderUi() {
+          try {
+            if (!volumeEl) return;
+            volumeEl.style.setProperty('--vol', String(volumeEl.value || 0));
+          } catch (_) {}
+        }
+
+        if (volumeEl) {
+          syncVolumeSliderUi();
+          volumeEl.addEventListener('input', syncVolumeSliderUi);
+          volumeEl.addEventListener('change', syncVolumeSliderUi);
+        }
+
+        (function installNoBackGuard() {
+          try {
+            window.history.pushState({ ieltsListeningInstructionsGuard: true }, '', window.location.href);
+          } catch (_) {}
+
+          window.addEventListener('popstate', function () {
+            try {
+              window.history.pushState({ ieltsListeningInstructionsGuard: true, t: Date.now() }, '', window.location.href);
+            } catch (_) {}
+            try {
+              window.history.go(1);
+            } catch (_) {}
+          });
+        })();
+
+        var storedCandidate = sanitizeCandidateNumber(readPortalValue('ieltsPortalCandidateNumber'));
+        setCandidateText(storedCandidate);
+        if (!storedCandidate) {
+          hydrateCandidateFromBackend().then(function (candidate) {
+            setCandidateText(candidate);
+          });
+        }
+
+        function resolveStartTarget() {
+          var usesHtmlRoutes = /\.html$/i.test(window.location.pathname || '');
+          return usesHtmlRoutes
+            ? 'ielts-listening-test-basic-paper1.html'
+            : 'ielts-listening-test-basic-paper1';
+        }
+
+        function goToListeningTest() {
+          if (hasStarted) return;
+          hasStarted = true;
+          if (autoStartTimerId) window.clearTimeout(autoStartTimerId);
+          if (countdownTimerId) window.clearInterval(countdownTimerId);
+
+          var target = resolveStartTarget();
+          try {
+            window.location.replace(target);
+          } catch (_) {
+            window.location.href = target;
+          }
+        }
+
+        function updateAutoStartLabel(remainingSeconds) {
+          if (!startBtn) return;
+          if (remainingSeconds > 0) {
+            startBtn.value = 'Start test (' + remainingSeconds + 's)';
+            return;
+          }
+          startBtn.value = 'Start test';
+        }
+
+        if (startBtn) {
+          startBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            goToListeningTest();
+          });
+
+          var startedAt = Date.now();
+          updateAutoStartLabel(AUTO_START_SECONDS);
+          countdownTimerId = window.setInterval(function () {
+            var elapsedSeconds = Math.floor((Date.now() - startedAt) / 1000);
+            var remainingSeconds = Math.max(0, AUTO_START_SECONDS - elapsedSeconds);
+            updateAutoStartLabel(remainingSeconds);
+            if (remainingSeconds <= 0 && countdownTimerId) {
+              window.clearInterval(countdownTimerId);
+              countdownTimerId = null;
+            }
+          }, 250);
+
+          autoStartTimerId = window.setTimeout(function () {
+            goToListeningTest();
+          }, AUTO_START_SECONDS * 1000);
+        }
+      })();
+    </script>
+  </body>
+</html>
+

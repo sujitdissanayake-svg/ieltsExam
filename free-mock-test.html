@@ -3,35 +3,31 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>IELTS Free Mock Test</title>
-    <link rel="stylesheet" href="styles.css?v=20260226" />
-    <script src="ielts-flow-guard.js?v=20260310-2" defer></script>
+    <title>Free Mock Test</title>
   </head>
   <body>
-    <main class="portal-page" aria-label="IELTS Free Mock Test">
-      <div class="portal-shell">
-        <section class="portal-card" aria-label="Free Mock Test">
-          <h1 class="portal-card-title free-mock-title">IELTS Free Mock Test</h1>
-          <div class="free-mock-choice" aria-label="Choose module">
-            <a class="free-mock-choice-label" href="free-mock-portal.html">IELTS Academic</a>
-            <span class="free-mock-choice-label">IELTS General</span>
-          </div>
-        </section>
-      </div>
-    </main>
-
     <script>
       (function () {
-        var link = document.querySelector('a.free-mock-choice-label[href^="free-mock-portal"]');
-        if (!link) return;
+        var params = new URLSearchParams(window.location.search || '');
+        var bypass = params.get('devBypass') === '1' || params.get('bypass') === '1';
+        var module = String(params.get('module') || '').trim().toLowerCase() === 'general' ? 'general' : 'academic';
 
-        // Free mock should go straight to the test (no portal/packages).
-        var isLocal =
-          window.location.hostname === 'localhost' ||
-          window.location.hostname === '127.0.0.1' ||
-          window.location.hostname === '::1';
-        var target = isLocal ? 'ielts-academic.html' : 'ielts-academic';
-        link.href = isLocal ? 'free-mock-portal.html?target=' + encodeURIComponent(target) : 'free-mock-portal?target=' + encodeURIComponent(target);
+        function withForwardParams(target) {
+          ['source', 'package', 'profile', 'auth', 'restart', 'module'].forEach(function (key) {
+            var value = String(params.get(key) || '').trim();
+            if (!value) return;
+            target += (target.indexOf('?') === -1 ? '?' : '&') + key + '=' + encodeURIComponent(value);
+          });
+          return target;
+        }
+
+        if (!bypass) {
+          window.location.replace(withForwardParams('free-mock-portal.html'));
+          return;
+        }
+
+        var nextTarget = 'ielts-academic.html?bypass=1&module=' + module;
+        window.location.replace(withForwardParams('free-mock-confirm.html?bypass=1&next=' + encodeURIComponent(nextTarget)));
       })();
     </script>
   </body>

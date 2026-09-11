@@ -1,0 +1,110 @@
+﻿<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test ended</title>
+    <link rel="stylesheet" href="styles.css?v=20260304" />
+    <script src="ielts-flow-guard.js?v=20260310-2" defer></script>
+    <script src="reading-score.js?v=20260616-2"></script>
+  </head>
+  <body class="listening-ended">
+    <main class="listening-ended-main" aria-label="Test ended">
+      <div class="listening-ended-wrap">
+        <div class="listening-ended-titleRow">
+          <span class="listening-ended-icon" aria-hidden="true">
+            <span class="listening-ended-iconDisc"></span>
+            <span class="listening-ended-iconClock" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 21a9 9 0 1 0-9-9 9 9 0 0 0 9 9Z" stroke="currentColor" stroke-width="2" />
+                <path d="M12 7v5l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </span>
+          </span>
+          <h1 class="listening-ended-title">Test ended</h1>
+        </div>
+
+        <section class="listening-ended-card" role="status" aria-live="polite">
+          <div class="listening-ended-body">
+            <p>Your test has finished.</p>
+            <p>All of your answers have been stored.</p>
+            <p>Please wait for further instructions.</p>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      (function () {
+        function submitReadingResult() {
+          try {
+            if (window.__ieltsReadingScore && typeof window.__ieltsReadingScore.submitReadingResult === 'function') {
+              return window.__ieltsReadingScore.submitReadingResult();
+            }
+          } catch (_) {}
+          return Promise.resolve({ ok: false, skipped: true, error: 'Reading scorer not available.' });
+        }
+
+        // Clear the reading timer so a new run starts fresh.
+        try {
+          window.localStorage.removeItem('ieltsReadingEndAt');
+          window.localStorage.removeItem('ieltsReadingWarn30Shown');
+          window.localStorage.removeItem('ieltsReadingWarn10Shown');
+          window.localStorage.removeItem('ieltsReadingWarn5Shown');
+        } catch (_) {}
+
+        var hasNavigated = false;
+        function readValue(key) {
+          try {
+            var localValue = String(window.localStorage.getItem(key) || '').trim();
+            if (localValue) return localValue;
+          } catch (_) {}
+          try {
+            return String(window.sessionStorage.getItem(key) || '').trim();
+          } catch (_) {
+            return '';
+          }
+        }
+
+        function normalizePackage(value) {
+          var raw = String(value || '').trim();
+          return /^(Lite|Basic|Standard|Pro)$/i.test(raw) ? raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase() : '';
+        }
+
+        function moveToWriting() {
+          if (hasNavigated) return;
+          hasNavigated = true;
+          var usesHtml = /\.html$/i.test(window.location.pathname || '');
+          var target = usesHtml ? 'ielts-writing-basic-paper1.html' : 'ielts-writing-basic-paper1';
+          window.location.href = target;
+        }
+
+        // Submit reading result while the user is on the ended page.
+        // We still move forward even if submission fails.
+        Promise.race([
+          submitReadingResult(),
+          new Promise(function (resolve) {
+            window.setTimeout(function () {
+              resolve({ ok: false, timeout: true });
+            }, 2200);
+          }),
+        ]).then(function (payload) {
+          var result = payload && typeof payload === 'object' ? payload : {};
+          var freeMockAttempt = result.freeMockAttempt && typeof result.freeMockAttempt === 'object' ? result.freeMockAttempt : null;
+          var shouldRedirect = !!(result.redirectToPackages || (freeMockAttempt && freeMockAttempt.redirectToPackages));
+
+          if (shouldRedirect) {
+            var redirectPath = String(result.redirectPath || (freeMockAttempt && freeMockAttempt.redirectPath) || '/packages.html').trim();
+            window.location.href = redirectPath;
+            return;
+          }
+
+          window.setTimeout(moveToWriting, 3000);
+        }).catch(function () {
+          window.setTimeout(moveToWriting, 3000);
+        });
+      })();
+    </script>
+  </body>
+</html>
+

@@ -1,0 +1,958 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Secure Payment Gateway</title>
+    <link rel="stylesheet" href="styles.css?v=20260226" />
+    <style>
+      .gateway-page {
+        min-height: 100vh;
+        padding: clamp(18px, 2.5vw, 34px);
+        background: linear-gradient(160deg, #f1f6ff 0%, #ecf3fc 42%, #e4eefb 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .gateway-shell {
+        width: min(1160px, calc(100% - 8px));
+        margin: 0;
+        display: grid;
+        grid-template-columns: minmax(0, 1.8fr) minmax(320px, 1fr);
+        gap: clamp(18px, 2vw, 28px);
+        align-items: start;
+        padding: clamp(6px, 0.8vw, 12px);
+        border-radius: 18px;
+        background: color-mix(in srgb, #ffffff, transparent 55%);
+        box-shadow: 0 18px 36px rgba(15, 23, 42, 0.08);
+      }
+
+      .gateway-main-card,
+      .gateway-summary-card {
+        border: 1px solid #9ec3f6;
+        border-radius: 14px;
+        background: #edf3fb;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
+      }
+
+      .gateway-main-card {
+        padding: 18px 18px 14px;
+        display: grid;
+        gap: 14px;
+        align-content: start;
+        align-self: start;
+      }
+
+      .gateway-method-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .gateway-radio-dot {
+        width: 14px;
+        height: 14px;
+        border-radius: 999px;
+        border: 2px solid #1f6fd2;
+        background: #ffffff;
+        position: relative;
+        flex: 0 0 auto;
+      }
+
+      .gateway-radio-dot::after {
+        content: '';
+        position: absolute;
+        inset: 2px;
+        border-radius: 999px;
+        background: #1f6fd2;
+      }
+
+      .gateway-card-icon {
+        width: 20px;
+        height: 14px;
+        border-radius: 3px;
+        background: #1f6fd2;
+        display: inline-block;
+        position: relative;
+      }
+
+      .gateway-card-icon::after {
+        content: '';
+        position: absolute;
+        left: 3px;
+        right: 3px;
+        top: 4px;
+        height: 2px;
+        background: rgba(255, 255, 255, 0.65);
+      }
+
+      .gateway-method-title {
+        margin: 0;
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #0f172a;
+      }
+
+      .gateway-fields {
+        border: 1px solid #c9dcf6;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.32);
+        padding: 14px;
+      }
+
+      .gateway-required {
+        margin: 0 0 8px;
+        font-size: 0.8rem;
+        color: #dc2626;
+      }
+
+      .gateway-field {
+        margin: 0 0 10px;
+      }
+
+      .gateway-field:last-child {
+        margin-bottom: 0;
+      }
+
+      .gateway-label {
+        display: block;
+        margin: 0 0 5px;
+        font-size: 0.95rem;
+        color: #0f172a;
+      }
+
+      .gateway-label .req {
+        color: #dc2626;
+      }
+
+      .gateway-input,
+      .gateway-select {
+        width: 100%;
+        height: 38px;
+        border: 1px solid #b8cce8;
+        border-radius: 7px;
+        background: #ffffff;
+        color: #0f172a;
+        padding: 0 10px;
+        font-size: 0.95rem;
+      }
+
+      .gateway-input:focus,
+      .gateway-select:focus {
+        outline: none;
+        border-color: #1f6fd2;
+        box-shadow: 0 0 0 2px rgba(31, 111, 210, 0.14);
+      }
+
+      .gateway-expiry-grid {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .gateway-expiry-grid .gateway-select {
+        flex: 1;
+      }
+
+      .gateway-brand-row {
+        margin: 6px 0 0;
+        display: flex;
+        gap: 6px;
+      }
+
+      .gateway-brand {
+        padding: 2px 5px;
+        border-radius: 4px;
+        border: 1px solid #d1d5db;
+        background: #f8fafc;
+        color: #64748b;
+        font-size: 0.72rem;
+        font-weight: 600;
+        opacity: 0.55;
+        transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+      }
+
+      .gateway-brand.is-selected {
+        opacity: 1;
+      }
+
+      .gateway-brand[data-brand='visa'].is-selected {
+        background: #1a1f71;
+        border-color: #1a1f71;
+        color: #ffffff;
+      }
+
+      .gateway-brand[data-brand='mc'].is-selected {
+        background: #eb001b;
+        border-color: #eb001b;
+        color: #ffffff;
+      }
+
+      .gateway-brand[data-brand='amex'].is-selected {
+        background: #2e77bb;
+        border-color: #2e77bb;
+        color: #ffffff;
+      }
+
+      .gateway-brand[data-brand='disc'].is-selected {
+        background: #f97316;
+        border-color: #f97316;
+        color: #ffffff;
+      }
+
+      .gateway-billing {
+        margin-top: 6px;
+        border-top: 1px solid #c9dcf6;
+        padding-top: 12px;
+        display: flex;
+        justify-content: center;
+      }
+
+      .gateway-billing-btn {
+        margin: 0;
+        min-width: 220px;
+        text-align: center;
+        padding: 10px 16px;
+        border-radius: 10px;
+        border: none;
+        background: #1f6fd2;
+        color: #ffffff;
+        font-size: 1rem;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+        cursor: pointer;
+      }
+
+      .gateway-billing-btn:hover {
+        background: #165bb0;
+      }
+
+      .gateway-back {
+        justify-self: start;
+        display: inline-flex;
+        align-items: center;
+        min-height: 38px;
+        margin-bottom: 2px;
+      }
+
+      .gateway-summary-card {
+        padding: 16px 14px;
+        position: sticky;
+        top: 16px;
+        align-self: start;
+        height: auto;
+        max-height: calc(100vh - 32px);
+        overflow: auto;
+      }
+
+      .gateway-summary-title {
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 700;
+        color: #0f172a;
+      }
+
+      .gateway-sep {
+        border: none;
+        border-top: 1px solid #a9c8f2;
+        margin: 12px 0;
+      }
+
+      .gateway-row {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .gateway-product {
+        margin: 0;
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #0f172a;
+      }
+
+      .gateway-muted {
+        margin: 0;
+        color: #475569;
+        font-size: 0.92rem;
+      }
+
+      .gateway-edit {
+        display: inline-block;
+        margin-top: 2px;
+        color: #1d4ed8;
+        font-size: 0.92rem;
+        text-decoration: none;
+      }
+
+      .gateway-edit:hover {
+        text-decoration: underline;
+      }
+
+      .gateway-price {
+        margin: 0;
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #0f172a;
+      }
+
+      .gateway-total-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-top: 2px;
+      }
+
+      .gateway-total-label,
+      .gateway-total-value {
+        margin: 0;
+        font-size: 1.95rem;
+        font-weight: 800;
+        color: #0f172a;
+      }
+
+      .gateway-btn {
+        margin-top: 10px;
+        width: 100%;
+        border: none;
+        border-radius: 12px;
+        background: #1f6fd2;
+        color: #ffffff;
+        font-size: 1.95rem;
+        font-weight: 700;
+        padding: 10px 14px;
+        cursor: pointer;
+      }
+
+      .gateway-package-select {
+        margin-top: 8px;
+        width: 100%;
+        height: 38px;
+        border: 1px solid #1f6fd2;
+        border-radius: 9px;
+        background: #ffffff;
+        color: #0f172a;
+        padding: 0 10px;
+        font-size: 0.95rem;
+      }
+
+      .gateway-package-select[hidden] {
+        display: none;
+      }
+
+      .gateway-btn:disabled {
+        opacity: 0.75;
+        cursor: default;
+      }
+
+      .gateway-btn:hover {
+        background: #165bb0;
+      }
+
+      .gateway-note {
+        margin: 0;
+        text-align: center;
+        color: #dc2626;
+        font-size: 0.92rem;
+        font-weight: 700;
+      }
+
+      .gateway-footer-row {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .gateway-footer-title {
+        margin: 0;
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #0f172a;
+      }
+
+      .gateway-footer-value {
+        margin: 0;
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #0f172a;
+      }
+
+      .gateway-error {
+        margin: 6px 0 0;
+        color: #b91c1c;
+        font-size: 0.88rem;
+        text-align: left;
+      }
+
+      .gateway-includes {
+        margin-top: 10px;
+        border-top: 1px dashed #a9c8f2;
+        padding-top: 10px;
+      }
+
+      .gateway-includes-title {
+        margin: 0 0 6px;
+        font-size: 1rem;
+        font-weight: 700;
+        color: #0f172a;
+      }
+
+      .gateway-includes-list {
+        margin: 0;
+        padding-left: 18px;
+        display: grid;
+        gap: 4px;
+      }
+
+      .gateway-includes-list li {
+        color: #1f2937;
+        font-size: 0.9rem;
+        line-height: 1.3;
+      }
+
+      @media (max-width: 980px) {
+        .gateway-page {
+          display: block;
+        }
+
+        .gateway-shell {
+          grid-template-columns: minmax(0, 1fr);
+          width: min(760px, 100%);
+          margin: 0 auto;
+          padding: 0;
+          background: transparent;
+          box-shadow: none;
+        }
+
+        .gateway-summary-card {
+          position: static;
+          height: auto;
+          max-height: none;
+          overflow: visible;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .gateway-page {
+          padding: 14px;
+        }
+
+        .gateway-main-card,
+        .gateway-summary-card {
+          padding: 14px 12px;
+        }
+
+        .gateway-total-label,
+        .gateway-total-value,
+        .gateway-btn {
+          font-size: 1.35rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="gateway-page" aria-label="Secure payment gateway">
+      <div class="gateway-shell">
+        <section class="gateway-main-card" aria-label="Card payment details">
+          <a class="packages-back gateway-back" id="gateway-back-link" href="demo-payment.html">Back to summary</a>
+
+          <div class="gateway-method-row">
+            <span class="gateway-radio-dot" aria-hidden="true"></span>
+            <span class="gateway-card-icon" aria-hidden="true"></span>
+            <p class="gateway-method-title">Credit or debit card</p>
+          </div>
+
+          <form id="gateway-card-form" novalidate>
+            <div class="gateway-fields">
+              <p class="gateway-required">* Required field</p>
+
+              <div class="gateway-field">
+                <label class="gateway-label" for="gateway-card-name">Cardholder name (exactly as printed on card) <span class="req">*</span></label>
+                <input class="gateway-input" id="gateway-card-name" name="cardName" type="text" autocomplete="cc-name" required />
+              </div>
+
+              <div class="gateway-field">
+                <label class="gateway-label" for="gateway-card-number">Card number <span class="req">*</span></label>
+                <input class="gateway-input" id="gateway-card-number" name="cardNumber" type="text" inputmode="numeric" autocomplete="cc-number" maxlength="19" required />
+                <div class="gateway-brand-row" aria-hidden="true">
+                  <span class="gateway-brand" data-brand="visa">VISA</span>
+                  <span class="gateway-brand" data-brand="mc">MC</span>
+                  <span class="gateway-brand" data-brand="amex">AMEX</span>
+                  <span class="gateway-brand" data-brand="disc">DISC</span>
+                </div>
+              </div>
+
+              <div class="gateway-field">
+                <label class="gateway-label" for="gateway-exp-month">Expiration date <span class="req">*</span></label>
+                <div class="gateway-expiry-grid">
+                  <select class="gateway-select" id="gateway-exp-month" name="expiryMonth" required>
+                    <option value="">- Select Month -</option>
+                    <option value="01">01</option>
+                    <option value="02">02</option>
+                    <option value="03">03</option>
+                    <option value="04">04</option>
+                    <option value="05">05</option>
+                    <option value="06">06</option>
+                    <option value="07">07</option>
+                    <option value="08">08</option>
+                    <option value="09">09</option>
+                    <option value="10">10</option>
+                    <option value="11">11</option>
+                    <option value="12">12</option>
+                  </select>
+                  <select class="gateway-select" id="gateway-exp-year" name="expiryYear" required>
+                    <option value="">- Select Year -</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="gateway-field">
+                <label class="gateway-label" for="gateway-cvv">CVV <span class="req">*</span></label>
+                <input class="gateway-input" id="gateway-cvv" name="cvv" type="password" inputmode="numeric" maxlength="4" autocomplete="cc-csc" required />
+              </div>
+
+              <p class="gateway-muted" style="font-size: 0.82rem; margin-top: 8px;">
+                Payment is processed securely by Stripe.
+              </p>
+            </div>
+
+            <div class="gateway-billing">
+              <button class="gateway-billing-btn" type="submit">Pay Now</button>
+            </div>
+          </form>
+        </section>
+
+        <aside class="gateway-summary-card" aria-label="Order summary">
+          <h2 class="gateway-summary-title">Order summary</h2>
+          <hr class="gateway-sep" />
+
+          <div class="gateway-row">
+            <div>
+              <p class="gateway-product" id="gateway-package">-</p>
+              <p class="gateway-muted">1 user x <span id="gateway-unit">$0.00</span></p>
+              <a class="gateway-edit" id="gateway-edit-link" href="demo-payment.html">Edit</a>
+            </div>
+            <p class="gateway-price" id="gateway-line-price">$0.00</p>
+          </div>
+
+          <hr class="gateway-sep" />
+
+          <div class="gateway-total-row">
+            <p class="gateway-total-label">Today's total</p>
+            <p class="gateway-total-value" id="gateway-total">$0.00</p>
+          </div>
+
+          <button class="gateway-btn" id="gateway-pay-btn" type="button">Selected Package</button>
+          <select class="gateway-package-select" id="gateway-package-select" hidden>
+            <option value="Lite">Lite</option>
+            <option value="Basic">Basic</option>
+            <option value="Standard">Standard</option>
+            <option value="Pro">Pro</option>
+          </select>
+          <p class="gateway-note">Optional: change your selected package only if needed.</p>
+
+          <hr class="gateway-sep" />
+          <div class="gateway-footer-row">
+            <div>
+              <p class="gateway-footer-title">Total billed</p>
+              <p class="gateway-muted">Plus applicable taxes</p>
+            </div>
+            <p class="gateway-footer-value" id="gateway-billed">$0.00</p>
+          </div>
+
+          <div class="gateway-includes" id="gateway-includes-block">
+            <p class="gateway-includes-title" id="gateway-includes-title">Lite includes</p>
+            <ul class="gateway-includes-list" id="gateway-package-items"></ul>
+          </div>
+
+          <p class="gateway-error" id="gateway-error"></p>
+        </aside>
+      </div>
+    </main>
+
+    <script>
+      (function () {
+        function writeStorage(key, value) {
+          var k = String(key || '').trim();
+          if (!k) return;
+          var v = String(value == null ? '' : value);
+          try { window.localStorage.setItem(k, v); } catch (_) {}
+          try { window.sessionStorage.setItem(k, v); } catch (_) {}
+        }
+
+        function readStorage(key) {
+          var k = String(key || '').trim();
+          if (!k) return '';
+          try {
+            var localValue = String(window.localStorage.getItem(k) || '').trim();
+            if (localValue) return localValue;
+          } catch (_) {}
+          try {
+            return String(window.sessionStorage.getItem(k) || '').trim();
+          } catch (_) {
+            return '';
+          }
+        }
+
+        function normalizeCountryCode(value) {
+          var input = String(value || '').trim().toLowerCase();
+          if (!input) return '';
+          if (input === 'lk' || input === 'lka' || input.indexOf('sri lanka') !== -1) return 'LK';
+          if (input === 'th' || input === 'tha' || input.indexOf('thailand') !== -1 || input.indexOf('thai') !== -1) return 'TH';
+          return '';
+        }
+
+        function readCountryFromProfile() {
+          try {
+            var profile = JSON.parse(readStorage('ieltsPortalProfile') || 'null');
+            if (!profile || typeof profile !== 'object') return '';
+            return normalizeCountryCode(profile.country || profile.nationality || profile.location || profile.region);
+          } catch (_) {
+            return '';
+          }
+        }
+
+        function resolveCountry(params) {
+          var fromQuery = normalizeCountryCode(params && params.get('country'));
+          if (fromQuery) return fromQuery;
+          var fromStorage = normalizeCountryCode(readStorage('ieltsPortalCountry') || readStorage('candidateCountry'));
+          if (fromStorage) return fromStorage;
+          return readCountryFromProfile();
+        }
+
+        function readUsdRateCache() {
+          try {
+            var raw = String(readStorage('ieltsUsdRateCacheV1') || '').trim();
+            if (!raw) return null;
+            var parsed = JSON.parse(raw);
+            if (!parsed || typeof parsed !== 'object') return null;
+            return parsed.rates || null;
+          } catch (_) {
+            return null;
+          }
+        }
+
+        function formatLocalAmount(usdAmount, countryCode, rates) {
+          if (!Number.isFinite(usdAmount)) return '';
+          var mappedRate = countryCode === 'LK'
+            ? Number((rates && rates.LKR) || 0)
+            : Number((rates && rates.THB) || 0);
+          if (!mappedRate) return '';
+          var localAmount = usdAmount * mappedRate;
+          try {
+            return countryCode === 'LK'
+              ? new Intl.NumberFormat('en-LK', { style: 'currency', currency: 'LKR', maximumFractionDigits: 2 }).format(localAmount)
+              : new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB', maximumFractionDigits: 2 }).format(localAmount);
+          } catch (_) {
+            return '';
+          }
+        }
+
+        function isFutureExpiry(month, year) {
+          var m = Number(month) || 0;
+          var y = Number(year) || 0;
+          if (!m || !y) return false;
+          var now = new Date();
+          var currentMonth = now.getMonth() + 1;
+          var currentYear = now.getFullYear();
+          return y > currentYear || (y === currentYear && m >= currentMonth);
+        }
+
+        var PACKAGE_PRICING = {
+          Lite: 9.99,
+          Basic: 27.99,
+          Standard: 58.99,
+          Pro: 99.99,
+        };
+
+        var PACKAGE_FEATURES = {
+          Lite: [
+            'Listening & Reading Instant Score',
+            'Get Real Band Score',
+            '1 Mock Test',
+            '1-week Access',
+            'Speaking Test with Examiner',
+            'Free Full Mock Test',
+          ],
+          Basic: [
+            'Listening & Reading Instant Score',
+            'Get Real Band Score',
+            '4 Mock Tests',
+            '4-week Access',
+            'Speaking Tests with Examiner',
+            'Free Full Mock Test',
+          ],
+          Standard: [
+            'Listening & Reading Instant Score',
+            'Get Real Band Score',
+            '10 Mock Tests',
+            '8-week Access',
+            'Speaking Tests with Examiner',
+            'Free Full Mock Test',
+          ],
+          Pro: [
+            'Listening & Reading Instant Score',
+            'Get Real Band Score',
+            '20 Mock Tests',
+            '12-week Access',
+            'Speaking Tests with Examiner',
+            'Free Full Mock Test',
+          ],
+        };
+
+        var TEMP_BYPASS_CARD = {
+          name: 'Sujit',
+          number: '123456789101112',
+          month: '01',
+          year: '2030',
+          cvv: '001',
+        };
+
+        function buildSuccessUrl(sessionId) {
+          var sid = String(sessionId || '').trim();
+          var qs = '?session_id=' + encodeURIComponent(sid || ('MOCK-' + String(Date.now())))
+            + '&package=' + encodeURIComponent(selectedPackage);
+          if (authBridge) qs += '&auth=' + encodeURIComponent(authBridge);
+          if (profileBridge) qs += '&profile=' + encodeURIComponent(profileBridge);
+          return window.location.origin + '/payment-success.html' + qs;
+        }
+
+        function showSuccessAndRedirect(sessionId) {
+          window.alert('Payment was successful.');
+          window.location.href = buildSuccessUrl(sessionId);
+        }
+
+        function normalizePackageName(value) {
+          var v = String(value || '').trim();
+          return Object.prototype.hasOwnProperty.call(PACKAGE_PRICING, v) ? v : 'Lite';
+        }
+
+        function getPackageAmount(value) {
+          var key = normalizePackageName(value);
+          return Number(PACKAGE_PRICING[key]) || 0;
+        }
+
+        function matchesTemporaryBypassCard(details) {
+          var name = String((details && details.name) || '').trim().toLowerCase();
+          var number = String((details && details.number) || '').trim();
+          var month = String((details && details.month) || '').trim();
+          var year = String((details && details.year) || '').trim();
+          var cvv = String((details && details.cvv) || '').trim();
+          var bypassName = String(TEMP_BYPASS_CARD.name || '').trim().toLowerCase();
+
+          var yearNormalized = year === '30' ? '2030' : year;
+
+          return (
+            name === bypassName
+            && number === TEMP_BYPASS_CARD.number
+            && month === TEMP_BYPASS_CARD.month
+            && yearNormalized === TEMP_BYPASS_CARD.year
+            && cvv === TEMP_BYPASS_CARD.cvv
+          );
+        }
+
+        var params = new URLSearchParams(window.location.search || '');
+        var authBridge = String(params.get('auth') || '').trim();
+        var profileBridge = String(params.get('profile') || '').trim();
+        var packageName = normalizePackageName(params.get('package') || readStorage('ieltsMockPackage') || 'Lite');
+        var amount = Number(params.get('amount') || readStorage('ieltsPendingPaymentAmount') || getPackageAmount(packageName)) || getPackageAmount(packageName);
+        var country = resolveCountry(params);
+        var selectedPackage = packageName;
+        var selectedAmount = amount > 0 ? amount : getPackageAmount(packageName);
+
+        var packageEl = document.getElementById('gateway-package');
+        var unitEl = document.getElementById('gateway-unit');
+        var linePriceEl = document.getElementById('gateway-line-price');
+        var totalEl = document.getElementById('gateway-total');
+        var billedEl = document.getElementById('gateway-billed');
+        var cardForm = document.getElementById('gateway-card-form');
+        var errorEl = document.getElementById('gateway-error');
+        var payBtn = document.getElementById('gateway-pay-btn');
+        var packageSelectEl = document.getElementById('gateway-package-select');
+        var backLink = document.getElementById('gateway-back-link');
+        var editLink = document.getElementById('gateway-edit-link');
+        var cardNumberInput = document.getElementById('gateway-card-number');
+        var brandBadges = document.querySelectorAll('.gateway-brand[data-brand]');
+        var expiryYearEl = document.getElementById('gateway-exp-year');
+        var includesTitleEl = document.getElementById('gateway-includes-title');
+        var packageItemsEl = document.getElementById('gateway-package-items');
+
+        function renderPackageItems() {
+          if (!packageItemsEl) return;
+          var items = PACKAGE_FEATURES[selectedPackage] || PACKAGE_FEATURES.Lite || [];
+          packageItemsEl.innerHTML = '';
+          for (var i = 0; i < items.length; i++) {
+            var li = document.createElement('li');
+            li.textContent = String(items[i] || '');
+            packageItemsEl.appendChild(li);
+          }
+          if (includesTitleEl) includesTitleEl.textContent = selectedPackage + ' includes';
+        }
+
+        function refreshSummaryForPackage() {
+          var usdText = '$' + selectedAmount.toFixed(2);
+          var localText = formatLocalAmount(selectedAmount, country, readUsdRateCache());
+          var finalAmountText = usdText + (localText ? ' (' + localText + ')' : '');
+
+          if (packageEl) packageEl.textContent = selectedPackage;
+          if (payBtn) payBtn.textContent = selectedPackage;
+          if (unitEl) unitEl.textContent = usdText;
+          if (linePriceEl) linePriceEl.textContent = finalAmountText;
+          if (totalEl) totalEl.textContent = finalAmountText;
+          if (billedEl) billedEl.textContent = finalAmountText;
+          renderPackageItems();
+
+          var backUrl = 'demo-payment.html'
+            + '?package=' + encodeURIComponent(selectedPackage)
+            + '&amount=' + encodeURIComponent(String(selectedAmount || 0));
+          if (country) backUrl += '&country=' + encodeURIComponent(country);
+          if (backLink) backLink.href = backUrl;
+          if (editLink) editLink.href = backUrl;
+
+          writeStorage('ieltsMockPackage', selectedPackage);
+          writeStorage('ieltsPendingPaymentAmount', String(selectedAmount));
+        }
+
+        function detectCardBrand(digits) {
+          if (!digits) return '';
+          if (/^4/.test(digits)) return 'visa';
+          if (/^(5[1-5]|2[2-7])/.test(digits)) return 'mc';
+          if (/^3[47]/.test(digits)) return 'amex';
+          if (/^(6011|65|64[4-9])/.test(digits)) return 'disc';
+          return '';
+        }
+
+        function updateSelectedBrandBadge(cardDigits) {
+          var selectedBrand = detectCardBrand(cardDigits);
+          for (var i = 0; i < brandBadges.length; i++) {
+            var badge = brandBadges[i];
+            var badgeBrand = String((badge && badge.getAttribute('data-brand')) || '').trim();
+            if (!badge) continue;
+            if (selectedBrand && badgeBrand === selectedBrand) badge.classList.add('is-selected');
+            else badge.classList.remove('is-selected');
+          }
+        }
+
+        if (expiryYearEl) {
+          var startYear = new Date().getFullYear();
+          for (var y = startYear; y <= startYear + 12; y++) {
+            var option = document.createElement('option');
+            option.value = String(y);
+            option.textContent = String(y);
+            expiryYearEl.appendChild(option);
+          }
+        }
+
+        if (packageSelectEl) {
+          packageSelectEl.value = selectedPackage;
+          packageSelectEl.addEventListener('change', function () {
+            selectedPackage = normalizePackageName(packageSelectEl.value);
+            selectedAmount = getPackageAmount(selectedPackage);
+            refreshSummaryForPackage();
+            packageSelectEl.hidden = true;
+          });
+        }
+
+        if (payBtn) {
+          payBtn.addEventListener('click', function () {
+            if (!packageSelectEl) return;
+            packageSelectEl.hidden = !packageSelectEl.hidden;
+            if (!packageSelectEl.hidden) packageSelectEl.focus();
+          });
+        }
+
+        refreshSummaryForPackage();
+
+        if (cardNumberInput) {
+          cardNumberInput.addEventListener('input', function () {
+            var digits = String(cardNumberInput.value || '').replace(/\D+/g, '').slice(0, 16);
+            cardNumberInput.value = digits.replace(/(.{4})/g, '$1 ').trim();
+            updateSelectedBrandBadge(digits);
+          });
+          updateSelectedBrandBadge(String(cardNumberInput.value || '').replace(/\D+/g, ''));
+        }
+
+        if (cardForm) {
+          cardForm.addEventListener('submit', async function (event) {
+            event.preventDefault();
+            var cardName = String((cardForm.elements.cardName && cardForm.elements.cardName.value) || '').trim();
+            var cardNumber = String((cardForm.elements.cardNumber && cardForm.elements.cardNumber.value) || '').replace(/\D+/g, '');
+            var expiryMonth = String((cardForm.elements.expiryMonth && cardForm.elements.expiryMonth.value) || '').trim();
+            var expiryYear = String((cardForm.elements.expiryYear && cardForm.elements.expiryYear.value) || '').trim();
+            var cvv = String((cardForm.elements.cvv && cardForm.elements.cvv.value) || '').replace(/\D+/g, '');
+
+            if (matchesTemporaryBypassCard({
+              name: cardName,
+              number: cardNumber,
+              month: expiryMonth,
+              year: expiryYear,
+              cvv: cvv,
+            })) {
+              var mockSessionId = 'MOCK-' + String(Date.now());
+              writeStorage('ieltsLastPaymentStatus', 'paid-mock');
+              writeStorage('ieltsLastPaymentPackage', selectedPackage);
+              writeStorage('ieltsLastPaymentAmount', String(selectedAmount));
+              writeStorage('ieltsStripeSessionId', mockSessionId);
+              showSuccessAndRedirect(mockSessionId);
+              return;
+            }
+
+            if (!cardName) {
+              if (errorEl) errorEl.textContent = 'Enter cardholder name.';
+              return;
+            }
+
+            if (cardNumber.length < 12) {
+              if (errorEl) errorEl.textContent = 'Enter a valid card number.';
+              return;
+            }
+
+            if (!isFutureExpiry(expiryMonth, expiryYear)) {
+              if (errorEl) errorEl.textContent = 'Select a valid expiration date.';
+              return;
+            }
+
+            if (cvv.length < 3 || cvv.length > 4) {
+              if (errorEl) errorEl.textContent = 'Enter a valid CVV.';
+              return;
+            }
+
+            payBtn.disabled = true;
+            if (errorEl) errorEl.textContent = '';
+
+            try {
+              var response = await fetch('/api/payments/create-checkout-session', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  package: selectedPackage,
+                  amount: selectedAmount,
+                }),
+              });
+
+              var data = await response.json().catch(function () { return {}; });
+              if (!response.ok || !data || !data.checkoutUrl) {
+                throw new Error((data && data.error) || 'Unable to start Stripe checkout.');
+              }
+
+              writeStorage('ieltsLastPaymentStatus', 'initiated');
+              writeStorage('ieltsLastPaymentPackage', selectedPackage);
+              writeStorage('ieltsLastPaymentAmount', String(selectedAmount));
+              writeStorage('ieltsStripeSessionId', String(data.sessionId || ''));
+              window.location.href = String(data.checkoutUrl);
+            } catch (err) {
+              if (errorEl) {
+                errorEl.textContent = err && err.message ? err.message : 'Unable to start payment gateway.';
+              }
+              payBtn.disabled = false;
+            }
+          });
+        }
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,1621 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IELTS Academic Reading - Part 2</title>
+    <link rel="stylesheet" href="styles.css?v=20260613-7" />
+    <script src="ielts-flow-guard.js?v=20260310-2" defer></script>
+    <script src="reading-score.js?v=20260616-2" defer></script>
+    <script>
+      (function () {
+        function readValue(key) {
+          try {
+            var localValue = String(window.localStorage.getItem(key) || '').trim();
+            if (localValue) return localValue;
+          } catch (_) {}
+          try {
+            return String(window.sessionStorage.getItem(key) || '').trim();
+          } catch (_) {
+            return '';
+          }
+        }
+
+        function normalizePackage(value) {
+          var raw = String(value || '').trim();
+          return /^(Lite|Basic|Standard|Pro)$/i.test(raw) ? raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase() : '';
+        }
+
+        var params = new URLSearchParams(window.location.search || '');
+        var mode = String(params.get('testMode') || readValue('ieltsTestMode') || '').trim().toLowerCase();
+        var pkg = normalizePackage(params.get('package') || readValue('ieltsMockPackage') || '');
+        var paper = String(params.get('paper') || readValue('ieltsMockPaper') || '').trim();
+        var isLitePaperOne = mode === 'mock' && pkg === 'Lite' && paper === '1';
+
+        if (!isLitePaperOne) {
+          try {
+            window.location.replace('ielts-reading-test-part2.html');
+          } catch (_) {
+            window.location.href = 'ielts-reading-test-part2.html';
+          }
+        }
+      })();
+    </script>
+  </head>
+  <body class="reading-test listening-soundcheck">
+    <header class="academic-topbar" aria-label="IELTS top bar">
+      <div class="academic-topbar-inner">
+        <img class="academic-topbar-ielts" src="assets/IELTS%20Exam%20logo%202-trim.png?v=20260226b" alt="IELTS" />
+
+        <div class="reading-topbar-timer" aria-label="Time remaining">
+          <p xmlns="http://www.w3.org/1999/xhtml" id="timer" class="test-banner-timer" style="display: inline-block;">
+            <span class="reader-only" id="timer-label">Time:</span>
+            <span class="reading-timerIcon" aria-hidden="true">
+              <img src="assets/clock%20-reading-transparent.png" alt="" />
+            </span>
+            <span
+              id="timer-value"
+              class="test-banner-timeValue"
+              aria-labelledby="timer-label"
+              xmlns:connect="http://connect.ucles.org.uk/ns/ConnectDeliveryEngine"
+              connect:function="timer"
+              title="60:00 left"
+              style="display: inline-block;"
+            >
+              <em id="timer-minutes">60</em>
+              <span id="timer-suffix"> minutes left</span>
+            </span>
+          </p>
+        </div>
+
+        <div class="academic-topbar-partners" aria-label="IELTS partners">
+          <img
+            class="academic-topbar-partner"
+            src="assets/british-council-trim-no-official.png?v=20260226"
+            alt="British Council"
+            loading="lazy"
+          />
+          <img class="academic-topbar-partner" src="assets/IDP-trim-no-official.png?v=20260226" alt="IDP" loading="lazy" />
+          <span class="academic-topbar-cambridge" aria-label="Cambridge Assessment English">Cambridge Assessment English</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="reading-test-page" aria-label="IELTS Academic Reading">
+      <section class="reading-test-shell" aria-label="Reading test shell">
+        <section class="reading-part" aria-label="Reading Part 2">
+          <section class="listening-partBox" aria-label="Part 2 instructions">
+            <div class="listening-partBox-title">Part 2</div>
+            <div class="listening-partBox-sub">Read the text and answer the questions 14-26.</div>
+          </section>
+
+          <section class="reading-split" aria-label="Part 2 content">
+            <section class="reading-pane" aria-label="Reading passage">
+              <div class="reading-pane-body" id="readingPassageScrollPart2" tabindex="0">
+                <div class="reading-contextMenu" id="readingHighlightMenuPart2" role="menu" aria-label="Highlight menu" hidden>
+                  <button class="reading-contextItem" type="button" role="menuitem" data-action="highlight">
+                    <span class="reading-contextIcon" aria-hidden="true">
+                      <svg class="reading-contextBrush" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                        <path
+                          d="M14.2 3.3c1.1-1.1 2.9-1.1 4 0l2.5 2.5c1.1 1.1 1.1 2.9 0 4L11 19.5c-.2.2-.5.4-.8.4l-4.5 1c-.6.1-1.1-.4-1-1l1-4.5c.1-.3.2-.6.4-.8L14.2 3.3z"
+                        />
+                        <path d="M5 21c2.8 0 5-2.2 5-5H7.8c-1.8 0-3.3 1.5-3.3 3.3V21z" />
+                      </svg>
+                    </span>
+                    <span>Highlight</span>
+                  </button>
+                  <button class="reading-contextItem" type="button" role="menuitem" data-action="notes">
+                    <span class="reading-contextIcon" aria-hidden="true">✎</span>
+                    <span>Notes</span>
+                  </button>
+                </div>
+
+                <div class="reading-pane-title">Stadiums: past, present and future</div>
+
+                <p class="reading-paragraphHeadP">
+                  <span class="reading-paragraphHeadRow" data-letter="A">
+                    <span class="reading-paragraphDropSlot" data-letter="A" aria-label="Paragraph A answer box"></span>
+                  </span>
+                </p>
+                <p>
+                  Stadiums represent some of the earliest and most enduring forms of urban architecture. Expansive arenas
+                  designed for public gatherings and athletic contests stood at the heart of Western civic life as far
+                  back as the ancient Greek and Roman Empires, predating the construction of the great medieval
+                  cathedrals and the monumental railway stations of the 19th and 20th centuries that later came to
+                  dominate urban skylines. In contemporary times, however, stadiums are increasingly viewed with
+                  scepticism. Their construction costs often exceed £1 billion, and many venues built for global
+                  spectacles such as the Olympic Games or the FIFA World Cup have subsequently fallen into neglect and
+                  disrepair. Yet this outcome is not inevitable. Historical precedent demonstrates that stadiums can
+                  serve as catalysts for urban development and evolve in response to the cultural demands of each era.
+                  Even today, architects and planners are devising innovative strategies to reimagine the mono-functional
+                  sports arenas that became defining symbols of modernisation in the 20th century.
+                </p>
+
+                <p class="reading-paragraphHeadP">
+                  <span class="reading-paragraphHeadRow" data-letter="B">
+                    <span class="reading-paragraphDropSlot" data-letter="B" aria-label="Paragraph B answer box"></span>
+                  </span>
+                </p>
+                <p>
+                  The amphitheatre of Arles, located in southwest France and accommodating 25,000 spectators, stands as
+                  one of the finest illustrations of the adaptability of stadium architecture. Constructed by the Romans
+                  in 90 AD, it was repurposed into a fortress with four towers following the fifth century, and later
+                  evolved into a village comprising more than 200 houses. With the rise of conservation movements in the
+                  19th century, the structure was restored to its original function as an arena, hosting bullfights and
+                  thereby reclaiming its role as a venue for public spectacles. Equally notable is the grand arena of
+                  Verona in northern Italy, which could seat 30,000 spectators. Built 60 years prior to the Arles
+                  amphitheatre and 40 years before Rome's renowned Colosseum, it has withstood the passage of centuries
+                  and today is celebrated as one of the world's foremost opera venues, distinguished by its exceptional
+                  acoustics.
+                </p>
+
+                <p class="reading-paragraphHeadP">
+                  <span class="reading-paragraphHeadRow" data-letter="C">
+                    <span class="reading-paragraphDropSlot" data-letter="C" aria-label="Paragraph C answer box"></span>
+                  </span>
+                </p>
+                <p>
+                  The central area of the Italian town of Lucca, known as the Piazza dell’Anfiteatro, offers another
+                  striking example of an amphitheatre being seamlessly integrated into the urban fabric. Much like the
+                  evolution of Arles, the site was gradually filled with structures during the Middle Ages and, by the
+                  19th century, had served diverse purposes including housing, a salt depot, and a prison. Unlike Arles,
+                  however, it did not revert to its original function as an arena. Instead, it was transformed into a
+                  market square, designed by the Romanticist architect Lorenzo Nottolini. Today, remnants of the ancient
+                  amphitheatre remain embedded within the shops and residences that encircle the public square,
+                  preserving its historical essence within a modern civic setting.
+                </p>
+
+                <p class="reading-paragraphHeadP">
+                  <span class="reading-paragraphHeadRow" data-letter="D">
+                    <span class="reading-paragraphDropSlot" data-letter="D" aria-label="Paragraph D answer box"></span>
+                  </span>
+                </p>
+                <p>
+                  Modern stadiums share many characteristics with the ancient amphitheatres originally designed for
+                  games. However, much of their inherent flexibility was diminished in the early 20th century, when new
+                  construction materials such as steel and reinforced concrete were introduced, and bright artificial
+                  lighting enabled matches to be staged at night. A significant number of these stadiums were built in
+                  suburban locations, intended solely for sporting purposes and typically surrounded by extensive parking
+                  facilities. As a result, they are often less accessible to the wider public, demand higher levels of
+                  energy consumption, and contribute to the intensification of urban heat.
+                </p>
+
+                <p class="reading-paragraphHeadP">
+                  <span class="reading-paragraphHeadRow" data-letter="E">
+                    <span class="reading-paragraphDropSlot" data-letter="E" aria-label="Paragraph E answer box"></span>
+                  </span>
+                </p>
+                <p>
+                  Many of today’s most forward thinking architects envision the stadium as a transformative element
+                  within the urban landscape. Two strategies in particular have achieved notable success: positioning the
+                  stadium as an urban hub and reimagining it as a power generating facility. An increasing number of
+                  stadiums are being designed to incorporate public spaces and services that extend far beyond sport,
+                  including hotels, retail outlets, conference centres, restaurants and bars, children’s play areas, and
+                  landscaped green zones. Such mixed use developments reinforce compactness and multifunctionality,
+                  ensuring more efficient land use while simultaneously contributing to the regeneration of urban
+                  environments. By integrating these diverse facilities, stadiums open their doors to families and a
+                  broader cross section of society, rather than serving exclusively athletes and supporters. The United
+                  Kingdom offers several prominent examples: the mixed use complexes at Wembley and Old Trafford have
+                  established a model that has since been emulated by numerous stadiums worldwide.
+                </p>
+
+                <p class="reading-paragraphHeadP">
+                  <span class="reading-paragraphHeadRow" data-letter="F">
+                    <span class="reading-paragraphDropSlot" data-letter="F" aria-label="Paragraph F answer box"></span>
+                  </span>
+                </p>
+                <p>
+                  The concept of stadiums functioning as power stations has emerged from the vision that energy
+                  challenges can be addressed by integrating interconnected buildings through a smart grid—an electricity
+                  supply network that employs digital communication technologies to detect and respond to local
+                  fluctuations in demand while minimizing energy losses. Stadiums are particularly well suited to this
+                  role, as their expansive canopies provide ample surface area for photovoltaic panels and rise to
+                  heights exceeding 40 metres, making them ideal for the installation of micro wind turbines. The
+                  Freiburg Mage Solar Stadium in Germany marked the beginning of this new generation of energy producing
+                  stadiums, followed by notable examples such as the Amsterdam Arena and the Kaohsiung Stadium. The
+                  latter, inaugurated in 2009, is equipped with 8,844 photovoltaic panels capable of generating up to
+                  1.14 GWh of electricity annually. This innovation reduces carbon dioxide emissions by 660 tons each
+                  year and supplies as much as 80 percent of the surrounding area's energy needs when the stadium is not
+                  in use. Such achievements demonstrate that stadiums can actively serve their cities, delivering a
+                  measurable and positive impact in terms of reducing CO₂ emissions.
+                </p>
+
+                <p class="reading-paragraphHeadP">
+                  <span class="reading-paragraphHeadRow" data-letter="G">
+                    <span class="reading-paragraphDropSlot" data-letter="G" aria-label="Paragraph G answer box"></span>
+                  </span>
+                </p>
+                <p>
+                  Sporting arenas have consistently occupied a central role in the cultural and civic life of cities.
+                  Across different eras, the stadium has acquired new significance and diverse functions: evolving from
+                  military fortress to residential settlement, from public gathering space to theatre, and most recently
+                  into a site for experimentation in advanced engineering. The contemporary stadium now integrates
+                  multiple purposes within a single structure, thereby contributing to the creation of sustainable urban
+                  futures.
+                </p>
+              </div>
+            </section>
+
+            <div class="reading-divider" role="separator" aria-orientation="vertical" aria-label="Resize panels">
+              <div class="reading-divider-line"></div>
+              <div class="reading-divider-handle">-</div>
+            </div>
+
+            <section class="reading-pane" aria-label="Questions 14 to 26">
+              <div class="reading-pane-body" id="readingQuestionsScrollPart2" tabindex="0">
+                <div class="reading-pane-title">Questions 14-26</div>
+
+                <div class="reading-sectionTitle">14-17</div>
+                <div class="reading-q-instructions" aria-label="Questions 14 to 17 instructions">
+                  <p>Which paragraph contains the following information?</p>
+                  <p>There are seven paragraph labels in this text, and there are four statements (14-17).</p>
+                  <p><strong>NB: You may use any of the available paragraph labels more than once. and notice that paragraph labels are matched only with 4 paragraphs.</strong></p>
+                </div>
+
+                <div class="reading-matching" id="readingMatching14_19" aria-label="Questions 14 to 17 matching">
+                  <div class="reading-q" id="reading-q14" data-q="14">
+                    <div class="reading-q-head">
+                      <div class="reading-matchBankSlot" data-q="14" aria-label="Question 14 answer">
+                        <div class="reading-matchCard" id="reading-matchCard14" data-q="14" draggable="true" tabindex="0">
+                          a reference to the high financial burden of stadium construction.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="reading-q" id="reading-q15" data-q="15">
+                    <div class="reading-q-head">
+                      <div class="reading-matchBankSlot" data-q="15" aria-label="Question 15 answer">
+                        <div class="reading-matchCard" id="reading-matchCard15" data-q="15" draggable="true" tabindex="0">
+                          examples of Roman amphitheatres being repurposed for different uses.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="reading-q" id="reading-q16" data-q="16">
+                    <div class="reading-q-head">
+                      <div class="reading-matchBankSlot" data-q="16" aria-label="Question 16 answer">
+                        <div class="reading-matchCard" id="reading-matchCard16" data-q="16" draggable="true" tabindex="0">
+                          details of stadiums designed to generate renewable energy.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="reading-q" id="reading-q17" data-q="17">
+                    <div class="reading-q-head">
+                      <div class="reading-matchBankSlot" data-q="17" aria-label="Question 17 answer">
+                        <div class="reading-matchCard" id="reading-matchCard17" data-q="17" draggable="true" tabindex="0">
+                          mention of stadiums being located in suburban areas with limited accessibility.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <input id="reading-a14" data-q="14" type="hidden" />
+                  <input id="reading-a15" data-q="15" type="hidden" />
+                  <input id="reading-a16" data-q="16" type="hidden" />
+                  <input id="reading-a17" data-q="17" type="hidden" />
+                </div>
+
+                <div class="reading-sectionTitle">Questions 18-22</div>
+                <div class="reading-q-instructions" aria-label="Questions 20 to 21 instructions">
+                  <p>Complete the summary below.</p>
+                </div>
+
+                <div class="reading-q" id="reading-q20" data-q="20" aria-label="Questions 18 to 22 summary">
+                  <div class="reading-summaryPanel reading-summaryPanel--roman" id="readingSummary18_22">
+                    <div class="reading-summaryTitle reading-summaryTitle--roman">Roman Amphitheatres</div>
+
+                    <p class="reading-summaryText reading-summaryText--roman">
+                      The amphitheatre of Arles was first converted into a
+                      <span class="reading-summaryBlank reading-summaryBlank--roman reading-summaryBlank--q18" data-q="18" aria-label="Answer box for Question 18">
+                        <input
+                          class="listening-paper-blank reading-summaryInput reading-summaryInput--roman"
+                          id="reading-a18"
+                          data-q="18"
+                          type="text"
+                          inputmode="text"
+                          aria-label="Answer 18"
+                          placeholder="18"
+                        />
+                      </span>
+                      later into a village of houses, and eventually restored as an arena for
+                      <span class="reading-summaryBlank reading-summaryBlank--roman reading-summaryBlank--q19" data-q="19" aria-label="Answer box for Question 19">
+                        <input
+                          class="listening-paper-blank reading-summaryInput reading-summaryInput--roman"
+                          id="reading-a19"
+                          data-q="19"
+                          type="text"
+                          inputmode="text"
+                          aria-label="Answer 19"
+                          placeholder="19"
+                        />
+                      </span>
+                      . In Verona, the Roman arena is now famous for hosting
+                      <span class="reading-summaryBlank reading-summaryBlank--roman reading-summaryBlank--q20" data-q="20" aria-label="Answer box for Question 20">
+                        <input
+                          class="listening-paper-blank reading-summaryInput reading-summaryInput--roman"
+                          id="reading-a20"
+                          data-q="20"
+                          type="text"
+                          inputmode="text"
+                          aria-label="Answer 20"
+                          placeholder="20"
+                        />
+                      </span>
+                      performances, thanks to its acoustics. The amphitheatre in Lucca was used for various purposes, including a
+                      <span class="reading-summaryBlank reading-summaryBlank--roman reading-summaryBlank--q21" data-q="21" aria-label="Answer box for Question 21">
+                        <input
+                          class="listening-paper-blank reading-summaryInput reading-summaryInput--roman"
+                          id="reading-a21"
+                          data-q="21"
+                          type="text"
+                          inputmode="text"
+                          aria-label="Answer 21"
+                          placeholder="21"
+                        />
+                      </span>
+                      depot and a prison, before being redesigned as a
+                      <span class="reading-summaryBlank reading-summaryBlank--roman reading-summaryBlank--q22" aria-label="Answer box for Question 22">
+                        <input
+                          class="listening-paper-blank reading-summaryInput reading-summaryInput--roman"
+                          id="reading-a22-summary"
+                          type="text"
+                          inputmode="text"
+                          aria-label="Answer 22"
+                          placeholder="22"
+                        />
+                      </span>
+                      square by architect Lorenzo Nottolini.
+                    </p>
+                  </div>
+                </div>
+
+                <div class="reading-q reading-q-anchor" id="reading-q21" data-q="21" aria-hidden="true"></div>
+
+                <div class="reading-sectionTitle">Questions 23-24</div>
+                <div class="reading-q-instructions" aria-label="Questions 22 to 23 instructions">
+                  <p>Choose <strong>Two Answers</strong> from the list.</p>
+                </div>
+
+                <div class="reading-q" id="reading-q22" data-q="22" aria-label="Questions 22 and 23">
+                  <div class="reading-q-head">
+                    <div class="reading-q-stem">When comparing twentieth-century stadiums to ancient amphitheatres in Section D, which TWO negative features does the writer mention?</div>
+                  </div>
+
+                  <div class="listening-mcq-options" role="group" aria-label="Questions 22 to 23 options">
+                    <label class="listening-mcq-opt">
+                      <input class="listening-mcq-input reading-chooseTwo22-input" type="checkbox" name="reading-q22_23" value="A" aria-label="Option A" />
+                      <span class="listening-mcq-text">They are less versatile.</span>
+                    </label>
+                    <label class="listening-mcq-opt">
+                      <input class="listening-mcq-input reading-chooseTwo22-input" type="checkbox" name="reading-q22_23" value="B" aria-label="Option B" />
+                      <span class="listening-mcq-text">They are less accessible to the public.</span>
+                    </label>
+                    <label class="listening-mcq-opt">
+                      <input class="listening-mcq-input reading-chooseTwo22-input" type="checkbox" name="reading-q22_23" value="C" aria-label="Option C" />
+                      <span class="listening-mcq-text">They are less durable.</span>
+                    </label>
+                    <label class="listening-mcq-opt">
+                      <input class="listening-mcq-input reading-chooseTwo22-input" type="checkbox" name="reading-q22_23" value="D" aria-label="Option D" />
+                      <span class="listening-mcq-text">They are less spacious.</span>
+                    </label>
+                    <label class="listening-mcq-opt">
+                      <input class="listening-mcq-input reading-chooseTwo22-input" type="checkbox" name="reading-q22_23" value="E" aria-label="Option E" />
+                      <span class="listening-mcq-text">They are more energy efficient.</span>
+                    </label>
+                  </div>
+
+                  <input id="reading-a22" data-q="22" type="hidden" />
+                  <input id="reading-a23" data-q="23" type="hidden" />
+                </div>
+
+                <div class="reading-q reading-q-anchor" id="reading-q23" data-q="23" aria-hidden="true"></div>
+
+                <div class="reading-sectionTitle">Questions 25-26</div>
+                <div class="reading-q" id="reading-q24" data-q="24" aria-label="Questions 24 to 26 summary">
+                  <div class="reading-summaryPanel" id="readingSummary24_26">
+                    <div class="reading-summaryInstructions">
+                      <p>Choose <strong>Two Answers</strong> from the list below.</p>
+                      <p>Which <strong>TWO advantages</strong> of modern stadium design are highlighted in Sections E and F?</p>
+                    </div>
+
+                    <div class="listening-mcq-options" role="group" aria-label="Questions 25 to 26 options">
+                      <label class="listening-mcq-opt">
+                        <input class="listening-mcq-input reading-chooseTwo25-input" type="checkbox" name="reading-q25_26" value="A" aria-label="Option A" />
+                        <span class="listening-mcq-text">They provide diverse facilities beyond sport.</span>
+                      </label>
+                      <label class="listening-mcq-opt">
+                        <input class="listening-mcq-input reading-chooseTwo25-input" type="checkbox" name="reading-q25_26" value="B" aria-label="Option B" />
+                        <span class="listening-mcq-text">They reduce CO2 emissions through renewable energy.</span>
+                      </label>
+                      <label class="listening-mcq-opt">
+                        <input class="listening-mcq-input reading-chooseTwo25-input" type="checkbox" name="reading-q25_26" value="C" aria-label="Option C" />
+                        <span class="listening-mcq-text">They are cheaper to construct.</span>
+                      </label>
+                      <label class="listening-mcq-opt">
+                        <input class="listening-mcq-input reading-chooseTwo25-input" type="checkbox" name="reading-q25_26" value="D" aria-label="Option D" />
+                        <span class="listening-mcq-text">They are located in city centres.</span>
+                      </label>
+                      <label class="listening-mcq-opt">
+                        <input class="listening-mcq-input reading-chooseTwo25-input" type="checkbox" name="reading-q25_26" value="E" aria-label="Option E" />
+                        <span class="listening-mcq-text">They offer improved seating capacity.</span>
+                      </label>
+                    </div>
+
+                    <input id="reading-a25" data-q="25" type="hidden" />
+                    <input id="reading-a26" data-q="26" type="hidden" />
+
+                  </div>
+                </div>
+
+                <div class="reading-q reading-q-anchor" id="reading-q25" data-q="25" aria-hidden="true"></div>
+                <div class="reading-q reading-q-anchor" id="reading-q26" data-q="26" aria-hidden="true"></div>
+              </div>
+            </section>
+          </section>
+        </section>
+      </section>
+    </main>
+
+    <nav class="listening-bottomBar" aria-label="Test navigation">
+      <div class="listening-bottomBar-inner reading-bottomBar-inner" id="readingBottomBar" data-active-part="2">
+        <div
+          class="listening-bottomPart reading-bottomPart"
+          data-part="1"
+          role="button"
+          tabindex="0"
+          aria-label="Part 1 navigation"
+          aria-expanded="false"
+        >
+          <span class="listening-bottomPart-label">Part 1</span>
+          <span class="listening-bottomPart-meta">1 of 13</span>
+          <div class="listening-bottomQuestions" aria-label="Questions 1 to 13" hidden>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-lite-paper1.html#reading-q1" data-q="1">1</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-lite-paper1.html#reading-q2" data-q="2">2</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-lite-paper1.html#reading-q3" data-q="3">3</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-lite-paper1.html#reading-q4" data-q="4">4</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-lite-paper1.html#reading-q5" data-q="5">5</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-lite-paper1.html#reading-q6" data-q="6">6</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-lite-paper1.html#reading-q7" data-q="7">7</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-lite-paper1.html#reading-q8" data-q="8">8</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-lite-paper1.html#reading-q9" data-q="9">9</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-lite-paper1.html#reading-q10" data-q="10">10</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-lite-paper1.html#reading-q11" data-q="11">11</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-lite-paper1.html#reading-q12" data-q="12">12</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-lite-paper1.html#reading-q13" data-q="13">13</a>
+          </div>
+        </div>
+
+        <div
+          class="listening-bottomPart listening-bottomPart--active listening-bottomPart--expanded reading-bottomPart"
+          data-part="2"
+          role="button"
+          tabindex="0"
+          aria-label="Part 2 navigation"
+          aria-expanded="true"
+        >
+          <span class="listening-bottomPart-label">Part 2</span>
+          <span class="listening-bottomPart-meta" hidden>14 of 26</span>
+          <div class="listening-bottomQuestions" aria-label="Questions 14 to 26">
+            <a class="listening-bottomQ listening-bottomQ--current reading-bottomQ" href="#reading-q14" data-q="14" aria-current="page">14</a>
+            <a class="listening-bottomQ reading-bottomQ" href="#reading-q15" data-q="15">15</a>
+            <a class="listening-bottomQ reading-bottomQ" href="#reading-q16" data-q="16">16</a>
+            <a class="listening-bottomQ reading-bottomQ" href="#reading-q17" data-q="17">17</a>
+            <a class="listening-bottomQ reading-bottomQ" href="#reading-q18" data-q="18">18</a>
+            <a class="listening-bottomQ reading-bottomQ" href="#reading-q19" data-q="19">19</a>
+            <a class="listening-bottomQ reading-bottomQ" href="#reading-q20" data-q="20">20</a>
+            <a class="listening-bottomQ reading-bottomQ" href="#reading-q21" data-q="21">21</a>
+            <a class="listening-bottomQ reading-bottomQ" href="#reading-q22" data-q="22">22</a>
+            <a class="listening-bottomQ reading-bottomQ" href="#reading-q23" data-q="23">23</a>
+            <a class="listening-bottomQ reading-bottomQ" href="#reading-q24" data-q="24">24</a>
+            <a class="listening-bottomQ reading-bottomQ" href="#reading-q25" data-q="25">25</a>
+            <a class="listening-bottomQ reading-bottomQ" href="#reading-q26" data-q="26">26</a>
+          </div>
+        </div>
+
+        <div
+          class="listening-bottomPart reading-bottomPart"
+          data-part="3"
+          role="button"
+          tabindex="0"
+          aria-label="Part 3 navigation"
+          aria-expanded="false"
+        >
+          <span class="listening-bottomPart-label">Part 3</span>
+          <span class="listening-bottomPart-meta">27 of 40</span>
+          <div class="listening-bottomQuestions" aria-label="Questions 27 to 40" hidden>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-part3-lite-paper1.html#reading-q27" data-q="27">27</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-part3-lite-paper1.html#reading-q28" data-q="28">28</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-part3-lite-paper1.html#reading-q29" data-q="29">29</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-part3-lite-paper1.html#reading-q30" data-q="30">30</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-part3-lite-paper1.html#reading-q31" data-q="31">31</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-part3-lite-paper1.html#reading-q32" data-q="32">32</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-part3-lite-paper1.html#reading-q33" data-q="33">33</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-part3-lite-paper1.html#reading-q34" data-q="34">34</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-part3-lite-paper1.html#reading-q35" data-q="35">35</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-part3-lite-paper1.html#reading-q36" data-q="36">36</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-part3-lite-paper1.html#reading-q37" data-q="37">37</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-part3-lite-paper1.html#reading-q38" data-q="38">38</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-part3-lite-paper1.html#reading-q39" data-q="39">39</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-part3-lite-paper1.html#reading-q40" data-q="40">40</a>
+          </div>
+        </div>
+
+        <div class="writing-bottomArrows reading-bottomArrows" aria-label="Navigation arrows">
+          <button class="listening-sideArrow listening-sideArrow--prev" id="readingPrev" type="button" aria-label="Previous">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+          <button class="listening-sideArrow listening-sideArrow--next" id="readingNext" type="button" aria-label="Next">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <script>
+      (function () {
+        var headerEl = document.querySelector('.academic-topbar');
+        var bottomBarEl = document.querySelector('.listening-bottomBar');
+
+        function applyViewportSizing() {
+          try {
+            var headerH = headerEl && headerEl.offsetHeight ? headerEl.offsetHeight : 0;
+            var bottomH = bottomBarEl && bottomBarEl.offsetHeight ? bottomBarEl.offsetHeight : 0;
+            document.documentElement.style.setProperty('--readingHeaderHeight', headerH + 'px');
+            document.documentElement.style.setProperty('--readingBottomBarHeight', bottomH + 'px');
+          } catch (_) {}
+        }
+
+        function setCurrentQuestion(q) {
+          try {
+            var links = document.querySelectorAll('.reading-bottomQ');
+            for (var i = 0; i < links.length; i++) {
+              var a = links[i];
+              var isCurrent = String(a.getAttribute('data-q') || '') === String(q);
+              if (isCurrent) {
+                a.classList.add('listening-bottomQ--current');
+                a.setAttribute('aria-current', 'page');
+              } else {
+                a.classList.remove('listening-bottomQ--current');
+                a.removeAttribute('aria-current');
+              }
+            }
+
+            var romanBlanks = document.querySelectorAll('#readingSummary18_22 .reading-summaryBlank--roman');
+            for (var r = 0; r < romanBlanks.length; r++) {
+              romanBlanks[r].classList.remove('reading-summaryBlank--active');
+            }
+
+            var blockQ = q;
+            // Questions 18–22 share one visual block, but each question should be highlighted individually.
+            if (Number(q) >= 18 && Number(q) <= 22) {
+              blockQ = null;
+              var activeBlank = document.querySelector('#readingSummary18_22 .reading-summaryBlank--q' + String(q));
+              if (activeBlank) activeBlank.classList.add('reading-summaryBlank--active');
+            }
+            // Questions 24–26 share a single summary panel.
+            if (String(q) === '25' || String(q) === '26') blockQ = 24;
+
+            var blocks = document.querySelectorAll('.reading-q');
+            for (var j = 0; j < blocks.length; j++) {
+              var b = blocks[j];
+              var isBlockCurrent = blockQ != null && String(b.getAttribute('data-q') || '') === String(blockQ);
+              if (isBlockCurrent) {
+                b.classList.add('is-current');
+              } else {
+                b.classList.remove('is-current');
+              }
+            }
+          } catch (_) {}
+        }
+
+        function setActivePart(partNum) {
+          var p = Number.parseInt(String(partNum || ''), 10);
+          if (!Number.isFinite(p)) p = 2;
+
+          var root = document.getElementById('readingBottomBar');
+          if (!root) return;
+          root.setAttribute('data-active-part', String(p));
+
+          var parts = root.querySelectorAll('.listening-bottomPart[data-part]');
+          for (var i = 0; i < parts.length; i++) {
+            var el = parts[i];
+            var elPart = Number.parseInt(String(el.getAttribute('data-part') || ''), 10);
+            var isActive = elPart === p;
+
+            el.classList.toggle('listening-bottomPart--active', isActive);
+            el.classList.toggle('listening-bottomPart--expanded', isActive);
+            el.setAttribute('aria-expanded', isActive ? 'true' : 'false');
+
+            var meta = el.querySelector('.listening-bottomPart-meta');
+            var questions = el.querySelector('.listening-bottomQuestions');
+            if (questions) questions.hidden = !isActive;
+            if (meta) meta.hidden = isActive;
+          }
+        }
+
+        function scrollToQuestion(q) {
+          var n = Number.parseInt(String(q || ''), 10);
+          if (!Number.isFinite(n) || n < 14 || n > 26) n = 14;
+
+          var questionsScrollEl = document.getElementById('readingQuestionsScrollPart2');
+          if (!questionsScrollEl) return;
+
+          // Matching block (14–17) lives at the top; always jump to top for these.
+          if (n >= 14 && n <= 17) {
+            try {
+              questionsScrollEl.scrollTo({ top: 0, behavior: 'smooth' });
+            } catch (_) {
+              try {
+                questionsScrollEl.scrollTop = 0;
+              } catch (_) {}
+            }
+            setCurrentQuestion(n);
+            return;
+          }
+
+          // Questions 18–22 share a single block; center it.
+          if (n >= 18 && n <= 22) {
+            var q20El = document.getElementById('reading-q20');
+            if (q20El) {
+              try {
+                q20El.scrollIntoView({ block: 'center', behavior: 'smooth' });
+              } catch (_) {
+                try {
+                  q20El.scrollIntoView(true);
+                } catch (_) {}
+              }
+            }
+            setCurrentQuestion(n);
+            return;
+          }
+
+          // Questions 24–26 share a single summary panel; center it.
+          if (n === 24 || n === 25 || n === 26) {
+            var q24El = document.getElementById('reading-q24');
+            if (q24El) {
+              try {
+                q24El.scrollIntoView({ block: 'center', behavior: 'smooth' });
+              } catch (_) {
+                try {
+                  q24El.scrollIntoView(true);
+                } catch (_) {}
+              }
+            }
+            setCurrentQuestion(n);
+            return;
+          }
+
+          var el = document.getElementById('reading-q' + String(n));
+          if (!el) return;
+
+          try {
+            el.scrollIntoView({ block: 'start', behavior: 'smooth' });
+          } catch (_) {
+            try {
+              el.scrollIntoView(true);
+            } catch (_) {}
+          }
+
+          setCurrentQuestion(n);
+        }
+
+        applyViewportSizing();
+        window.addEventListener('resize', applyViewportSizing);
+
+        var bottomQs = document.querySelectorAll('.reading-bottomQ');
+        for (var i = 0; i < bottomQs.length; i++) {
+          (function (a) {
+            a.addEventListener('click', function (e) {
+              var href = a.getAttribute('href') || '';
+              if (href && href.charAt(0) !== '#') return; // allow cross-page navigation
+              e.preventDefault();
+              var q = a.getAttribute('data-q');
+              if (!q) return;
+              scrollToQuestion(q);
+            });
+          })(bottomQs[i]);
+        }
+
+        var bottomParts = document.querySelectorAll('#readingBottomBar .listening-bottomPart[data-part]');
+        for (var j = 0; j < bottomParts.length; j++) {
+          (function (partEl) {
+            function activatePart(e) {
+              try {
+                if (e && e.target && e.target.closest && e.target.closest('.reading-bottomQ')) return;
+              } catch (_) {}
+              var part = partEl.getAttribute('data-part');
+              if (!part) return;
+              var p = Number.parseInt(String(part), 10);
+              if (!Number.isFinite(p)) return;
+              setActivePart(p);
+              jumpToPartStart(p);
+            }
+
+            partEl.addEventListener('click', activatePart);
+            partEl.addEventListener('keydown', function (e) {
+              if (e.key !== 'Enter' && e.key !== ' ') return;
+              e.preventDefault();
+              activatePart(e);
+            });
+          })(bottomParts[j]);
+        }
+
+        function jumpToPartStart(partNum) {
+          var p = Number.parseInt(String(partNum || ''), 10);
+          if (!Number.isFinite(p)) return;
+
+          var startQByPart = { 1: 1, 2: 14, 3: 27 };
+          var urlByPart = {
+            1: 'ielts-reading-test-lite-paper1.html#reading-q1',
+            2: 'ielts-reading-test-part2-lite-paper1.html#reading-q14',
+            3: 'ielts-reading-test-part3-lite-paper1.html#reading-q27',
+          };
+
+          var startQ = startQByPart[p];
+          var url = urlByPart[p];
+          if (!startQ || !url) return;
+
+          // This page is Part 2.
+          if (p === 2) {
+            setActivePart(2);
+            scrollToQuestion(startQ);
+            return;
+          }
+
+          window.location.href = url;
+        }
+
+        (function initArrowNav() {
+          var CURRENT_PART = 2;
+          var prevBtn = document.getElementById('readingPrev');
+          var nextBtn = document.getElementById('readingNext');
+
+          if (prevBtn) {
+            prevBtn.disabled = false;
+            prevBtn.addEventListener('click', function () {
+              jumpToPartStart(CURRENT_PART - 1);
+            });
+          }
+
+          if (nextBtn) {
+            nextBtn.disabled = false;
+            nextBtn.addEventListener('click', function () {
+              jumpToPartStart(CURRENT_PART + 1);
+            });
+          }
+        })();
+
+
+        window.setTimeout(function () {
+          var hash = String(window.location.hash || '').trim();
+          var m = /^#reading-q(\d{1,2})$/.exec(hash);
+          var q = m ? Number.parseInt(m[1], 10) : 14;
+          setActivePart(2);
+          scrollToQuestion(q);
+        }, 0);
+
+        (function initMatching14_19() {
+          var matchingRoot = document.getElementById('readingMatching14_19');
+          if (!matchingRoot) return;
+
+          function getQRow(q) {
+            return document.getElementById('reading-q' + String(q));
+          }
+
+          function hideQRow(q) {
+            var row = getQRow(q);
+            if (!row || !row.classList) return;
+            row.classList.add('is-matchedOut');
+          }
+
+          function showQRow(q) {
+            var row = getQRow(q);
+            if (!row || !row.classList) return;
+            row.classList.remove('is-matchedOut');
+          }
+
+          function parseQ(raw) {
+            var n = Number.parseInt(String(raw || ''), 10);
+            if (!Number.isFinite(n) || n < 14 || n > 19) return null;
+            return n;
+          }
+
+          function normalizeLetter(raw) {
+            var s = String(raw || '').trim().toUpperCase();
+            if (!s) return '';
+            var ch = s.charAt(0);
+            if (ch < 'A' || ch > 'G') return '';
+            return ch;
+          }
+
+          function setAnswer(q, letter) {
+            var hidden = document.getElementById('reading-a' + String(q));
+            if (hidden) hidden.value = String(letter || '');
+          }
+
+          function getHomeBankSlot(q) {
+            return matchingRoot.querySelector('.reading-matchBankSlot[data-q="' + String(q) + '"]');
+          }
+
+          function moveCardToHome(card) {
+            if (!card) return;
+            var q = parseQ(card.getAttribute('data-q'));
+            if (!q) return;
+            var home = getHomeBankSlot(q);
+            if (!home) return;
+            home.appendChild(card);
+            setAnswer(q, '');
+            showQRow(q);
+          }
+
+          function getCardFromEventTarget(t) {
+            try {
+              if (!t || !t.closest) return null;
+              return t.closest('.reading-matchCard[data-q]');
+            } catch (_) {
+              return null;
+            }
+          }
+
+          var draggingCard = null;
+
+          document.addEventListener('dragstart', function (e) {
+            var card = getCardFromEventTarget(e && e.target);
+            if (!card) return;
+            var q = parseQ(card.getAttribute('data-q'));
+            if (!q) return;
+
+            draggingCard = card;
+            card.classList.add('is-dragging');
+            try {
+              if (e && e.dataTransfer) {
+                e.dataTransfer.setData('text/plain', card.id || '');
+                e.dataTransfer.effectAllowed = 'move';
+              }
+            } catch (_) {}
+          });
+
+          document.addEventListener('dragend', function (e) {
+            var card = getCardFromEventTarget(e && e.target);
+            if (card) card.classList.remove('is-dragging');
+            draggingCard = null;
+          });
+
+          function resolveCardFromDataTransfer(e) {
+            if (draggingCard) return draggingCard;
+            var id = '';
+            try {
+              id = e && e.dataTransfer ? e.dataTransfer.getData('text/plain') : '';
+            } catch (_) {}
+            if (!id) return null;
+            var el = document.getElementById(id);
+            if (el && el.classList && el.classList.contains('reading-matchCard')) return el;
+            return null;
+          }
+
+          function allowDrop(e) {
+            if (!e) return;
+            e.preventDefault();
+            try {
+              if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+            } catch (_) {}
+          }
+
+          function markOver(el, on) {
+            if (!el || !el.classList) return;
+            el.classList.toggle('is-dragOver', !!on);
+          }
+
+          function onDropIntoBankSlot(bankSlot, e) {
+            allowDrop(e);
+            markOver(bankSlot, false);
+
+            var card = resolveCardFromDataTransfer(e);
+            if (!card) return;
+            var cardQ = parseQ(card.getAttribute('data-q'));
+            if (!cardQ) return;
+            var slotQ = parseQ(bankSlot.getAttribute('data-q'));
+            if (!slotQ) return;
+            if (cardQ !== slotQ) return;
+
+            bankSlot.appendChild(card);
+            setAnswer(cardQ, '');
+            showQRow(cardQ);
+          }
+
+          function onDropIntoParagraphSlot(dropSlot, e) {
+            allowDrop(e);
+            markOver(dropSlot, false);
+
+            var card = resolveCardFromDataTransfer(e);
+            if (!card) return;
+            var q = parseQ(card.getAttribute('data-q'));
+            if (!q) return;
+
+            // Only allow one card per paragraph slot.
+            var existing = dropSlot.querySelector('.reading-matchCard[data-q]');
+            if (existing && existing !== card) {
+              moveCardToHome(existing);
+            }
+
+            dropSlot.appendChild(card);
+            var letter = normalizeLetter(dropSlot.getAttribute('data-letter'));
+            setAnswer(q, letter);
+
+            hideQRow(q);
+          }
+
+          function wireBankSlot(bankSlot) {
+            if (!bankSlot) return;
+            bankSlot.addEventListener('dragover', allowDrop);
+            bankSlot.addEventListener('dragenter', function () {
+              markOver(bankSlot, true);
+            });
+            bankSlot.addEventListener('dragleave', function () {
+              markOver(bankSlot, false);
+            });
+            bankSlot.addEventListener('drop', function (e) {
+              onDropIntoBankSlot(bankSlot, e);
+            });
+          }
+
+          function wireParagraphSlot(dropSlot) {
+            if (!dropSlot) return;
+            dropSlot.addEventListener('dragover', allowDrop);
+            dropSlot.addEventListener('dragenter', function () {
+              markOver(dropSlot, true);
+            });
+            dropSlot.addEventListener('dragleave', function () {
+              markOver(dropSlot, false);
+            });
+            dropSlot.addEventListener('drop', function (e) {
+              onDropIntoParagraphSlot(dropSlot, e);
+            });
+          }
+
+          var bankSlots = matchingRoot.querySelectorAll('.reading-matchBankSlot[data-q]');
+          for (var i = 0; i < bankSlots.length; i++) wireBankSlot(bankSlots[i]);
+
+          var paragraphSlots = document.querySelectorAll('.reading-paragraphDropSlot[data-letter]');
+          for (var j = 0; j < paragraphSlots.length; j++) wireParagraphSlot(paragraphSlots[j]);
+
+          // Allow dropping back anywhere in the matching area to return a card.
+          matchingRoot.addEventListener('dragover', allowDrop);
+          matchingRoot.addEventListener('drop', function (e) {
+            // Let specific slots handle their own drops.
+            try {
+              if (e && e.target && e.target.closest) {
+                if (e.target.closest('.reading-matchBankSlot, .reading-paragraphDropSlot')) return;
+              }
+            } catch (_) {}
+
+            allowDrop(e);
+            var card = resolveCardFromDataTransfer(e);
+            if (!card) return;
+            moveCardToHome(card);
+          });
+        })();
+
+        (function initChooseTwo20_21() {
+          var q20 = document.getElementById('reading-q20');
+          if (!q20) return;
+
+          var inputs = q20.querySelectorAll('input.reading-chooseTwo-input[type="checkbox"]');
+          if (!inputs || !inputs.length) return;
+
+          function syncHiddenFromChecks() {
+            var chosen = [];
+            for (var i = 0; i < inputs.length; i++) {
+              if (inputs[i].checked) chosen.push(String(inputs[i].value || '').trim().toUpperCase());
+            }
+            var a20 = document.getElementById('reading-a20');
+            var a21 = document.getElementById('reading-a21');
+            if (a20) a20.value = chosen[0] || '';
+            if (a21) a21.value = chosen[1] || '';
+          }
+
+          function enforceMaxTwo(changed) {
+            var count = 0;
+            for (var i = 0; i < inputs.length; i++) if (inputs[i].checked) count++;
+            if (count <= 2) return;
+            // If a third was selected, undo that selection.
+            if (changed && changed.checked) changed.checked = false;
+          }
+
+          for (var i = 0; i < inputs.length; i++) {
+            (function (el) {
+              el.addEventListener('change', function () {
+                enforceMaxTwo(el);
+                syncHiddenFromChecks();
+              });
+            })(inputs[i]);
+          }
+
+          syncHiddenFromChecks();
+        })();
+
+        (function initChooseTwo22_23() {
+          var q22 = document.getElementById('reading-q22');
+          if (!q22) return;
+
+          var inputs = q22.querySelectorAll('input.reading-chooseTwo22-input[type="checkbox"]');
+          if (!inputs || !inputs.length) return;
+
+          function syncHiddenFromChecks() {
+            var chosen = [];
+            for (var i = 0; i < inputs.length; i++) {
+              if (inputs[i].checked) chosen.push(String(inputs[i].value || '').trim().toUpperCase());
+            }
+            var a22 = document.getElementById('reading-a22');
+            var a23 = document.getElementById('reading-a23');
+            if (a22) a22.value = chosen[0] || '';
+            if (a23) a23.value = chosen[1] || '';
+          }
+
+          function enforceMaxTwo(changed) {
+            var count = 0;
+            for (var i = 0; i < inputs.length; i++) if (inputs[i].checked) count++;
+            if (count <= 2) return;
+            if (changed && changed.checked) changed.checked = false;
+          }
+
+          for (var i = 0; i < inputs.length; i++) {
+            (function (el) {
+              el.addEventListener('change', function () {
+                enforceMaxTwo(el);
+                syncHiddenFromChecks();
+              });
+            })(inputs[i]);
+          }
+
+          syncHiddenFromChecks();
+        })();
+
+        (function initChooseTwo25_26() {
+          var q24 = document.getElementById('reading-q24');
+          if (!q24) return;
+
+          var inputs = q24.querySelectorAll('input.reading-chooseTwo25-input[type="checkbox"]');
+          if (!inputs || !inputs.length) return;
+
+          function syncHiddenFromChecks() {
+            var chosen = [];
+            for (var i = 0; i < inputs.length; i++) {
+              if (inputs[i].checked) chosen.push(String(inputs[i].value || '').trim().toUpperCase());
+            }
+            var a25 = document.getElementById('reading-a25');
+            var a26 = document.getElementById('reading-a26');
+            if (a25) a25.value = chosen[0] || '';
+            if (a26) a26.value = chosen[1] || '';
+          }
+
+          function enforceMaxTwo(changed) {
+            var count = 0;
+            for (var i = 0; i < inputs.length; i++) if (inputs[i].checked) count++;
+            if (count <= 2) return;
+            if (changed && changed.checked) changed.checked = false;
+          }
+
+          for (var i = 0; i < inputs.length; i++) {
+            (function (el) {
+              el.addEventListener('change', function () {
+                enforceMaxTwo(el);
+                syncHiddenFromChecks();
+              });
+            })(inputs[i]);
+          }
+
+          syncHiddenFromChecks();
+        })();
+
+
+
+      })();
+    </script>
+
+    <script>
+      (function () {
+        function initPassage(passageEl, contextMenuEl) {
+          if (!passageEl) return;
+          var lastContextRange = null;
+
+          function isNodeInside(node, container) {
+            try {
+              if (!node || !container) return false;
+              return container === node || container.contains(node.nodeType === 1 ? node : node.parentNode);
+            } catch (_) {
+              return false;
+            }
+          }
+
+          function getSelectionRangeInPassage() {
+            var sel = window.getSelection ? window.getSelection() : null;
+            if (!sel || sel.rangeCount === 0) return null;
+            var range = sel.getRangeAt(0);
+            if (!range) return null;
+
+            var startOk = isNodeInside(range.startContainer, passageEl);
+            var endOk = isNodeInside(range.endContainer, passageEl);
+            if (!startOk || !endOk) return null;
+            return range;
+          }
+
+          function hideContextMenu() {
+            if (!contextMenuEl) return;
+            contextMenuEl.hidden = true;
+            contextMenuEl.style.left = '';
+            contextMenuEl.style.top = '';
+            lastContextRange = null;
+          }
+
+          function showContextMenu(x, y) {
+            if (!contextMenuEl) return;
+            contextMenuEl.hidden = false;
+            contextMenuEl.style.left = x + 'px';
+            contextMenuEl.style.top = y + 'px';
+
+            try {
+              var rect = contextMenuEl.getBoundingClientRect();
+              var pad = 8;
+              var nx = x;
+              var ny = y;
+              if (rect.right > window.innerWidth - pad) nx = Math.max(pad, window.innerWidth - rect.width - pad);
+              if (rect.bottom > window.innerHeight - pad) ny = Math.max(pad, window.innerHeight - rect.height - pad);
+              contextMenuEl.style.left = nx + 'px';
+              contextMenuEl.style.top = ny + 'px';
+            } catch (_) {}
+          }
+
+          function unwrapSpan(span) {
+            if (!span || !span.parentNode) return;
+            var parent = span.parentNode;
+            var children = Array.prototype.slice.call(span.childNodes);
+            for (var i = 0; i < children.length; i++) parent.insertBefore(children[i], span);
+            parent.removeChild(span);
+            parent.normalize();
+          }
+
+          function removeHighlights(range) {
+            var sel = window.getSelection ? window.getSelection() : null;
+
+            if (sel && sel.isCollapsed) {
+              var node = sel.anchorNode;
+              var el = node && node.nodeType === 1 ? node : node && node.parentElement;
+              while (el && el !== passageEl) {
+                if (el.classList && el.classList.contains('reading-highlight')) {
+                  unwrapSpan(el);
+                  break;
+                }
+                el = el.parentElement;
+              }
+              return;
+            }
+
+            var spans = passageEl.querySelectorAll('.reading-highlight');
+            for (var i = 0; i < spans.length; i++) {
+              var s = spans[i];
+              try {
+                if (range && range.intersectsNode && range.intersectsNode(s)) {
+                  unwrapSpan(s);
+                }
+              } catch (_) {}
+            }
+          }
+
+          function wrapTextPortion(textNode, startOffset, endOffset, color) {
+            if (!textNode || textNode.nodeType !== 3) return;
+            var text = textNode.nodeValue || '';
+            if (startOffset < 0) startOffset = 0;
+            if (endOffset > text.length) endOffset = text.length;
+            if (endOffset <= startOffset) return;
+
+            var middle = textNode;
+            if (startOffset > 0) {
+              middle = middle.splitText(startOffset);
+            }
+            if (endOffset - startOffset < middle.nodeValue.length) {
+              middle.splitText(endOffset - startOffset);
+            }
+
+            var parent = middle.parentNode;
+            if (parent && parent.nodeType === 1 && parent.classList && parent.classList.contains('reading-highlight')) {
+              parent.setAttribute('data-hl', color);
+              return;
+            }
+
+            var span = document.createElement('span');
+            span.className = 'reading-highlight';
+            span.setAttribute('data-hl', color);
+            parent.insertBefore(span, middle);
+            span.appendChild(middle);
+          }
+
+          function applyHighlight(color) {
+            var sel = window.getSelection ? window.getSelection() : null;
+            var range = getSelectionRangeInPassage();
+            if (!sel || !range) return;
+            if (sel.isCollapsed) return;
+
+            removeHighlights(range);
+
+            var walker = document.createTreeWalker(
+              passageEl,
+              NodeFilter.SHOW_TEXT,
+              {
+                acceptNode: function (node) {
+                  if (!node || !node.nodeValue || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+                  try {
+                    if (range.intersectsNode && range.intersectsNode(node)) return NodeFilter.FILTER_ACCEPT;
+                  } catch (_) {}
+                  return NodeFilter.FILTER_REJECT;
+                },
+              },
+              false
+            );
+
+            var nodes = [];
+            var n;
+            while ((n = walker.nextNode())) nodes.push(n);
+
+            for (var i = 0; i < nodes.length; i++) {
+              var tn = nodes[i];
+              var start = 0;
+              var end = tn.nodeValue.length;
+
+              if (tn === range.startContainer) start = range.startOffset;
+              if (tn === range.endContainer) end = range.endOffset;
+
+              wrapTextPortion(tn, start, end, color);
+            }
+
+            try {
+              sel.removeAllRanges();
+            } catch (_) {}
+          }
+
+          function onPassageContextMenu(e) {
+            var range = getSelectionRangeInPassage();
+            var sel = window.getSelection ? window.getSelection() : null;
+            if (!range || !sel || sel.isCollapsed) {
+              hideContextMenu();
+              return;
+            }
+
+            e.preventDefault();
+            lastContextRange = range.cloneRange ? range.cloneRange() : range;
+            showContextMenu(e.clientX, e.clientY);
+          }
+
+          function restoreSelectionFromLastRange() {
+            if (!lastContextRange) return;
+            var sel = window.getSelection ? window.getSelection() : null;
+            if (!sel) return;
+            try {
+              sel.removeAllRanges();
+              sel.addRange(lastContextRange);
+            } catch (_) {}
+          }
+
+          function onContextMenuClick(e) {
+            var item = e.target && e.target.closest ? e.target.closest('[data-action]') : null;
+            if (!item) return;
+            var action = item.getAttribute('data-action');
+            if (!action) return;
+
+            if (action === 'highlight') {
+              restoreSelectionFromLastRange();
+              applyHighlight('yellow');
+              hideContextMenu();
+              return;
+            }
+
+            if (action === 'notes') {
+              hideContextMenu();
+              return;
+            }
+          }
+
+          passageEl.addEventListener('contextmenu', onPassageContextMenu);
+          passageEl.addEventListener('scroll', hideContextMenu, { passive: true });
+
+          document.addEventListener('click', function (e) {
+            if (!contextMenuEl || contextMenuEl.hidden) return;
+            if (contextMenuEl.contains(e.target)) return;
+            hideContextMenu();
+          });
+
+          document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') hideContextMenu();
+          });
+
+          if (contextMenuEl) contextMenuEl.addEventListener('click', onContextMenuClick);
+        }
+
+        initPassage(document.getElementById('readingPassageScrollPart2'), document.getElementById('readingHighlightMenuPart2'));
+      })();
+    </script>
+
+    <script>
+      (function () {
+        try {
+          var split = document.querySelector('.reading-split');
+          var divider = split ? split.querySelector('.reading-divider') : null;
+          if (!split || !divider || !window.PointerEvent) return;
+
+          var pointerId = null;
+          var dividerWidth = 16;
+
+          function isMobile() {
+            try {
+              return window.matchMedia('(max-width: 980px)').matches;
+            } catch (_) {
+              return window.innerWidth <= 980;
+            }
+          }
+
+          function clamp(n, min, max) {
+            return Math.min(max, Math.max(min, n));
+          }
+
+          function setColumns(leftPx) {
+            if (isMobile()) return;
+            var rect = split.getBoundingClientRect();
+            var available = rect.width - dividerWidth;
+            var minLeft = 320;
+            var minRight = 320;
+            var left = clamp(leftPx, minLeft, Math.max(minLeft, available - minRight));
+            var right = Math.max(minRight, available - left);
+            split.style.setProperty('--reading-left-col', left + 'px');
+            split.style.setProperty('--reading-right-col', right + 'px');
+          }
+
+          function updateFromEvent(e) {
+            if (!e) return;
+            var rect = split.getBoundingClientRect();
+            var x = e.clientX;
+            var leftPx = x - rect.left - dividerWidth / 2;
+            setColumns(leftPx);
+          }
+
+          divider.addEventListener('pointerdown', function (e) {
+            if (!e) return;
+            if (typeof e.button === 'number' && e.button !== 0) return;
+            pointerId = e.pointerId;
+            try {
+              divider.setPointerCapture(pointerId);
+            } catch (_) {}
+            document.body.classList.add('reading-resizing');
+            updateFromEvent(e);
+          });
+
+          divider.addEventListener('pointermove', function (e) {
+            if (!e) return;
+            if (pointerId === null || e.pointerId !== pointerId) return;
+            updateFromEvent(e);
+          });
+
+          var endDrag = function (e) {
+            if (!e) return;
+            if (pointerId === null || e.pointerId !== pointerId) return;
+            pointerId = null;
+            document.body.classList.remove('reading-resizing');
+            try {
+              divider.releasePointerCapture(e.pointerId);
+            } catch (_) {}
+          };
+
+          divider.addEventListener('pointerup', endDrag);
+          divider.addEventListener('pointercancel', endDrag);
+          divider.addEventListener('lostpointercapture', function () {
+            pointerId = null;
+            document.body.classList.remove('reading-resizing');
+          });
+
+          window.addEventListener('resize', function () {
+            if (!isMobile()) return;
+            split.style.removeProperty('--reading-left-col');
+            split.style.removeProperty('--reading-right-col');
+          });
+        } catch (_) {}
+      })();
+    </script>
+
+    <script>
+      (function () {
+        var END_AT_KEY = 'ieltsReadingEndAt';
+        var WARN_30_KEY = 'ieltsReadingWarn30Shown';
+        var WARN_10_KEY = 'ieltsReadingWarn10Shown';
+        var WARN_5_KEY = 'ieltsReadingWarn5Shown';
+        var DURATION_MS = 60 * 60 * 1000;
+        var WARN_30_AT_SECONDS = 30 * 60;
+        var WARN_10_AT_SECONDS = 10 * 60;
+        var WARN_5_AT_SECONDS = 5 * 60;
+        var WARN_WINDOW_SECONDS = 5;
+
+        var minutesEl = document.getElementById('timer-minutes');
+        var suffixEl = document.getElementById('timer-suffix');
+        var valueEl = document.getElementById('timer-value');
+        var timerEl = document.getElementById('timer');
+        var topbarEl = document.querySelector('.listening-topbar, .academic-topbar');
+
+        var lastRemainingSeconds = null;
+
+        function markWarnShown(key) {
+          try {
+            window.localStorage.setItem(key, '1');
+          } catch (_) {}
+        }
+
+        function isWarnShown(key) {
+          try {
+            return window.localStorage.getItem(key) === '1';
+          } catch (_) {
+            return false;
+          }
+        }
+
+        function triggerWarn(secondsKey) {
+          if (!timerEl) return;
+
+          try {
+            timerEl.classList.remove('reading-timer-alert');
+            void timerEl.offsetWidth;
+          } catch (_) {}
+
+          timerEl.classList.add('reading-timer-alert');
+          window.setTimeout(function () {
+            try {
+              timerEl.classList.remove('reading-timer-alert');
+            } catch (_) {}
+          }, 5000);
+        }
+
+        function maybeTriggerWarnAt(targetSeconds, key, currentRemainingSeconds) {
+          if (isWarnShown(key)) return;
+
+          var crossed =
+            lastRemainingSeconds !== null && lastRemainingSeconds > targetSeconds && currentRemainingSeconds <= targetSeconds;
+          var inWindow =
+            lastRemainingSeconds === null && currentRemainingSeconds <= targetSeconds && currentRemainingSeconds >= targetSeconds - WARN_WINDOW_SECONDS;
+
+          if (crossed || currentRemainingSeconds === targetSeconds || inWindow) {
+            markWarnShown(key);
+            triggerWarn(key);
+          }
+        }
+
+        function formatMmSs(totalSeconds) {
+          var s = Math.max(0, Math.floor(totalSeconds));
+          var mm = String(Math.floor(s / 60)).padStart(2, '0');
+          var ss = String(s % 60).padStart(2, '0');
+          return mm + ':' + ss;
+        }
+
+        function applyTimerUI(remainingSeconds) {
+          var remainingMinutes = Math.max(0, Math.ceil(remainingSeconds / 60));
+          if (minutesEl) minutesEl.textContent = String(remainingMinutes);
+          if (suffixEl) suffixEl.textContent = remainingMinutes === 1 ? ' minute left' : ' minutes left';
+          if (valueEl) valueEl.title = formatMmSs(remainingSeconds) + ' left';
+        }
+
+        function getOrInitEndAt() {
+          var now = Date.now();
+          var endAt = 0;
+          try {
+            endAt = Number.parseInt(String(window.localStorage.getItem(END_AT_KEY) || ''), 10);
+          } catch (_) {
+            endAt = 0;
+          }
+
+          if (!Number.isFinite(endAt) || endAt <= 0) {
+            endAt = now + DURATION_MS;
+            try {
+              window.localStorage.setItem(END_AT_KEY, String(endAt));
+            } catch (_) {}
+          }
+
+          return endAt;
+        }
+
+        function redirectEnded() {
+          if (window.__ieltsReadingEnded) return;
+          window.__ieltsReadingEnded = true;
+          try {
+            window.location.href = 'ielts-reading-ended.html';
+          } catch (_) {}
+        }
+
+        function tick() {
+          if (window.__ieltsReadingEnded) return;
+          var endAt = getOrInitEndAt();
+          var remainingMs = endAt - Date.now();
+          var remainingSeconds = Math.max(0, Math.floor(remainingMs / 1000));
+
+          applyTimerUI(remainingSeconds);
+          if (topbarEl) topbarEl.classList.toggle('topbar-last-minute', remainingSeconds <= 60 && remainingSeconds > 0);
+
+          // At 0: blink red, then redirect to ended page after 3 seconds.
+          if (remainingSeconds <= 0) {
+            if (topbarEl) topbarEl.classList.remove('topbar-last-minute');
+            if (window.__ieltsReadingEndPending) return;
+            window.__ieltsReadingEndPending = true;
+            triggerWarn('zero');
+            try {
+              if (interval) window.clearInterval(interval);
+            } catch (_) {}
+            window.setTimeout(function () {
+              redirectEnded();
+            }, 3000);
+            return;
+          }
+
+          // Warnings: blink red for 5 seconds at 30, 10, and 5 minutes remaining.
+          maybeTriggerWarnAt(WARN_30_AT_SECONDS, WARN_30_KEY, remainingSeconds);
+          maybeTriggerWarnAt(WARN_10_AT_SECONDS, WARN_10_KEY, remainingSeconds);
+          maybeTriggerWarnAt(WARN_5_AT_SECONDS, WARN_5_KEY, remainingSeconds);
+          lastRemainingSeconds = remainingSeconds;
+        }
+
+        function runDemoWarnings() {
+          var stages = [WARN_30_AT_SECONDS, WARN_10_AT_SECONDS, WARN_5_AT_SECONDS];
+          var i = 0;
+
+          function next() {
+            if (i >= stages.length) return;
+            var s = stages[i];
+            applyTimerUI(s);
+            triggerWarn('demo');
+            i += 1;
+            window.setTimeout(next, 5600);
+          }
+
+          next();
+        }
+
+        var isDemo = false;
+        var isDemoZero = false;
+        try {
+          var qs = new URLSearchParams(window.location.search);
+          isDemo = qs.has('demoWarnings');
+          isDemoZero = qs.has('demoZero');
+        } catch (_) {}
+
+        if (isDemoZero) {
+          try {
+            window.localStorage.setItem(END_AT_KEY, String(Date.now()));
+          } catch (_) {}
+        }
+
+        var interval = null;
+        if (isDemo) {
+          runDemoWarnings();
+        } else {
+          interval = window.setInterval(tick, 1000);
+          tick();
+        }
+
+        try {
+          document.addEventListener('visibilitychange', function () {
+            if (!document.hidden) tick();
+          });
+        } catch (_) {}
+
+        try {
+          window.addEventListener('pagehide', function () {
+            if (interval) window.clearInterval(interval);
+          });
+        } catch (_) {}
+      })();
+    </script>
+  </body>
+</html>
+
+

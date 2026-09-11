@@ -1,0 +1,8 @@
+.vercel
+
+# Next.js build output
+.next/
+out/
+
+# Turborepo cache
+.turbo/

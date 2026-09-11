@@ -1,0 +1,452 @@
+﻿<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IELTS Writing Test - Part 2</title>
+    <link rel="stylesheet" href="styles.css?v=20260613-7" />
+    <script src="ielts-flow-guard.js?v=20260310-3" defer></script>
+    <script src="topbar-candidate.js?v=20260612-1" defer></script>
+  </head>
+  <body class="writing-test">
+    <header class="listening-topbar" aria-label="Writing test header">
+      <div class="listening-topbar-inner">
+        <div class="listening-topbar-left">
+          <div class="listening-brand" aria-label="IELTS brand">
+            <img class="listening-brand-logo" src="assets/IELTS%20Exam%20logo%202-trim.png?v=20260226b" alt="IELTS" />
+          </div>
+
+          <div class="listening-id-block" aria-label="Candidate information">
+            <div class="listening-id-title">Test Taker ID</div>
+            <div class="listening-id-candidate" data-candidate-number>Candidate Number: -</div>
+          </div>
+        </div>
+
+        <div class="writing-topbar-timer" aria-label="Time remaining">
+          <p id="writingTimer" class="test-banner-timer" style="display: inline-block;">
+            <span class="reader-only" id="writingTimerLabel">Time:</span>
+            <span class="writing-timerIcon" aria-hidden="true">
+              <img src="assets/clock%20-reading-transparent.png" alt="" />
+            </span>
+            <span id="writingTimerValue" class="test-banner-timeValue" aria-labelledby="writingTimerLabel" title="60:00 left" style="display: inline-block;">
+              <em id="writingTimerMinutes">60</em>
+              <span id="writingTimerSuffix"> minutes left</span>
+            </span>
+          </p>
+        </div>
+
+        <div class="listening-topbar-right" aria-label="IELTS partners">
+          <div class="academic-topbar-partners" aria-label="IELTS partners">
+            <img
+              class="academic-topbar-partner"
+              src="assets/british-council-trim-no-official.png?v=20260226"
+              alt="British Council"
+              loading="lazy"
+            />
+            <img class="academic-topbar-partner" src="assets/IDP-trim-no-official.png?v=20260226" alt="IDP" loading="lazy" />
+            <span class="academic-topbar-cambridge" aria-label="Cambridge Assessment English">Cambridge Assessment English</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="writing-test-main" aria-label="IELTS Writing test">
+      <section class="listening-partBox writing-part1-box" aria-label="Part 2 instructions">
+        <div class="listening-partBox-title">Part 2</div>
+        <div class="listening-partBox-sub writing-partBox-row">
+          <span>You should spend about 40 minutes on this task.</span>
+          <span>Write at least 250 words.</span>
+        </div>
+      </section>
+
+      <section class="writing-split" aria-label="Writing content">
+        <section class="writing-pane writing-pane--left" aria-label="Part 2">
+          <div class="writing-taskIntro" aria-label="Task 2 prompt">
+            <p class="writing-taskLine">Write about the following topic:</p>
+            <p class="writing-taskLine">The average standard of people's health is likely to be lower in the future than it is now.</p>
+            <p class="writing-taskLine">To what extent do you agree or disagree with this statement?</p>
+            <p class="writing-taskLine">Give reasons for your answer and include any relevant examples from your own knowledge or experience.</p>
+          </div>
+        </section>
+
+        <div class="writing-divider" role="separator" aria-orientation="vertical" aria-label="Resize panels">
+          <div class="writing-divider-line"></div>
+          <div class="writing-divider-handle">−</div>
+        </div>
+
+        <section class="writing-pane writing-pane--right" aria-label="Answer">
+          <div class="writing-editorBox" aria-label="Answer box">
+            <textarea
+              id="writingAnswer"
+              class="writing-editor"
+              aria-label="Write your answer"
+              autocomplete="off"
+              autocapitalize="off"
+              autocorrect="off"
+              spellcheck="false"
+              data-gramm="false"
+              data-gramm_editor="false"
+              data-enable-grammarly="false"
+              data-lt-active="false"
+            ></textarea>
+          </div>
+          <div class="writing-words" id="writingWords" aria-live="polite">Words: 0</div>
+        </section>
+      </section>
+    </main>
+
+    <nav class="writing-bottomBar" aria-label="Bottom navigation">
+      <div class="writing-bottomBar-inner">
+        <div class="writing-bottomLabel" id="writingNavPart1" role="button" tabindex="0" aria-label="Part 1 label">Part 1</div>
+        <div class="writing-bottomLabel writing-bottomLabel--active" id="writingNavPart2" role="button" tabindex="0" aria-label="Part 2 label">Part 2</div>
+        <div class="writing-bottomArrows" aria-label="Navigation arrows">
+          <button class="listening-sideArrow listening-sideArrow--prev" id="writingPrev" type="button" aria-label="Previous">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+          <button class="listening-sideArrow listening-sideArrow--next" type="button" aria-label="Next" disabled>
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <script src="writing-score.js?v=20260609-1"></script>
+    <script>
+      (function () {
+        var timerMinutesEl = document.getElementById('writingTimerMinutes');
+        var timerValueEl = document.getElementById('writingTimerValue');
+        var timerEl = document.getElementById('writingTimer');
+        var topbarEl = document.querySelector('.listening-topbar, .academic-topbar');
+        var blinkTimeout = null;
+
+        var ensureWritingTimes = function () {
+          try {
+            var startAt = Number(window.localStorage.getItem('ieltsWritingStartAt'));
+            var part1EndAt = Number(window.localStorage.getItem('ieltsWritingPart1EndAt'));
+            var endAt = Number(window.localStorage.getItem('ieltsWritingEndAt'));
+
+            var storedSessionId = String(window.localStorage.getItem('ieltsWritingSessionId') || '').trim();
+            var sessionId = '';
+            try {
+              sessionId = String(window.sessionStorage.getItem('ieltsWritingSessionId') || '').trim();
+            } catch (_) {
+              sessionId = '';
+            }
+
+            if (storedSessionId && !sessionId) {
+              try {
+                window.sessionStorage.setItem('ieltsWritingSessionId', storedSessionId);
+                sessionId = storedSessionId;
+              } catch (_) {
+                // ignore
+              }
+            }
+
+            var now = Date.now();
+            var expectedTotal = 60 * 60 * 1000;
+            var expectedPart1 = 20 * 60 * 1000;
+
+            var durationOk = Number.isFinite(endAt - startAt) && Math.abs((endAt - startAt) - expectedTotal) < 90 * 1000;
+            var part1Ok = Number.isFinite(part1EndAt - startAt) && Math.abs((part1EndAt - startAt) - expectedPart1) < 60 * 1000;
+            var stillRunning = Number.isFinite(endAt) && endAt > now;
+
+            var hasAnySession = !!(storedSessionId || sessionId);
+            var hasSessionMatch = !hasAnySession || (!!storedSessionId && !!sessionId && storedSessionId === sessionId);
+
+            if (!Number.isFinite(startAt) || !Number.isFinite(part1EndAt) || !Number.isFinite(endAt) || !stillRunning || !durationOk || !part1Ok || !hasSessionMatch) {
+              startAt = now;
+              part1EndAt = startAt + 20 * 60 * 1000;
+              endAt = startAt + 60 * 60 * 1000;
+
+              var newSessionId = String(startAt) + '-' + String(Math.random()).slice(2);
+              try {
+                window.sessionStorage.setItem('ieltsWritingSessionId', newSessionId);
+              } catch (_) {
+                // ignore
+              }
+              window.localStorage.setItem('ieltsWritingSessionId', newSessionId);
+              window.localStorage.setItem('ieltsWritingStartAt', String(startAt));
+              window.localStorage.setItem('ieltsWritingPart1EndAt', String(part1EndAt));
+              window.localStorage.setItem('ieltsWritingEndAt', String(endAt));
+            }
+
+            return { startAt: startAt, part1EndAt: part1EndAt, endAt: endAt };
+          } catch (_) {
+            var s = Date.now();
+            return { startAt: s, part1EndAt: s + 20 * 60 * 1000, endAt: s + 60 * 60 * 1000 };
+          }
+        };
+
+        var times = ensureWritingTimes();
+
+        var renderWritingTimer = function () {
+          if (!timerMinutesEl) return;
+
+          // Overall Writing countdown: 60 minutes total.
+          var remainingMs = times.endAt - Date.now();
+          if (!Number.isFinite(remainingMs)) remainingMs = 0;
+          if (topbarEl) topbarEl.classList.toggle('topbar-last-minute', remainingMs <= 60 * 1000 && remainingMs > 0);
+
+          var minutesLeft = Math.max(0, Math.ceil(remainingMs / 60000));
+          timerMinutesEl.textContent = String(minutesLeft);
+          if (timerValueEl) timerValueEl.setAttribute('title', String(minutesLeft) + ':00 left');
+
+          // One-time warnings: blink red for 10 seconds.
+          var warn = function (key) {
+            try {
+              if (window.localStorage.getItem(key) === '1') return;
+              window.localStorage.setItem(key, '1');
+            } catch (_) {
+              // ignore
+            }
+
+            if (!timerEl) return;
+            timerEl.classList.add('writing-timer-alert');
+            if (blinkTimeout) {
+              window.clearTimeout(blinkTimeout);
+              blinkTimeout = null;
+            }
+            blinkTimeout = window.setTimeout(function () {
+              timerEl.classList.remove('writing-timer-alert');
+              blinkTimeout = null;
+            }, 10000);
+          };
+
+          if (minutesLeft === 45) warn('ieltsWritingWarn45Shown');
+          if (minutesLeft === 40) warn('ieltsWritingWarn40Shown');
+          if (minutesLeft === 15) warn('ieltsWritingWarn15Shown');
+          if (minutesLeft === 5) warn('ieltsWritingWarn5Shown');
+          if (minutesLeft === 1) warn('ieltsWritingWarn1Shown');
+
+          if (remainingMs <= 0) {
+            if (topbarEl) topbarEl.classList.remove('topbar-last-minute');
+            try {
+              window.location.replace('ielts-writing-ended-basic-paper1.html');
+            } catch (_) {
+              window.location.href = 'ielts-writing-ended-basic-paper1.html';
+            }
+            return true;
+          }
+
+          return false;
+        };
+
+        var stopNow = renderWritingTimer();
+        if (!stopNow) {
+          var timerInterval = window.setInterval(function () {
+            var done = renderWritingTimer();
+            if (done) window.clearInterval(timerInterval);
+          }, 1000);
+        }
+
+        var prevBtn = document.getElementById('writingPrev');
+        if (prevBtn) {
+          prevBtn.addEventListener('click', function () {
+            try {
+              window.location.href = 'ielts-writing-test-part1-basic-paper1.html';
+            } catch (_) {
+              window.location.replace('ielts-writing-test-part1-basic-paper1.html');
+            }
+          });
+        }
+
+        var navPart1 = document.getElementById('writingNavPart1');
+        var gotoPart1 = function () {
+          try {
+            window.location.href = 'ielts-writing-test-part1-basic-paper1.html';
+          } catch (_) {
+            window.location.replace('ielts-writing-test-part1-basic-paper1.html');
+          }
+        };
+        if (navPart1) {
+          navPart1.addEventListener('click', gotoPart1);
+          navPart1.addEventListener('keydown', function (e) {
+            if (!e) return;
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              gotoPart1();
+            }
+          });
+        }
+
+        // Divider drag: expand/contract panes by dragging.
+        try {
+          var split = document.querySelector('.writing-split');
+          var divider = split ? split.querySelector('.writing-divider') : null;
+          if (split && divider && window.PointerEvent) {
+            var pointerId = null;
+            var dividerWidth = 16;
+
+            var clamp = function (n, a, b) {
+              return Math.min(b, Math.max(a, n));
+            };
+
+            var setColumns = function (leftPx) {
+              var rect = split.getBoundingClientRect();
+              var available = rect.width - dividerWidth;
+              var minLeft = 260;
+              var minRight = 320;
+              var left = clamp(leftPx, minLeft, Math.max(minLeft, available - minRight));
+              var right = Math.max(minRight, available - left);
+              split.style.setProperty('--writing-left-col', left + 'px');
+              split.style.setProperty('--writing-right-col', right + 'px');
+            };
+
+            var updateFromEvent = function (e) {
+              if (!e) return;
+              var rect = split.getBoundingClientRect();
+              var x = e.clientX;
+              var leftPx = x - rect.left - dividerWidth / 2;
+              setColumns(leftPx);
+            };
+
+            divider.addEventListener('pointerdown', function (e) {
+              if (!e) return;
+              if (typeof e.button === 'number' && e.button !== 0) return;
+              pointerId = e.pointerId;
+              try {
+                divider.setPointerCapture(pointerId);
+              } catch (_) {
+                // ignore
+              }
+              document.body.classList.add('writing-resizing');
+              updateFromEvent(e);
+            });
+
+            divider.addEventListener('pointermove', function (e) {
+              if (!e) return;
+              if (pointerId === null || e.pointerId !== pointerId) return;
+              updateFromEvent(e);
+            });
+
+            var endDrag = function (e) {
+              if (!e) return;
+              if (pointerId === null || e.pointerId !== pointerId) return;
+              pointerId = null;
+              document.body.classList.remove('writing-resizing');
+              try {
+                divider.releasePointerCapture(e.pointerId);
+              } catch (_) {
+                // ignore
+              }
+            };
+
+            divider.addEventListener('pointerup', endDrag);
+            divider.addEventListener('pointercancel', endDrag);
+          }
+        } catch (_) {
+          // ignore
+        }
+
+        var answerEl = document.getElementById('writingAnswer');
+        var wordsEl = document.getElementById('writingWords');
+        var maxWords = 1500;
+
+        var blockPasteIntoAnswer = function (el) {
+          if (!el) return;
+
+          var lastWarningAt = 0;
+          var showCheatingWarning = function () {
+            var now = Date.now();
+            if (now - lastWarningAt < 1500) return;
+            lastWarningAt = now;
+            try {
+              window.alert('Cheating is punishable.');
+            } catch (_) {
+              // ignore
+            }
+          };
+
+          var stopInsertion = function (e) {
+            if (!e) return;
+            try {
+              e.preventDefault();
+            } catch (_) {
+              // ignore
+            }
+            showCheatingWarning();
+          };
+
+          el.addEventListener('paste', stopInsertion);
+          el.addEventListener('drop', stopInsertion);
+
+          el.addEventListener('beforeinput', function (e) {
+            if (!e) return;
+            var inputType = String(e.inputType || '');
+            if (inputType === 'insertFromPaste' || inputType === 'insertFromDrop') {
+              stopInsertion(e);
+            }
+          });
+
+          el.addEventListener('keydown', function (e) {
+            if (!e) return;
+            var key = String(e.key || '').toLowerCase();
+            var isCtrlOrMeta = !!e.ctrlKey || !!e.metaKey;
+            var isPasteShortcut = isCtrlOrMeta && key === 'v';
+            var isShiftInsert = !!e.shiftKey && key === 'insert';
+            if (isPasteShortcut || isShiftInsert) {
+              stopInsertion(e);
+            }
+          });
+        };
+
+        var getWords = function (text) {
+          var t = String(text || '').trim();
+          if (!t) return [];
+          return t.split(/\s+/).filter(Boolean);
+        };
+
+        var render = function () {
+          if (!answerEl || !wordsEl) return;
+          var words = getWords(answerEl.value);
+          if (words.length > maxWords) {
+            answerEl.value = words.slice(0, maxWords).join(' ') + ' ';
+            words = words.slice(0, maxWords);
+          }
+          wordsEl.textContent = 'Words: ' + words.length;
+        };
+
+        if (answerEl) answerEl.addEventListener('input', render);
+        blockPasteIntoAnswer(answerEl);
+        render();
+
+        // Best-effort: discourage common third-party grammar overlays.
+        // Note: browser extensions can still inject UI; this just opts out where supported.
+        if (answerEl) {
+          try {
+            answerEl.setAttribute('data-gramm', 'false');
+            answerEl.setAttribute('data-gramm_editor', 'false');
+            answerEl.setAttribute('data-enable-grammarly', 'false');
+            answerEl.setAttribute('data-lt-active', 'false');
+          } catch (_) {
+            // ignore
+          }
+        }
+
+        try {
+          var removeInjected = function () {
+            var nodes = document.querySelectorAll(
+              'grammarly-extension, grammarly-popups, grammarly-ghost, [data-grammarly-part], .grammarly-desktop-integration'
+            );
+            nodes.forEach(function (n) {
+              if (n && n.parentNode) n.parentNode.removeChild(n);
+            });
+          };
+
+          removeInjected();
+          var obs = new MutationObserver(function () {
+            removeInjected();
+          });
+          obs.observe(document.documentElement, { childList: true, subtree: true });
+        } catch (_) {
+          // ignore
+        }
+      })();
+    </script>
+  </body>
+</html>
+

@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mock Test</title>
+    <link rel="stylesheet" href="styles.css?v=20260323" />
+  </head>
+  <body>
+    <main class="packages-page" aria-label="Mock Test">
+      <div class="packages-shell">
+        <div class="packages-top">
+          <a class="packages-back" id="mock-back" href="./index.html#mock">← Back to Mock Tests</a>
+          <h1 class="packages-title" id="mock-title">Mock Test</h1>
+          <p class="packages-subtitle" id="mock-subtitle" style="margin-bottom:0;">Loading…</p>
+        </div>
+
+        <section class="packages-info" aria-label="Mock test paper" style="grid-template-columns: 1fr;">
+          <section class="packages-info-section packages-info-section--indented" aria-label="Mock test navigation">
+            <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;">
+              <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
+                <button class="module-component-btn" type="button" data-nav="listening">Listening</button>
+                <button class="module-component-btn" type="button" data-nav="reading">Reading</button>
+                <button class="module-component-btn" type="button" data-nav="writing">Writing</button>
+                <button class="module-component-btn" type="button" data-nav="speaking">Speaking</button>
+              </div>
+
+              <div style="display:flex;gap:10px;align-items:center;">
+                <button class="portal-submit" type="button" id="mock-prev" style="margin-top:0;">Prev</button>
+                <button class="portal-submit" type="button" id="mock-next" style="margin-top:0;">Next</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="packages-info-section packages-info-section--indented" aria-label="Paper">
+            <h2 class="packages-info-title"><span id="paper-heading">Paper</span></h2>
+
+            <div id="paper-audio" style="margin-top:10px;" hidden>
+              <p class="portal-card-intro" style="margin:0 0 8px;">Audio</p>
+              <audio id="paper-audio-player" controls style="width:100%;"></audio>
+            </div>
+
+            <div id="paper-body" style="margin-top:10px;"></div>
+            <p class="portal-small-note" id="paper-note" style="margin:10px 0 0;"></p>
+          </section>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      (function () {
+        var SECTION_ORDER = ['listening', 'reading', 'writing', 'speaking'];
+
+        function usesHtmlRoutes() {
+          return /\.html$/i.test(window.location.pathname || '');
+        }
+
+        (function syncBackLink() {
+          var back = document.getElementById('mock-back');
+          if (!back) return;
+          back.setAttribute('href', usesHtmlRoutes() ? './index.html#mock' : '/#mock');
+        })();
+
+        function getParams() {
+          try {
+            return new URLSearchParams(window.location.search || '');
+          } catch (_) {
+            return new URLSearchParams('');
+          }
+        }
+
+        function normalizeSection(value) {
+          var v = String(value || '').trim().toLowerCase();
+          if (v === 'listening' || v === 'reading' || v === 'writing' || v === 'speaking') return v;
+          return 'listening';
+        }
+
+        function normalizeTest(value) {
+          var n = Number(String(value || '1').trim());
+          if (!Number.isFinite(n) || n < 1 || n > 4) return 1;
+          return Math.floor(n);
+        }
+
+        function sectionLabel(section) {
+          var s = normalizeSection(section);
+          if (s === 'listening') return 'Listening';
+          if (s === 'reading') return 'Reading';
+          if (s === 'writing') return 'Writing';
+          if (s === 'speaking') return 'Speaking';
+          return 'Listening';
+        }
+
+        function safeText(text) {
+          return String(text || '');
+        }
+
+        function renderPaperContent(host, content) {
+          if (!host) return;
+          host.innerHTML = '';
+
+          var text = safeText(content);
+          if (!text.trim()) {
+            var empty = document.createElement('p');
+            empty.className = 'portal-small-note';
+            empty.style.margin = '0';
+            empty.textContent = 'No content saved for this paper.';
+            host.appendChild(empty);
+            return;
+          }
+
+          if (section === 'listening') {
+            var wrap = document.createElement('section');
+            wrap.className = 'listening-paper';
+            wrap.setAttribute('aria-label', 'Listening question paper');
+
+            var sheet = document.createElement('div');
+            sheet.className = 'listening-paper-sheet';
+
+            var title = document.createElement('div');
+            title.className = 'listening-paper-title';
+            title.textContent = 'Paper';
+
+            var lead = document.createElement('div');
+            lead.className = 'listening-paper-lead';
+            lead.textContent = 'Imported content (use [[1]], [[2]]… for answer boxes).';
+
+            var body = document.createElement('div');
+            body.style.marginTop = '10px';
+
+            // Convert placeholders [[n]] into input boxes.
+            var normalized = text.replace(/\r\n/g, '\n');
+            var parts = normalized.split(/(\[\[\d+\]\])/g);
+
+            var para = document.createElement('p');
+            para.style.whiteSpace = 'pre-wrap';
+            para.style.lineHeight = '1.65';
+            para.style.fontWeight = '650';
+            para.style.color = 'var(--text)';
+
+            function flushPara() {
+              if (!para) return;
+              if (para.textContent || para.childNodes.length) {
+                body.appendChild(para);
+              }
+              para = document.createElement('p');
+              para.style.whiteSpace = 'pre-wrap';
+              para.style.lineHeight = '1.65';
+              para.style.fontWeight = '650';
+              para.style.color = 'var(--text)';
+            }
+
+            for (var i = 0; i < parts.length; i++) {
+              var token = String(parts[i] || '');
+              if (/^\[\[\d+\]\]$/.test(token)) {
+                var n = Number(token.replace(/\[|\]/g, ''));
+                if (!Number.isFinite(n) || n < 1) n = 1;
+
+                var blankWrap = document.createElement('span');
+                blankWrap.className = 'listening-paper-blankWrap';
+                blankWrap.setAttribute('data-q', String(n));
+
+                var num = document.createElement('span');
+                num.className = 'listening-paper-blankNumIn';
+                num.setAttribute('aria-hidden', 'true');
+                num.textContent = String(n);
+
+                var input = document.createElement('input');
+                input.className = 'listening-paper-blank';
+                input.type = 'text';
+                input.setAttribute('inputmode', 'text');
+                input.setAttribute('data-q', String(n));
+                input.setAttribute('aria-label', 'Answer ' + String(n));
+
+                blankWrap.appendChild(num);
+                blankWrap.appendChild(input);
+                para.appendChild(blankWrap);
+                continue;
+              }
+
+              // Preserve paragraph breaks.
+              var chunks = token.split(/\n\n+/);
+              for (var c = 0; c < chunks.length; c++) {
+                if (c > 0) flushPara();
+                para.appendChild(document.createTextNode(chunks[c]));
+              }
+            }
+            flushPara();
+
+            sheet.appendChild(title);
+            sheet.appendChild(lead);
+            sheet.appendChild(body);
+            wrap.appendChild(sheet);
+            host.appendChild(wrap);
+            return;
+          }
+
+          // Render as paragraphs while preserving blank lines.
+          var parts = text.replace(/\r\n/g, '\n').split(/\n\n+/);
+          for (var i = 0; i < parts.length; i++) {
+            var pText = String(parts[i] || '').trim();
+            if (!pText) continue;
+            var p = document.createElement('p');
+            p.style.whiteSpace = 'pre-wrap';
+            p.style.lineHeight = '1.65';
+            p.style.fontWeight = '600';
+            p.style.color = 'var(--text)';
+            p.textContent = pText;
+            host.appendChild(p);
+          }
+        }
+
+        // IndexedDB (same DB as Director Panel)
+        var DB_NAME = 'ieltsDirectorDb';
+        var DB_VERSION = 2;
+        var STORE_PAPERS = 'papers';
+
+        function openDb() {
+          return new Promise(function (resolve, reject) {
+            if (!('indexedDB' in window)) {
+              reject(new Error('IndexedDB is not available in this browser.'));
+              return;
+            }
+            var request = window.indexedDB.open(DB_NAME, DB_VERSION);
+            request.onupgradeneeded = function () {
+              // If the DB doesn't exist yet (user never opened Director Panel), create minimal store.
+              var db = request.result;
+              try {
+                if (!db.objectStoreNames.contains(STORE_PAPERS)) {
+                  db.createObjectStore(STORE_PAPERS, { keyPath: 'id' });
+                }
+              } catch (_) {}
+            };
+            request.onsuccess = function () {
+              resolve(request.result);
+            };
+            request.onerror = function () {
+              reject(request.error || new Error('Failed to open IndexedDB.'));
+            };
+          });
+        }
+
+        function idbGetAll(db, storeName) {
+          return new Promise(function (resolve, reject) {
+            try {
+              var tx = db.transaction(storeName, 'readonly');
+              var store = tx.objectStore(storeName);
+              var req = store.getAll();
+              req.onsuccess = function () {
+                resolve(req.result || []);
+              };
+              req.onerror = function () {
+                reject(req.error || new Error('Failed to read store.'));
+              };
+            } catch (err) {
+              reject(err);
+            }
+          });
+        }
+
+        function buildUrl(testId, section) {
+          var t = normalizeTest(testId);
+          var s = normalizeSection(section);
+          var base = usesHtmlRoutes() ? 'mock-test-run.html' : 'mock-test-run';
+          return base + '?test=' + encodeURIComponent(String(t)) + '&section=' + encodeURIComponent(String(s));
+        }
+
+        var params = getParams();
+        var testId = normalizeTest(params.get('test'));
+        var section = normalizeSection(params.get('section'));
+
+        var titleEl = document.getElementById('mock-title');
+        var subtitleEl = document.getElementById('mock-subtitle');
+        var headingEl = document.getElementById('paper-heading');
+        var bodyEl = document.getElementById('paper-body');
+        var noteEl = document.getElementById('paper-note');
+
+        var audioWrap = document.getElementById('paper-audio');
+        var audioPlayer = document.getElementById('paper-audio-player');
+        var currentObjectUrl = '';
+
+        function setNote(text, kind) {
+          if (!noteEl) return;
+          noteEl.textContent = String(text || '');
+          if (kind === 'success') {
+            noteEl.style.color = '#16a34a';
+            noteEl.style.fontWeight = '700';
+          } else if (kind === 'error') {
+            noteEl.style.color = '#dc2626';
+            noteEl.style.fontWeight = '700';
+          } else {
+            noteEl.style.color = '#9ca3af';
+            noteEl.style.fontWeight = '500';
+          }
+        }
+
+        function setActiveNav() {
+          var buttons = document.querySelectorAll('button[data-nav]');
+          for (var i = 0; i < buttons.length; i++) {
+            var b = buttons[i];
+            var s = normalizeSection(b.getAttribute('data-nav'));
+            if (s === section) b.classList.add('is-active');
+            else b.classList.remove('is-active');
+          }
+        }
+
+        function goToSection(newSection) {
+          window.location.href = buildUrl(testId, newSection);
+        }
+
+        function goRelative(delta) {
+          var idx = SECTION_ORDER.indexOf(section);
+          if (idx < 0) idx = 0;
+          var next = idx + delta;
+          if (next < 0) next = 0;
+          if (next >= SECTION_ORDER.length) next = SECTION_ORDER.length - 1;
+          goToSection(SECTION_ORDER[next]);
+        }
+
+        if (titleEl) titleEl.textContent = 'Mock Test ' + testId;
+        if (subtitleEl) subtitleEl.textContent = sectionLabel(section) + ' paper';
+        if (headingEl) headingEl.textContent = sectionLabel(section);
+        setActiveNav();
+
+        var prevBtn = document.getElementById('mock-prev');
+        var nextBtn = document.getElementById('mock-next');
+        if (prevBtn) prevBtn.addEventListener('click', function () { goRelative(-1); });
+        if (nextBtn) nextBtn.addEventListener('click', function () { goRelative(1); });
+
+        var navButtons = document.querySelectorAll('button[data-nav]');
+        for (var n = 0; n < navButtons.length; n++) {
+          (function (btn) {
+            btn.addEventListener('click', function () {
+              goToSection(btn.getAttribute('data-nav'));
+            });
+          })(navButtons[n]);
+        }
+
+        function showAudioForRow(row) {
+          if (!audioWrap || !audioPlayer) return;
+          try {
+            if (currentObjectUrl) {
+              try {
+                URL.revokeObjectURL(currentObjectUrl);
+              } catch (_) {}
+              currentObjectUrl = '';
+            }
+            audioPlayer.removeAttribute('src');
+            audioPlayer.load();
+          } catch (_) {}
+
+          if (!row || section !== 'listening') {
+            audioWrap.hidden = true;
+            return;
+          }
+
+          var src = '';
+          if (row.audioUrl) src = String(row.audioUrl || '').trim();
+          if (!src && row.audioDataUrl) src = String(row.audioDataUrl || '').trim();
+          if (!src && row.audioBlob) {
+            try {
+              currentObjectUrl = URL.createObjectURL(row.audioBlob);
+              src = currentObjectUrl;
+            } catch (_) {
+              src = '';
+            }
+          }
+
+          if (!src) {
+            audioWrap.hidden = true;
+            return;
+          }
+
+          audioWrap.hidden = false;
+          audioPlayer.src = src;
+        }
+
+        window.addEventListener('beforeunload', function () {
+          if (!currentObjectUrl) return;
+          try {
+            URL.revokeObjectURL(currentObjectUrl);
+          } catch (_) {}
+          currentObjectUrl = '';
+        });
+
+        openDb()
+          .then(function (db) {
+            return idbGetAll(db, STORE_PAPERS);
+          })
+          .then(function (rows) {
+            var all = (rows || []).filter(function (p) {
+              if (!p) return false;
+              var sec = normalizeSection(p.section);
+              var t = normalizeTest(p.testId || 1);
+              return sec === section && t === testId;
+            });
+
+            all.sort(function (a, b) {
+              var ta = Date.parse((a && a.createdAt) || '') || 0;
+              var tb = Date.parse((b && b.createdAt) || '') || 0;
+              return tb - ta;
+            });
+
+            if (!all.length) {
+              renderPaperContent(bodyEl, '');
+              showAudioForRow(null);
+              setNote('No paper found for Mock Test ' + testId + ' (' + sectionLabel(section) + '). Add it in Director Panel → Add Papers to Mock Tests.', 'error');
+              return;
+            }
+
+            var row = all[0];
+            if (subtitleEl) subtitleEl.textContent = (row.title ? row.title : (sectionLabel(section) + ' paper'));
+            renderPaperContent(bodyEl, row.content || '');
+            showAudioForRow(row);
+            setNote('Loaded: ' + (row.createdAt || ''), 'success');
+          })
+          .catch(function (err) {
+            renderPaperContent(bodyEl, '');
+            showAudioForRow(null);
+            setNote((err && err.message) ? err.message : 'Unable to load papers.', 'error');
+          });
+      })();
+    </script>
+  </body>
+</html>

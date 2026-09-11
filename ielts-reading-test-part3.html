@@ -4,8 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IELTS Academic Reading - Part 3</title>
-    <link rel="stylesheet" href="styles.css?v=20260310-1" />
+    <link rel="stylesheet" href="styles.css?v=20260613-7" />
     <script src="ielts-flow-guard.js?v=20260310-2" defer></script>
+    <script src="reading-score.js?v=20260616-2" defer></script>
   </head>
   <body class="reading-test listening-soundcheck">
     <header class="academic-topbar" aria-label="IELTS top bar">
@@ -171,6 +172,11 @@
               </div>
             </section>
 
+            <div class="reading-divider" role="separator" aria-orientation="vertical" aria-label="Resize panels">
+              <div class="reading-divider-line"></div>
+              <div class="reading-divider-handle">-</div>
+            </div>
+
             <section class="reading-pane" aria-label="Questions 27 to 40">
               <div class="reading-pane-body" id="readingQuestionsScrollPart3" tabindex="0">
                 <div class="reading-pane-title">Questions 27-40</div>
@@ -294,57 +300,37 @@
                       </div>
 
                       <div class="reading-dndBank" id="readingDndBank31_36" aria-label="List of phrases">
-                        <div class="reading-matchBankSlot reading-dndBankSlot" data-choice="A" aria-label="Phrase constant conflict">
-                        <div class="reading-matchCard reading-dndCard" id="reading-dnd31_36-A" data-choice="A" data-order="1" draggable="true" tabindex="0">
-                          constant conflict
-                        </div>
-                      </div>
                         <div class="reading-matchBankSlot reading-dndBankSlot" data-choice="B" aria-label="Phrase additional evidence">
-                        <div class="reading-matchCard reading-dndCard" id="reading-dnd31_36-B" data-choice="B" data-order="2" draggable="true" tabindex="0">
-                          additional evidence
+                          <div class="reading-matchCard reading-dndCard" id="reading-dnd31_36-B" data-choice="B" data-order="1" draggable="true" tabindex="0">
+                            additional evidence
+                          </div>
                         </div>
-                      </div>
                         <div class="reading-matchBankSlot reading-dndBankSlot" data-choice="C" aria-label="Phrase different locations">
-                        <div class="reading-matchCard reading-dndCard" id="reading-dnd31_36-C" data-choice="C" data-order="3" draggable="true" tabindex="0">
-                          different locations
+                          <div class="reading-matchCard reading-dndCard" id="reading-dnd31_36-C" data-choice="C" data-order="2" draggable="true" tabindex="0">
+                            different locations
+                          </div>
                         </div>
-                      </div>
-                        <div class="reading-matchBankSlot reading-dndBankSlot" data-choice="D" aria-label="Phrase experimental subjects">
-                        <div class="reading-matchCard reading-dndCard" id="reading-dnd31_36-D" data-choice="D" data-order="4" draggable="true" tabindex="0">
-                          experimental subjects
-                        </div>
-                      </div>
                         <div class="reading-matchBankSlot reading-dndBankSlot" data-choice="E" aria-label="Phrase short period">
-                        <div class="reading-matchCard reading-dndCard" id="reading-dnd31_36-E" data-choice="E" data-order="5" draggable="true" tabindex="0">
-                          short period
+                          <div class="reading-matchCard reading-dndCard" id="reading-dnd31_36-E" data-choice="E" data-order="3" draggable="true" tabindex="0">
+                            short period
+                          </div>
                         </div>
-                      </div>
-                        <div class="reading-matchBankSlot reading-dndBankSlot" data-choice="F" aria-label="Phrase extreme distrust">
-                        <div class="reading-matchCard reading-dndCard" id="reading-dnd31_36-F" data-choice="F" data-order="6" draggable="true" tabindex="0">
-                          extreme distrust
-                        </div>
-                      </div>
                         <div class="reading-matchBankSlot reading-dndBankSlot" data-choice="G" aria-label="Phrase frequent exposure">
-                        <div class="reading-matchCard reading-dndCard" id="reading-dnd31_36-G" data-choice="G" data-order="7" draggable="true" tabindex="0">
-                          frequent exposure
+                          <div class="reading-matchCard reading-dndCard" id="reading-dnd31_36-G" data-choice="G" data-order="4" draggable="true" tabindex="0">
+                            frequent exposure
+                          </div>
                         </div>
-                      </div>
                         <div class="reading-matchBankSlot reading-dndBankSlot" data-choice="H" aria-label="Phrase mental operation">
-                        <div class="reading-matchCard reading-dndCard" id="reading-dnd31_36-H" data-choice="H" data-order="8" draggable="true" tabindex="0">
-                          mental operation
+                          <div class="reading-matchCard reading-dndCard" id="reading-dnd31_36-H" data-choice="H" data-order="5" draggable="true" tabindex="0">
+                            mental operation
+                          </div>
                         </div>
-                      </div>
-                        <div class="reading-matchBankSlot reading-dndBankSlot" data-choice="I" aria-label="Phrase dubious reason">
-                        <div class="reading-matchCard reading-dndCard" id="reading-dnd31_36-I" data-choice="I" data-order="9" draggable="true" tabindex="0">
-                          dubious reason
-                        </div>
-                      </div>
                         <div class="reading-matchBankSlot reading-dndBankSlot" data-choice="J" aria-label="Phrase different ideas">
-                        <div class="reading-matchCard reading-dndCard" id="reading-dnd31_36-J" data-choice="J" data-order="10" draggable="true" tabindex="0">
-                          different ideas
+                          <div class="reading-matchCard reading-dndCard" id="reading-dnd31_36-J" data-choice="J" data-order="6" draggable="true" tabindex="0">
+                            different ideas
+                          </div>
                         </div>
                       </div>
-                    </div>
 
                       <div class="reading-summaryTitle">What happens when people encounter environmental noise?</div>
                       <p class="reading-summaryText">
@@ -651,6 +637,17 @@
 
           var questionsScrollEl = document.getElementById('readingQuestionsScrollPart3');
           if (!questionsScrollEl) return;
+
+          // For Q31-Q33, always return to the top of Part 3 question panel.
+          if (n >= 31 && n <= 33) {
+            try {
+              questionsScrollEl.scrollTo({ top: 0, behavior: 'smooth' });
+            } catch (_) {
+              questionsScrollEl.scrollTop = 0;
+            }
+            setCurrentQuestion(n);
+            return;
+          }
 
           // Questions 31–36 share a single block; center it.
           if (n >= 31 && n <= 36) {
@@ -1171,6 +1168,91 @@
 
     <script>
       (function () {
+        try {
+          var split = document.querySelector('.reading-split');
+          var divider = split ? split.querySelector('.reading-divider') : null;
+          if (!split || !divider || !window.PointerEvent) return;
+
+          var pointerId = null;
+          var dividerWidth = 16;
+
+          function isMobile() {
+            try {
+              return window.matchMedia('(max-width: 980px)').matches;
+            } catch (_) {
+              return window.innerWidth <= 980;
+            }
+          }
+
+          function clamp(n, min, max) {
+            return Math.min(max, Math.max(min, n));
+          }
+
+          function setColumns(leftPx) {
+            if (isMobile()) return;
+            var rect = split.getBoundingClientRect();
+            var available = rect.width - dividerWidth;
+            var minLeft = 320;
+            var minRight = 320;
+            var left = clamp(leftPx, minLeft, Math.max(minLeft, available - minRight));
+            var right = Math.max(minRight, available - left);
+            split.style.setProperty('--reading-left-col', left + 'px');
+            split.style.setProperty('--reading-right-col', right + 'px');
+          }
+
+          function updateFromEvent(e) {
+            if (!e) return;
+            var rect = split.getBoundingClientRect();
+            var x = e.clientX;
+            var leftPx = x - rect.left - dividerWidth / 2;
+            setColumns(leftPx);
+          }
+
+          divider.addEventListener('pointerdown', function (e) {
+            if (!e) return;
+            if (typeof e.button === 'number' && e.button !== 0) return;
+            pointerId = e.pointerId;
+            try {
+              divider.setPointerCapture(pointerId);
+            } catch (_) {}
+            document.body.classList.add('reading-resizing');
+            updateFromEvent(e);
+          });
+
+          divider.addEventListener('pointermove', function (e) {
+            if (!e) return;
+            if (pointerId === null || e.pointerId !== pointerId) return;
+            updateFromEvent(e);
+          });
+
+          var endDrag = function (e) {
+            if (!e) return;
+            if (pointerId === null || e.pointerId !== pointerId) return;
+            pointerId = null;
+            document.body.classList.remove('reading-resizing');
+            try {
+              divider.releasePointerCapture(e.pointerId);
+            } catch (_) {}
+          };
+
+          divider.addEventListener('pointerup', endDrag);
+          divider.addEventListener('pointercancel', endDrag);
+          divider.addEventListener('lostpointercapture', function () {
+            pointerId = null;
+            document.body.classList.remove('reading-resizing');
+          });
+
+          window.addEventListener('resize', function () {
+            if (!isMobile()) return;
+            split.style.removeProperty('--reading-left-col');
+            split.style.removeProperty('--reading-right-col');
+          });
+        } catch (_) {}
+      })();
+    </script>
+
+    <script>
+      (function () {
         var END_AT_KEY = 'ieltsReadingEndAt';
         var WARN_30_KEY = 'ieltsReadingWarn30Shown';
         var WARN_10_KEY = 'ieltsReadingWarn10Shown';
@@ -1185,6 +1267,7 @@
         var suffixEl = document.getElementById('timer-suffix');
         var valueEl = document.getElementById('timer-value');
         var timerEl = document.getElementById('timer');
+        var topbarEl = document.querySelector('.listening-topbar, .academic-topbar');
 
         var lastRemainingSeconds = null;
 
@@ -1280,9 +1363,11 @@
           var remainingSeconds = Math.max(0, Math.floor(remainingMs / 1000));
 
           applyTimerUI(remainingSeconds);
+          if (topbarEl) topbarEl.classList.toggle('topbar-last-minute', remainingSeconds <= 60 && remainingSeconds > 0);
 
           // At 0: blink red, then redirect to ended page after 3 seconds.
           if (remainingSeconds <= 0) {
+            if (topbarEl) topbarEl.classList.remove('topbar-last-minute');
             if (window.__ieltsReadingEndPending) return;
             window.__ieltsReadingEndPending = true;
             triggerWarn('zero');
@@ -1354,74 +1439,6 @@
       })();
     </script>
 
-    <script>
-      (function () {
-        var redirected = false;
 
-        function hasRadioAnswer(name) {
-          try {
-            var nodes = document.querySelectorAll('input[type="radio"][name="' + name + '"]');
-            for (var i = 0; i < nodes.length; i++) {
-              if (nodes[i] && nodes[i].checked) return true;
-            }
-          } catch (_) {}
-          return false;
-        }
-
-        function hiddenHasValue(id) {
-          try {
-            var el = document.getElementById(id);
-            if (!el) return false;
-            return String(el.value || '').trim().length > 0;
-          } catch (_) {
-            return false;
-          }
-        }
-
-        function isPart3Complete() {
-          // Q27–30 (MCQ)
-          for (var q = 27; q <= 30; q++) {
-            if (!hasRadioAnswer('reading-q' + q)) return false;
-          }
-
-          // Q31–36 (drag & drop summary)
-          for (var q2 = 31; q2 <= 36; q2++) {
-            if (!hiddenHasValue('reading-a' + q2)) return false;
-          }
-
-          // Q37–40 (YES/NO/NOT GIVEN)
-          for (var q3 = 37; q3 <= 40; q3++) {
-            if (!hasRadioAnswer('reading-q' + q3)) return false;
-          }
-
-          return true;
-        }
-
-        function maybeEndTest() {
-          if (redirected) return;
-          if (window.__ieltsReadingEnded) return;
-          if (!isPart3Complete()) return;
-          redirected = true;
-          window.__ieltsReadingEnded = true;
-          window.setTimeout(function () {
-            window.location.href = 'ielts-reading-ended.html';
-          }, 600);
-        }
-
-        // Radio answers
-        document.addEventListener('change', function (e) {
-          var t = e && e.target;
-          if (!t || !t.matches) return;
-          if (t.matches('input[type="radio"][name^="reading-q"]')) {
-            maybeEndTest();
-          }
-        });
-
-        // Drag & drop blanks (hidden inputs update on drop)
-        document.addEventListener('drop', function () {
-          window.setTimeout(maybeEndTest, 0);
-        });
-      })();
-    </script>
   </body>
 </html>

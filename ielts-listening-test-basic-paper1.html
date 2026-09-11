@@ -1,0 +1,3203 @@
+﻿<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IELTS Listening Test</title>
+    <link rel="stylesheet" href="styles.css?v=20260309-4" />
+    <script src="ielts-flow-guard.js?v=20260310-2"></script>
+    <style>
+      .listening-chooseThree {
+        margin-top: 14px;
+        width: min(760px, 100%);
+      }
+
+      .listening-chooseThree-list {
+        display: grid;
+        gap: 12px;
+      }
+
+      .listening-chooseThree-item {
+        position: relative;
+        display: grid;
+        grid-template-columns: 30px 1fr;
+        align-items: center;
+        column-gap: 14px;
+        border: 1px solid color-mix(in srgb, var(--border), #000000 28%);
+        border-radius: 10px;
+        background: #ffffff;
+        padding: 10px 14px;
+        cursor: pointer;
+        transition: border-color 120ms ease, background-color 120ms ease, box-shadow 120ms ease;
+      }
+
+      .listening-chooseThree-item:hover {
+        border-color: #0f172a;
+        background: #f8fafc;
+      }
+
+      .listening-chooseThree-item:focus-within {
+        outline: 3px solid color-mix(in srgb, var(--focus), transparent 72%);
+        outline-offset: 2px;
+      }
+
+      .listening-chooseThree-item.is-selected {
+        border-color: #0f172a;
+        background: #f1f5f9;
+      }
+
+      .listening-chooseThree-item.is-disabled {
+        opacity: 0.58;
+      }
+
+      .listening-chooseThree-input {
+        position: absolute;
+        opacity: 0;
+        width: 1px;
+        height: 1px;
+        margin: 0;
+        pointer-events: none;
+      }
+
+      .listening-chooseThree-box {
+        width: 26px;
+        height: 26px;
+        border: 3px solid #111827;
+        border-radius: 2px;
+        background: #ffffff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .listening-chooseThree-input:checked + .listening-chooseThree-box::after {
+        content: "";
+        width: 13px;
+        height: 13px;
+        border-radius: 1px;
+        background: #111827;
+      }
+
+      .listening-chooseThree-text {
+        font-family: "Times New Roman", Times, serif;
+        font-size: 18px;
+        line-height: 1.15;
+        color: #000000;
+      }
+
+      .listening-part2OneWordLead {
+        margin: 0 0 8px;
+        font-family: "Times New Roman", Times, serif;
+        font-size: 18px;
+        line-height: 1.35;
+        color: #000000;
+      }
+
+      .listening-part2OneWord {
+        margin-top: 10px;
+        display: grid;
+        gap: 10px;
+        width: min(940px, 100%);
+      }
+
+      .listening-part2OneWord-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(280px, 324px);
+        align-items: center;
+        column-gap: 16px;
+      }
+
+      .listening-part2OneWord-question {
+        font-family: "Times New Roman", Times, serif;
+        font-size: 18px;
+        line-height: 1.25;
+        color: #000000;
+      }
+
+      .listening-paper-blankWrap--part2OneWord {
+        width: 100%;
+        height: 40px;
+      }
+
+      .listening-paper-blankWrap--part2OneWord .listening-paper-blankNumIn {
+        font-family: "Times New Roman", Times, serif;
+        font-size: 18px;
+        font-weight: 400;
+      }
+
+      .listening-paper-blank--part2OneWord {
+        height: 40px;
+        border: 2px solid #1f2937;
+        border-radius: 0;
+        box-shadow: none;
+        background: #ffffff;
+        padding: 0 10px;
+        font-family: "Times New Roman", Times, serif;
+        font-size: 18px;
+      }
+
+      .listening-part2MatchBlock {
+        margin-top: 24px;
+      }
+
+      .listening-part2MatchTitle {
+        margin-bottom: 8px;
+      }
+
+      .listening-part2MatchLead {
+        margin: 0 0 14px;
+        font-family: "Times New Roman", Times, serif;
+        font-size: 18px;
+        font-weight: 700;
+        line-height: 1.3;
+        color: #000000;
+      }
+
+      .listening-part2MatchChoices {
+        margin-top: -4px;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-auto-flow: row;
+        row-gap: 12px;
+        column-gap: 44px;
+        align-content: start;
+        margin: 0 0 18px;
+        width: min(860px, 100%);
+      }
+
+      .listening-part2MatchChoices .listening-choiceTile {
+        min-height: 0;
+        border: 2px solid #000000;
+        border-radius: 10px;
+        background: #ffffff;
+        padding: 8px 12px;
+        width: 75%;
+        justify-self: start;
+        font-family: "Times New Roman", Times, serif;
+        font-size: 16px;
+        line-height: 1.2;
+        color: #000000;
+        cursor: grab;
+        user-select: none;
+      }
+
+      .listening-part2MatchChoices .listening-choiceTile.is-dragging {
+        opacity: 0.65;
+      }
+
+      .listening-part2MatchPrompt {
+        margin: 2px 0 10px;
+        font-family: "Times New Roman", Times, serif;
+        font-size: 18px;
+        font-weight: 700;
+        line-height: 1.3;
+        color: #000000;
+      }
+
+      .listening-part2MatchRows {
+        display: grid;
+        gap: 6px;
+        width: min(760px, 100%);
+      }
+
+      .listening-part2MatchRow {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(240px, 324px);
+        align-items: center;
+        column-gap: 18px;
+      }
+
+      .listening-part2MatchQuestion {
+        font-family: "Times New Roman", Times, serif;
+        font-size: 18px;
+        line-height: 1.3;
+        color: #000000;
+      }
+
+      .listening-paper-blankWrap--part2Match {
+        width: 100%;
+        height: 40px;
+      }
+
+      .listening-paper-blankWrap--part2Match .listening-paper-blankNumIn {
+        font-family: "Times New Roman", Times, serif;
+        font-size: 18px;
+        font-weight: 400;
+      }
+
+      .listening-paper-blank--part2Match {
+        height: 40px;
+        border: 2px solid #1f2937;
+        border-radius: 0;
+        box-shadow: none;
+        background: #ffffff;
+        padding: 0 10px;
+        font-family: "Times New Roman", Times, serif;
+        font-size: 18px;
+      }
+
+      .listening-paper-blankWrap--part2Match .listening-planTile--placed {
+        position: absolute;
+        inset: 2px;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        padding: 0 10px;
+        min-height: 0;
+        display: flex;
+        align-items: center;
+        gap: 0;
+        font-family: "Times New Roman", Times, serif;
+        font-size: 18px;
+        line-height: 1.2;
+        color: #000000;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        cursor: grab;
+        z-index: 2;
+      }
+
+      .listening-part3ChoiceBlock {
+        margin: 2px 0 18px;
+        width: min(920px, 100%);
+        font-family: "Times New Roman", Times, serif;
+        color: #000000;
+      }
+
+      .listening-part3ChoiceQuestion {
+        margin: 0 0 16px;
+        scroll-margin-top: 120px;
+      }
+
+      .listening-part3ChoiceStem {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        font-size: 18px;
+        line-height: 1.25;
+        margin: 0 0 8px;
+      }
+
+      .listening-part3ChoiceNum {
+        font-weight: 700;
+      }
+
+      .listening-part3ChoiceText {
+        font-weight: 400;
+      }
+
+      .listening-part3ChoiceOptions {
+        margin: 0;
+        padding-left: 44px;
+        display: grid;
+        gap: 4px;
+      }
+
+      .listening-part3ChoiceOpt {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        width: fit-content;
+        cursor: pointer;
+        font-size: 18px;
+        line-height: 1.3;
+      }
+
+      .listening-part3ChoiceOpt .listening-mcq-input {
+        width: 18px;
+        height: 18px;
+        margin: 0;
+      }
+
+      .listening-part3TableBlock {
+        margin-top: 12px;
+      }
+
+      .listening-part3TableWrap {
+        margin-top: 10px;
+        width: min(1150px, 100%);
+        overflow-x: auto;
+      }
+
+      .listening-part3Table {
+        width: 100%;
+        min-width: 980px;
+        border-collapse: collapse;
+        table-layout: fixed;
+        font-family: "Times New Roman", Times, serif;
+        font-size: 18px;
+        line-height: 1.25;
+        color: #000000;
+      }
+
+      .listening-part3Table th,
+      .listening-part3Table td {
+        border: 2px solid #1f2937;
+        padding: 8px 10px;
+        vertical-align: middle;
+      }
+
+      .listening-part3Table thead th {
+        background: #d1d5db;
+        font-weight: 700;
+        text-align: center;
+      }
+
+      .listening-part3TableRowHead {
+        background: #e5e7eb;
+        font-weight: 700;
+        width: 22%;
+      }
+
+      .listening-part3TableValueCell {
+        text-align: center;
+      }
+
+      .listening-part3TableValueCell--left {
+        text-align: left;
+      }
+
+      .listening-part3TableBlank {
+        width: 100%;
+        max-width: none;
+        height: 50px;
+      }
+
+      .listening-part3TableBlank .listening-paper-blankNumIn {
+        font-family: "Times New Roman", Times, serif;
+        font-size: 17px;
+        font-weight: 700;
+      }
+
+      .listening-part3TableBlank .listening-paper-blank {
+        height: 100%;
+        border: 4px solid #bdbdbd;
+        border-radius: 10px;
+        background: #f8fafc;
+        box-shadow: none;
+        font-family: "Times New Roman", Times, serif;
+        font-size: 18px;
+        text-align: center;
+        padding: 0 10px;
+      }
+
+      .listening-part4ChoiceBlock {
+        margin: 2px 0 22px;
+        width: min(980px, 100%);
+        font-family: "Times New Roman", Times, serif;
+        color: #000000;
+      }
+
+      .listening-part4ChoiceQuestion {
+        margin: 0 0 22px;
+        scroll-margin-top: 120px;
+      }
+
+      .listening-part4ChoiceStem {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        font-size: 18px;
+        line-height: 1.3;
+        margin: 0 0 10px;
+      }
+
+      .listening-part4ChoiceNum,
+      .listening-part4ChoiceText {
+        font-weight: 700;
+      }
+
+      .listening-part4ChoiceOptions {
+        margin: 0;
+        padding-left: 44px;
+        display: grid;
+        gap: 6px;
+      }
+
+      .listening-part4ChoiceOpt {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        width: fit-content;
+        cursor: pointer;
+        font-size: 18px;
+        line-height: 1.3;
+      }
+
+      .listening-part4ChoiceOpt .listening-mcq-input {
+        width: 18px;
+        height: 18px;
+        margin: 0;
+      }
+
+      .listening-part4FormationBlock {
+        margin: 8px 0 0;
+      }
+
+      .listening-part4FormationTitle {
+        margin: 0 0 10px;
+        font-family: "Times New Roman", Times, serif;
+        font-size: 18px;
+        font-weight: 700;
+        line-height: 1.3;
+        color: #000000;
+      }
+
+      .listening-part4FormationWrap {
+        width: min(1180px, 100%);
+        overflow-x: auto;
+      }
+
+      .listening-part4FormationTable {
+        width: 100%;
+        min-width: 980px;
+        border-collapse: collapse;
+        table-layout: fixed;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 16px;
+        line-height: 1.25;
+        color: #000000;
+      }
+
+      .listening-part4FormationTable th,
+      .listening-part4FormationTable td {
+        border: 2px solid #111827;
+        padding: 6px 12px;
+        vertical-align: top;
+      }
+
+      .listening-part4FormationTable th {
+        text-align: center;
+        font-size: 18px;
+        font-weight: 700;
+        line-height: 1.12;
+      }
+
+      .listening-part4FormationTable td {
+        font-size: 18px;
+      }
+
+      .listening-part4FormationTable strong {
+        font-weight: 700;
+      }
+
+      .listening-part4FormationTable td:nth-child(1) {
+        width: 22%;
+      }
+
+      .listening-part4FormationTable td:nth-child(2) {
+        width: 31%;
+      }
+
+      .listening-part4FormationTable td:nth-child(3) {
+        width: 47%;
+      }
+
+      .listening-paper-blankWrap.listening-part4FormationBlank {
+        position: relative;
+        display: inline-block;
+        width: 190px;
+        height: 40px;
+        margin: 0 2px;
+        vertical-align: middle;
+      }
+
+      .listening-part4FormationBlank .listening-paper-blankNumIn {
+        left: 0;
+        width: 100%;
+        justify-content: center;
+        padding: 0;
+        font-family: "Times New Roman", Times, serif;
+        font-size: 18px;
+        font-weight: 400;
+      }
+
+      .listening-paper-blank.listening-paper-blank--formation {
+        height: 100%;
+        border: 2px solid #1f2937;
+        border-radius: 0;
+        background: #ffffff;
+        box-shadow: none;
+        padding: 0 10px;
+        font-family: "Times New Roman", Times, serif;
+        font-size: 18px;
+        line-height: 1;
+        text-align: left;
+      }
+
+      @media (max-width: 560px) {
+        .listening-chooseThree-item {
+          grid-template-columns: 24px 1fr;
+          column-gap: 10px;
+          padding: 9px 10px;
+        }
+
+        .listening-chooseThree-box {
+          width: 22px;
+          height: 22px;
+          border-width: 2px;
+        }
+
+        .listening-chooseThree-input:checked + .listening-chooseThree-box::after {
+          width: 10px;
+          height: 10px;
+        }
+
+        .listening-chooseThree-text {
+          font-size: 18px;
+        }
+
+        .listening-part2OneWord-row {
+          grid-template-columns: 1fr;
+          row-gap: 8px;
+        }
+
+        .listening-part2OneWord-question {
+          font-size: 18px;
+        }
+
+        .listening-paper-blankWrap--part2OneWord {
+          max-width: 100%;
+        }
+
+        .listening-paper-blankWrap--part2OneWord .listening-paper-blankNumIn,
+        .listening-paper-blank--part2OneWord {
+          font-size: 18px;
+        }
+
+        .listening-part2MatchChoices {
+          margin-top: 0;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+        }
+
+        .listening-part2MatchChoices .listening-choiceTile {
+          font-size: 16px;
+        }
+
+        .listening-part2MatchRow {
+          grid-template-columns: 1fr;
+          row-gap: 8px;
+        }
+
+        .listening-part3ChoiceStem {
+          font-size: 18px;
+        }
+
+        .listening-part3ChoiceOptions {
+          padding-left: 34px;
+        }
+
+        .listening-part3ChoiceOpt {
+          font-size: 18px;
+        }
+
+        .listening-part3Table {
+          min-width: 760px;
+          font-size: 16px;
+        }
+
+        .listening-part3TableBlank {
+          height: 42px;
+        }
+
+        .listening-part3TableBlank .listening-paper-blankNumIn {
+          font-size: 17px;
+        }
+
+        .listening-part4ChoiceStem,
+        .listening-part4ChoiceOpt {
+          font-size: 18px;
+        }
+
+        .listening-part4ChoiceOptions {
+          padding-left: 34px;
+        }
+
+        .listening-part4FormationTable {
+          min-width: 760px;
+          font-size: 16px;
+        }
+
+        .listening-part4FormationTable th {
+          font-size: 18px;
+        }
+
+        .listening-paper-blankWrap.listening-part4FormationBlank {
+          width: 150px;
+          height: 36px;
+        }
+
+        .listening-paper-blank.listening-paper-blank--formation {
+          font-size: 17px;
+          padding: 0 8px;
+        }
+
+        .listening-paper-blankWrap--part2Match .listening-paper-blankNumIn,
+        .listening-paper-blank--part2Match,
+        .listening-paper-blankWrap--part2Match .listening-planTile--placed {
+          font-size: 18px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="listening-topbar" aria-label="Listening test header">
+      <div class="listening-topbar-inner">
+        <div class="listening-topbar-left">
+          <div class="listening-brand" aria-label="IELTS brand">
+            <img
+              class="listening-brand-logo"
+              src="assets/IELTS%20Exam%20logo%202-trim.png?v=20260226b"
+              alt="IELTS"
+            />
+          </div>
+
+          <div class="listening-id-block" aria-label="Candidate information">
+            <div class="listening-id-title">Test Taker ID</div>
+            <div class="listening-audio" aria-label="Audio status">
+              <span class="listening-audio-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M11 5L7 9H4v6h3l4 4V5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+                  <path d="M15.5 8.5a4 4 0 0 1 0 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
+              </span>
+              <span>Audio is playing</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="listening-topbar-right" aria-label="Header actions">
+          <div class="academic-topbar-partners" aria-label="IELTS partners">
+            <img class="academic-topbar-partner" src="assets/british-council-trim-no-official.png?v=20260226" alt="British Council" loading="lazy" />
+            <img class="academic-topbar-partner" src="assets/IDP-trim-no-official.png?v=20260226" alt="IDP" loading="lazy" />
+            <span class="academic-topbar-cambridge" aria-label="Cambridge Assessment English">Cambridge Assessment English</span>
+          </div>
+
+          <div class="listening-topbar-actions" aria-label="Header icons">
+            <button class="listening-topbar-icon" type="button" aria-label="Connection status">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M2.5 9.5a14 14 0 0 1 19 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                <path d="M5.5 12.5a10 10 0 0 1 13 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                <path d="M8.5 15.5a6 6 0 0 1 7 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                <path d="M12 19h0" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+              </svg>
+            </button>
+            <button class="listening-topbar-icon" type="button" aria-label="Notifications">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M12 22a2.5 2.5 0 0 0 2.4-2h-4.8A2.5 2.5 0 0 0 12 22Z" fill="currentColor" opacity="0.9" />
+                <path d="M18 10a6 6 0 1 0-12 0c0 7-2.5 7-2.5 7h17S18 17 18 10Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+              </svg>
+            </button>
+            <button class="header__optionsButton___1BF6Z" id="optionsMenuButton" type="button">
+              <span class="header__icon___1ECrT">
+                <span class="sr-only">Options</span>
+                <i class="fa fa-bars fa-3" aria-hidden="true"></i>
+              </span>
+            </button>
+          </div>
+
+          <div class="listening-volume" aria-label="Volume">
+            <span class="soundcheck-volume-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M11 5L7 9H4v6h3l4 4V5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+                <path d="M15.5 8.5a4 4 0 0 1 0 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              </svg>
+            </span>
+            <input id="volume" class="soundcheck-volume-range" type="range" min="0" max="100" value="70" aria-label="Volume" />
+          </div>
+
+          <section class="options-modal" id="optionsModal" role="dialog" aria-modal="true" aria-label="Options" hidden>
+            <div class="options-modal-header" aria-label="Options header">
+              <button class="options-modal-back" id="optionsModalBack" type="button" aria-label="Back" hidden>
+                <span class="options-modal-backIcon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </span>
+                <span class="options-modal-backText">Options</span>
+              </button>
+
+              <div class="options-modal-headerTitle" id="optionsModalHeaderTitle">Options</div>
+
+              <button class="options-modal-close" id="optionsModalClose" type="button" aria-label="Close options">
+                <span aria-hidden="true">×</span>
+              </button>
+            </div>
+
+            <div class="options-modal-body">
+              <div class="options-view" id="optionsViewMain" data-view="main">
+                <a class="options-primary" href="ielts-listening-submission-basic-paper1.html" role="button" aria-label="Go to submission page">
+                  <span class="options-primary-left">
+                    <span class="options-primary-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M21 3L10 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M21 3l-7 20-4-9-9-4 20-7Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+                      </svg>
+                    </span>
+                    <span>Go to submission page</span>
+                  </span>
+                  <span class="options-chevron" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                  </span>
+                </a>
+
+                <div class="options-group" role="menu" aria-label="Option items">
+                  <button class="options-row" type="button" role="menuitem" id="optionsContrast">
+                    <span class="options-row-left">
+                      <span class="options-row-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M12 3a9 9 0 1 0 0 18V3Z" fill="currentColor" opacity="0.25" />
+                          <path d="M12 21a9 9 0 1 0 0-18" stroke="currentColor" stroke-width="2" />
+                        </svg>
+                      </span>
+                      <span>Contrast</span>
+                    </span>
+                    <span class="options-chevron" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                    </span>
+                  </button>
+
+                  <button class="options-row" type="button" role="menuitem" id="optionsTextSize">
+                    <span class="options-row-left">
+                      <span class="options-row-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M11 19a8 8 0 1 1 0-16 8 8 0 0 1 0 16Z" stroke="currentColor" stroke-width="2" />
+                          <path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                          <path d="M11 8v6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                          <path d="M8 11h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        </svg>
+                      </span>
+                      <span>Text size</span>
+                    </span>
+                    <span class="options-chevron" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="options-view" id="optionsViewContrast" data-view="contrast" hidden>
+                <div class="options-contrast-card" role="menu" aria-label="Contrast options">
+                  <button class="options-choice" type="button" role="menuitem" data-contrast="bw">
+                    <span class="options-choice-check" aria-hidden="true">✓</span>
+                    <span>Black on white</span>
+                  </button>
+                  <button class="options-choice" type="button" role="menuitem" data-contrast="wb">
+                    <span class="options-choice-check" aria-hidden="true">✓</span>
+                    <span>White on black</span>
+                  </button>
+                  <button class="options-choice" type="button" role="menuitem" data-contrast="yb">
+                    <span class="options-choice-check" aria-hidden="true">✓</span>
+                    <span>Yellow on black</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </header>
+
+    <audio id="listeningAudio" preload="auto" playsinline>
+      <source src="assets/IELTS%20BASIC%20PKG%20Paper%201.mp3" type="audio/mpeg" />
+    </audio>
+
+    <main class="listening-test-page listening-test-page--wide listening-test-page--withBottomBar" aria-label="IELTS Listening test">
+      <section class="listening-test-shell listening-test-shell--wide" id="listening-part-1" data-part="1">
+        <section class="listening-partBox" aria-label="Part instructions">
+          <div class="listening-partBox-title">Part 1</div>
+          <div class="listening-partBox-sub">Listen and answer questions 1-7</div>
+        </section>
+
+        <section class="listening-paper" aria-label="Part 1 question paper">
+          <div class="listening-paper-sheet">
+            <div class="listening-paper-title">Questions 1-7</div>
+            <div class="listening-paper-lead">
+              Complete the form.<br>
+              Write <b>NO MORE THAN TWO WORDS</b> OR <b>A NUMBER</b> for each answer.
+            </div>
+
+            <div class="listening-paper-blockTitle">Client Details</div>
+            <div class="listening-paper-row">
+              <div class="listening-paper-label">Name</div>
+              <div class="listening-paper-colon">:</div>
+              <div class="listening-paper-answer">Andrew Peterson (Example)</div>
+            </div>
+            <div class="listening-paper-row">
+              <div class="listening-paper-label">Educational Qualification</div>
+              <div class="listening-paper-colon">:</div>
+              <div class="listening-paper-answer">
+                Degree in
+                <span class="listening-paper-blankWrap reading-inlineBlank">
+                  <span class="listening-paper-blankNumIn" aria-hidden="true">1</span>
+                  <input class="listening-paper-blank" id="listening-q1" data-q="1" type="text" inputmode="text" aria-label="Answer 1" />
+                </span>
+              </div>
+            </div>
+            <div class="listening-paper-row">
+              <div class="listening-paper-label">Previous Job</div>
+              <div class="listening-paper-colon">:</div>
+              <div class="listening-paper-answer">
+                <span class="listening-paper-blankWrap reading-inlineBlank">
+                  <span class="listening-paper-blankNumIn" aria-hidden="true">2</span>
+                  <input class="listening-paper-blank" id="listening-q2" data-q="2" type="text" inputmode="text" aria-label="Answer 2" />
+                </span>
+              </div>
+            </div>
+            <div class="listening-paper-row">
+              <div class="listening-paper-label">Hobbies</div>
+              <div class="listening-paper-colon">:</div>
+              <div class="listening-paper-answer">
+                <span class="listening-paper-blankWrap reading-inlineBlank">
+                  <span class="listening-paper-blankNumIn" aria-hidden="true">3</span>
+                  <input class="listening-paper-blank" id="listening-q3" data-q="3" type="text" inputmode="text" aria-label="Answer 3" />
+                </span>
+              </div>
+            </div>
+            <div class="listening-paper-row">
+              <div class="listening-paper-label">Main Skills</div>
+              <div class="listening-paper-colon">:</div>
+              <div class="listening-paper-answer">
+                <span class="listening-paper-blankWrap reading-inlineBlank">
+                  <span class="listening-paper-blankNumIn" aria-hidden="true">4</span>
+                  <input class="listening-paper-blank" id="listening-q4" data-q="4" type="text" inputmode="text" aria-label="Answer 4" />
+                </span>
+              </div>
+            </div>
+            <div class="listening-paper-row">
+              <div class="listening-paper-label">Expected Salary ($)</div>
+              <div class="listening-paper-colon">:</div>
+              <div class="listening-paper-answer">
+                <span class="listening-paper-blankWrap reading-inlineBlank">
+                  <span class="listening-paper-blankNumIn" aria-hidden="true">5</span>
+                  <input class="listening-paper-blank" id="listening-q5" data-q="5" type="text" inputmode="text" aria-label="Answer 5" />
+                </span>
+              </div>
+            </div>
+            <div class="listening-paper-row">
+              <div class="listening-paper-label">Can start?</div>
+              <div class="listening-paper-colon">:</div>
+              <div class="listening-paper-answer">
+                <span class="listening-paper-blankWrap reading-inlineBlank">
+                  <span class="listening-paper-blankNumIn" aria-hidden="true">6</span>
+                  <input class="listening-paper-blank" id="listening-q6" data-q="6" type="text" inputmode="text" aria-label="Answer 6" />
+                </span>
+              </div>
+            </div>
+            <div class="listening-paper-row">
+              <div class="listening-paper-label">Other languages?</div>
+              <div class="listening-paper-colon">:</div>
+              <div class="listening-paper-answer">
+                <span class="listening-paper-blankWrap reading-inlineBlank">
+                  <span class="listening-paper-blankNumIn" aria-hidden="true">7</span>
+                  <input class="listening-paper-blank" id="listening-q7" data-q="7" type="text" inputmode="text" aria-label="Answer 7" />
+                </span>
+              </div>
+            </div>
+
+            <section class="listening-partBox listening-partBox--paperBreak" aria-label="Questions 8 to 10">
+              <div class="listening-partBox-sub listening-partBox-sub--solo" style="font-size: 18px; font-family: Arial, Helvetica, sans-serif; font-weight: 700;">Questions 8-10</div>
+            </section>
+
+            <div class="listening-paper-instructionSub" style="font-size: 18px; font-family: Arial, Helvetica, sans-serif;">Choose <b>THREE</b> qualities employers most value in their staff.</div>
+
+            <div class="listening-chooseThree" aria-label="Questions 8 to 10 options">
+              <div class="listening-chooseThree-list" role="group" aria-label="Choose three qualities">
+                <label class="listening-chooseThree-item" id="listening-q8">
+                  <input class="listening-mcq-input listening-chooseThree-input" type="checkbox" value="Problem-solving skills" data-q="8" aria-label="Problem-solving skills" />
+                  <span class="listening-chooseThree-box" aria-hidden="true"></span>
+                  <span class="listening-chooseThree-text">Problem-solving skills</span>
+                </label>
+
+                <label class="listening-chooseThree-item">
+                  <input class="listening-mcq-input listening-chooseThree-input" type="checkbox" value="Diligence" data-q="8" aria-label="Diligence" />
+                  <span class="listening-chooseThree-box" aria-hidden="true"></span>
+                  <span class="listening-chooseThree-text">Diligence</span>
+                </label>
+
+                <label class="listening-chooseThree-item" id="listening-q9">
+                  <input class="listening-mcq-input listening-chooseThree-input" type="checkbox" value="Experience" data-q="9" aria-label="Experience" />
+                  <span class="listening-chooseThree-box" aria-hidden="true"></span>
+                  <span class="listening-chooseThree-text">Experience</span>
+                </label>
+
+                <label class="listening-chooseThree-item">
+                  <input class="listening-mcq-input listening-chooseThree-input" type="checkbox" value="Flexible hours" data-q="9" aria-label="Flexible hours" />
+                  <span class="listening-chooseThree-box" aria-hidden="true"></span>
+                  <span class="listening-chooseThree-text">Flexible hours</span>
+                </label>
+
+                <label class="listening-chooseThree-item" id="listening-q10">
+                  <input class="listening-mcq-input listening-chooseThree-input" type="checkbox" value="Independent thinking" data-q="10" aria-label="Independent thinking" />
+                  <span class="listening-chooseThree-box" aria-hidden="true"></span>
+                  <span class="listening-chooseThree-text">Independent thinking</span>
+                </label>
+
+                <label class="listening-chooseThree-item">
+                  <input class="listening-mcq-input listening-chooseThree-input" type="checkbox" value="Good personality" data-q="10" aria-label="Good personality" />
+                  <span class="listening-chooseThree-box" aria-hidden="true"></span>
+                  <span class="listening-chooseThree-text">Good personality</span>
+                </label>
+
+                <label class="listening-chooseThree-item">
+                  <input class="listening-mcq-input listening-chooseThree-input" type="checkbox" value="Qualifications" data-q="10" aria-label="Qualifications" />
+                  <span class="listening-chooseThree-box" aria-hidden="true"></span>
+                  <span class="listening-chooseThree-text">Qualifications</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <section class="listening-test-shell listening-test-shell--wide" id="listening-part-2" data-part="2" hidden>
+        <section class="listening-partBox" aria-label="Part instructions">
+          <div class="listening-partBox-title">Part 2</div>
+          <div class="listening-partBox-sub">Listen and answer questions 11-15</div>
+        </section>
+
+        <section class="listening-paper" aria-label="Part 2 question paper">
+          <div class="listening-paper-sheet">
+            <div class="listening-paper-title">Questions 11-15</div>
+            <div class="listening-part2OneWordLead">Answer the questions.</div>
+            <div class="listening-part2OneWordLead">Write <strong>ONE WORD ONLY</strong> for each answer.</div>
+
+            <div class="listening-part2OneWord" aria-label="Questions 11 to 15">
+              <div class="listening-part2OneWord-row">
+                <div class="listening-part2OneWord-question">What does the centre provide first?</div>
+                <div class="listening-paper-blankWrap listening-paper-blankWrap--part2OneWord" data-q="11" aria-label="Answer box for Question 11">
+                  <span class="listening-paper-blankNumIn" aria-hidden="true">11</span>
+                  <input class="listening-paper-blank listening-paper-blank--part2OneWord" id="listening-q11" data-q="11" type="text" inputmode="text" aria-label="Answer 11" />
+                </div>
+              </div>
+
+              <div class="listening-part2OneWord-row">
+                <div class="listening-part2OneWord-question">What is important to control?</div>
+                <div class="listening-paper-blankWrap listening-paper-blankWrap--part2OneWord" data-q="12" aria-label="Answer box for Question 12">
+                  <span class="listening-paper-blankNumIn" aria-hidden="true">12</span>
+                  <input class="listening-paper-blank listening-paper-blank--part2OneWord" id="listening-q12" data-q="12" type="text" inputmode="text" aria-label="Answer 12" />
+                </div>
+              </div>
+
+              <div class="listening-part2OneWord-row">
+                <div class="listening-part2OneWord-question">What will be used to assess member's fitness level?</div>
+                <div class="listening-paper-blankWrap listening-paper-blankWrap--part2OneWord" data-q="13" aria-label="Answer box for Question 13">
+                  <span class="listening-paper-blankNumIn" aria-hidden="true">13</span>
+                  <input class="listening-paper-blank listening-paper-blank--part2OneWord" id="listening-q13" data-q="13" type="text" inputmode="text" aria-label="Answer 13" />
+                </div>
+              </div>
+
+              <div class="listening-part2OneWord-row">
+                <div class="listening-part2OneWord-question">How often is the exercise schedule reviewed?</div>
+                <div class="listening-paper-blankWrap listening-paper-blankWrap--part2OneWord" data-q="14" aria-label="Answer box for Question 14">
+                  <span class="listening-paper-blankNumIn" aria-hidden="true">14</span>
+                  <input class="listening-paper-blank listening-paper-blank--part2OneWord" id="listening-q14" data-q="14" type="text" inputmode="text" aria-label="Answer 14" />
+                </div>
+              </div>
+
+              <div class="listening-part2OneWord-row">
+                <div class="listening-part2OneWord-question">How many exercise programs are available?</div>
+                <div class="listening-paper-blankWrap listening-paper-blankWrap--part2OneWord" data-q="15" aria-label="Answer box for Question 15">
+                  <span class="listening-paper-blankNumIn" aria-hidden="true">15</span>
+                  <input class="listening-paper-blank listening-paper-blank--part2OneWord" id="listening-q15" data-q="15" type="text" inputmode="text" aria-label="Answer 15" />
+                </div>
+              </div>
+            </div>
+
+            <div class="listening-paper-nextBlock listening-part2MatchBlock" aria-label="Questions 16 to 20">
+              <div class="listening-paper-nextTitle listening-part2MatchTitle">Questions 16-20</div>
+              <div class="listening-part2MatchLead">Use the correct answer from the following next to the questions.</div>
+
+              <div class="listening-part2MatchChoices" id="listening-planChoiceBank" aria-label="Options for Questions 16 to 20">
+                <div class="listening-choiceTile" draggable="true" data-value="jogging machines" aria-label="Option jogging machines">jogging machines</div>
+                <div class="listening-choiceTile" draggable="true" data-value="Yoga studio" aria-label="Option Yoga studio">Yoga studio</div>
+                <div class="listening-choiceTile" draggable="true" data-value="Weight units" aria-label="Option Weight units">Weight units</div>
+                <div class="listening-choiceTile" draggable="true" data-value="Front-desk area" aria-label="Option Front-desk area">Front-desk area</div>
+                <div class="listening-choiceTile" draggable="true" data-value="Squash courts" aria-label="Option Squash courts">Squash courts</div>
+                <div class="listening-choiceTile" draggable="true" data-value="Shower blocks" aria-label="Option Shower blocks">Shower blocks</div>
+                <div class="listening-choiceTile" draggable="true" data-value="Swimming pool" aria-label="Option Swimming pool">Swimming pool</div>
+              </div>
+
+              <div class="listening-part2MatchPrompt">Which place is best for</div>
+
+              <div class="listening-part2MatchRows listening-paper-planAnswers" aria-label="Answers for Questions 16 to 20">
+                <div class="listening-part2MatchRow" id="listening-q16" data-q="16">
+                  <div class="listening-part2MatchQuestion">developing confidence?</div>
+                  <div class="listening-paper-blankWrap listening-paper-blankWrap--part2Match" data-q="16" aria-label="Answer box for Question 16">
+                    <span class="listening-paper-blankNumIn" aria-hidden="true">16</span>
+                    <input class="listening-paper-blank listening-paper-blank--part2Match" type="text" inputmode="text" aria-label="Answer 16" data-q="16" />
+                  </div>
+                </div>
+
+                <div class="listening-part2MatchRow" id="listening-q17" data-q="17">
+                  <div class="listening-part2MatchQuestion">reducing stress?</div>
+                  <div class="listening-paper-blankWrap listening-paper-blankWrap--part2Match" data-q="17" aria-label="Answer box for Question 17">
+                    <span class="listening-paper-blankNumIn" aria-hidden="true">17</span>
+                    <input class="listening-paper-blank listening-paper-blank--part2Match" type="text" inputmode="text" aria-label="Answer 17" data-q="17" />
+                  </div>
+                </div>
+
+                <div class="listening-part2MatchRow" id="listening-q18" data-q="18">
+                  <div class="listening-part2MatchQuestion">building fitness?</div>
+                  <div class="listening-paper-blankWrap listening-paper-blankWrap--part2Match" data-q="18" aria-label="Answer box for Question 18">
+                    <span class="listening-paper-blankNumIn" aria-hidden="true">18</span>
+                    <input class="listening-paper-blank listening-paper-blank--part2Match" type="text" inputmode="text" aria-label="Answer 18" data-q="18" />
+                  </div>
+                </div>
+
+                <div class="listening-part2MatchRow" id="listening-q19" data-q="19">
+                  <div class="listening-part2MatchQuestion">meeting others?</div>
+                  <div class="listening-paper-blankWrap listening-paper-blankWrap--part2Match" data-q="19" aria-label="Answer box for Question 19">
+                    <span class="listening-paper-blankNumIn" aria-hidden="true">19</span>
+                    <input class="listening-paper-blank listening-paper-blank--part2Match" type="text" inputmode="text" aria-label="Answer 19" data-q="19" />
+                  </div>
+                </div>
+
+                <div class="listening-part2MatchRow" id="listening-q20" data-q="20">
+                  <div class="listening-part2MatchQuestion">finding information?</div>
+                  <div class="listening-paper-blankWrap listening-paper-blankWrap--part2Match" data-q="20" aria-label="Answer box for Question 20">
+                    <span class="listening-paper-blankNumIn" aria-hidden="true">20</span>
+                    <input class="listening-paper-blank listening-paper-blank--part2Match" type="text" inputmode="text" aria-label="Answer 20" data-q="20" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <section class="listening-test-shell listening-test-shell--wide" id="listening-part-3" data-part="3" hidden>
+        <section class="listening-partBox" aria-label="Part instructions">
+          <div class="listening-partBox-title">Part 3</div>
+          <div class="listening-partBox-sub">Listen and answer questions 21-25</div>
+        </section>
+
+        <section class="listening-paper" aria-label="Part 3 question paper">
+          <div class="listening-paper-sheet">
+            <div class="listening-paper-title">Questions 21-25</div>
+            <div class="listening-paper-choiceLine">Choose the correct Answer</div>
+
+            <div class="listening-part3ChoiceBlock" aria-label="Questions 21 to 25">
+              <div class="listening-mcq-q listening-part3ChoiceQuestion" id="listening-q21" data-q="21" tabindex="-1">
+                <div class="listening-part3ChoiceStem">
+                  <span class="listening-part3ChoiceNum">21</span>
+                  <span class="listening-part3ChoiceText">The position needs someone good at</span>
+                </div>
+                <div class="listening-part3ChoiceOptions" role="radiogroup" aria-label="Question 21 options">
+                  <label class="listening-part3ChoiceOpt"><input class="listening-mcq-input" type="radio" name="listening-part3-q21" value="Computers" data-q="21" /> <span>Computers.</span></label>
+                  <label class="listening-part3ChoiceOpt"><input class="listening-mcq-input" type="radio" name="listening-part3-q21" value="Dealing with people" data-q="21" /> <span>Dealing with people.</span></label>
+                  <label class="listening-part3ChoiceOpt"><input class="listening-mcq-input" type="radio" name="listening-part3-q21" value="Arts" data-q="21" /> <span>Arts.</span></label>
+                </div>
+              </div>
+
+              <div class="listening-mcq-q listening-part3ChoiceQuestion" id="listening-q22" data-q="22" tabindex="-1">
+                <div class="listening-part3ChoiceStem">
+                  <span class="listening-part3ChoiceNum">22</span>
+                  <span class="listening-part3ChoiceText">The directors will select someone from the faculty of</span>
+                </div>
+                <div class="listening-part3ChoiceOptions" role="radiogroup" aria-label="Question 22 options">
+                  <label class="listening-part3ChoiceOpt"><input class="listening-mcq-input" type="radio" name="listening-part3-q22" value="Arts" data-q="22" /> <span>Arts.</span></label>
+                  <label class="listening-part3ChoiceOpt"><input class="listening-mcq-input" type="radio" name="listening-part3-q22" value="Computing" data-q="22" /> <span>Computing.</span></label>
+                  <label class="listening-part3ChoiceOpt"><input class="listening-mcq-input" type="radio" name="listening-part3-q22" value="Business" data-q="22" /> <span>Business.</span></label>
+                </div>
+              </div>
+
+              <div class="listening-mcq-q listening-part3ChoiceQuestion" id="listening-q23" data-q="23" tabindex="-1">
+                <div class="listening-part3ChoiceStem">
+                  <span class="listening-part3ChoiceNum">23</span>
+                  <span class="listening-part3ChoiceText">The position will require the person to</span>
+                </div>
+                <div class="listening-part3ChoiceOptions" role="radiogroup" aria-label="Question 23 options">
+                  <label class="listening-part3ChoiceOpt"><input class="listening-mcq-input" type="radio" name="listening-part3-q23" value="Work long hours" data-q="23" /> <span>Work long hours.</span></label>
+                  <label class="listening-part3ChoiceOpt"><input class="listening-mcq-input" type="radio" name="listening-part3-q23" value="Train others" data-q="23" /> <span>Train others.</span></label>
+                  <label class="listening-part3ChoiceOpt"><input class="listening-mcq-input" type="radio" name="listening-part3-q23" value="Do weekend work" data-q="23" /> <span>Do weekend work.</span></label>
+                </div>
+              </div>
+
+              <div class="listening-mcq-q listening-part3ChoiceQuestion" id="listening-q24" data-q="24" tabindex="-1">
+                <div class="listening-part3ChoiceStem">
+                  <span class="listening-part3ChoiceNum">24</span>
+                  <span class="listening-part3ChoiceText">The position will come with a</span>
+                </div>
+                <div class="listening-part3ChoiceOptions" role="radiogroup" aria-label="Question 24 options">
+                  <label class="listening-part3ChoiceOpt"><input class="listening-mcq-input" type="radio" name="listening-part3-q24" value="Car" data-q="24" /> <span>Car.</span></label>
+                  <label class="listening-part3ChoiceOpt"><input class="listening-mcq-input" type="radio" name="listening-part3-q24" value="Parking space" data-q="24" /> <span>Parking space.</span></label>
+                  <label class="listening-part3ChoiceOpt"><input class="listening-mcq-input" type="radio" name="listening-part3-q24" value="Much better salary" data-q="24" /> <span>Much better salary.</span></label>
+                </div>
+              </div>
+
+              <div class="listening-mcq-q listening-part3ChoiceQuestion" id="listening-q25" data-q="25" tabindex="-1">
+                <div class="listening-part3ChoiceStem">
+                  <span class="listening-part3ChoiceNum">25</span>
+                  <span class="listening-part3ChoiceText">The best aspect of the job is it</span>
+                </div>
+                <div class="listening-part3ChoiceOptions" role="radiogroup" aria-label="Question 25 options">
+                  <label class="listening-part3ChoiceOpt"><input class="listening-mcq-input" type="radio" name="listening-part3-q25" value="Gives more responsibility" data-q="25" /> <span>Gives more responsibility.</span></label>
+                  <label class="listening-part3ChoiceOpt"><input class="listening-mcq-input" type="radio" name="listening-part3-q25" value="Comes with a private office" data-q="25" /> <span>Comes with a private office.</span></label>
+                  <label class="listening-part3ChoiceOpt"><input class="listening-mcq-input" type="radio" name="listening-part3-q25" value="Is a step to higher positions" data-q="25" /> <span>Is a step to higher positions</span></label>
+                </div>
+              </div>
+            </div>
+
+            <div class="listening-paper-nextBlock listening-part3TableBlock" aria-label="Questions 26 to 30">
+              <div class="listening-paper-nextTitle">Questions 26-30</div>
+              <div class="listening-paper-nextLine">Complete the table.</div>
+              <div class="listening-paper-nextLine">Write <strong>NO MORE THAN TWO WORDS OR A NUMBER</strong> for each answer</div>
+
+              <div class="listening-part3TableWrap" aria-label="Candidates table for Questions 26 to 30">
+                <table class="listening-part3Table">
+                  <thead>
+                    <tr>
+                      <th rowspan="2"></th>
+                      <th colspan="4">Candidates</th>
+                    </tr>
+                    <tr>
+                      <th>Steven</th>
+                      <th>Abdul</th>
+                      <th>Lek</th>
+                      <th>Oscar</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="listening-part3TableRowHead">Years of<br />Experience</td>
+                      <td>
+                        <div class="listening-paper-blankWrap listening-part3TableBlank" data-q="26" aria-label="Answer box for Question 26">
+                          <span class="listening-paper-blankNumIn" aria-hidden="true">26</span>
+                          <input class="listening-paper-blank" id="listening-q26" data-q="26" type="text" inputmode="text" aria-label="Answer 26" />
+                        </div>
+                      </td>
+                      <td class="listening-part3TableValueCell">7</td>
+                      <td class="listening-part3TableValueCell">8</td>
+                      <td class="listening-part3TableValueCell">12</td>
+                    </tr>
+                    <tr>
+                      <td class="listening-part3TableRowHead">Qualification</td>
+                      <td class="listening-part3TableValueCell--left">MBA</td>
+                      <td>
+                        <div class="listening-paper-blankWrap listening-part3TableBlank" data-q="27" aria-label="Answer box for Question 27">
+                          <span class="listening-paper-blankNumIn" aria-hidden="true">27</span>
+                          <input class="listening-paper-blank" id="listening-q27" data-q="27" type="text" inputmode="text" aria-label="Answer 27" />
+                        </div>
+                      </td>
+                      <td class="listening-part3TableValueCell--left">degree</td>
+                      <td class="listening-part3TableValueCell--left">Certificates</td>
+                    </tr>
+                    <tr>
+                      <td class="listening-part3TableRowHead">Possible<br />Concerns</td>
+                      <td>
+                        <div class="listening-paper-blankWrap listening-part3TableBlank" data-q="28" aria-label="Answer box for Question 28">
+                          <span class="listening-paper-blankNumIn" aria-hidden="true">28</span>
+                          <input class="listening-paper-blank" id="listening-q28" data-q="28" type="text" inputmode="text" aria-label="Answer 28" />
+                        </div>
+                      </td>
+                      <td class="listening-part3TableValueCell--left">limited<br />English</td>
+                      <td>
+                        <div class="listening-paper-blankWrap listening-part3TableBlank" data-q="29" aria-label="Answer box for Question 29">
+                          <span class="listening-paper-blankNumIn" aria-hidden="true">29</span>
+                          <input class="listening-paper-blank" id="listening-q29" data-q="29" type="text" inputmode="text" aria-label="Answer 29" />
+                        </div>
+                      </td>
+                      <td>
+                        <div class="listening-paper-blankWrap listening-part3TableBlank" data-q="30" aria-label="Answer box for Question 30">
+                          <span class="listening-paper-blankNumIn" aria-hidden="true">30</span>
+                          <input class="listening-paper-blank" id="listening-q30" data-q="30" type="text" inputmode="text" aria-label="Answer 30" />
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <section class="listening-test-shell listening-test-shell--wide" id="listening-part-4" data-part="4" hidden>
+        <section class="listening-partBox" aria-label="Part instructions">
+          <div class="listening-partBox-title">Part 4</div>
+          <div class="listening-partBox-sub">Listen and answer questions 31-40</div>
+        </section>
+
+        <section class="listening-paper" aria-label="Part 4 question paper">
+          <div class="listening-paper-sheet">
+            <div class="listening-paper-title">Questions 31-33</div>
+            <div class="listening-paper-nextLine">Choose the correct answer.</div>
+
+            <div class="listening-part4ChoiceBlock" aria-label="Questions 31 to 33">
+              <div class="listening-mcq-q listening-part4ChoiceQuestion" id="listening-q31" data-q="31" tabindex="-1">
+                <div class="listening-part4ChoiceStem">
+                  <span class="listening-part4ChoiceNum">31</span>
+                  <span class="listening-part4ChoiceText">Caves are</span>
+                </div>
+                <div class="listening-part4ChoiceOptions" role="radiogroup" aria-label="Question 31 options">
+                  <label class="listening-part4ChoiceOpt"><input class="listening-mcq-input" type="radio" name="listening-part4-q31" value="Often ignored" data-q="31" /> <span>Often ignored</span></label>
+                  <label class="listening-part4ChoiceOpt"><input class="listening-mcq-input" type="radio" name="listening-part4-q31" value="Mostly in remote areas" data-q="31" /> <span>Mostly in remote areas</span></label>
+                  <label class="listening-part4ChoiceOpt"><input class="listening-mcq-input" type="radio" name="listening-part4-q31" value="Often difficult to explore" data-q="31" /> <span>Often difficult to explore</span></label>
+                </div>
+              </div>
+
+              <div class="listening-mcq-q listening-part4ChoiceQuestion" id="listening-q32" data-q="32" tabindex="-1">
+                <div class="listening-part4ChoiceStem">
+                  <span class="listening-part4ChoiceNum">32</span>
+                  <span class="listening-part4ChoiceText">People who explore caves</span>
+                </div>
+                <div class="listening-part4ChoiceOptions" role="radiogroup" aria-label="Question 32 options">
+                  <label class="listening-part4ChoiceOpt"><input class="listening-mcq-input" type="radio" name="listening-part4-q32" value="Mostly need to know about cartography" data-q="32" /> <span>Mostly need to know about cartography</span></label>
+                  <label class="listening-part4ChoiceOpt"><input class="listening-mcq-input" type="radio" name="listening-part4-q32" value="Enjoy overcoming the difficulties" data-q="32" /> <span>Enjoy overcoming the difficulties</span></label>
+                  <label class="listening-part4ChoiceOpt"><input class="listening-mcq-input" type="radio" name="listening-part4-q32" value="Usually know about cave sciences" data-q="32" /> <span>Usually know about cave sciences</span></label>
+                </div>
+              </div>
+
+              <div class="listening-mcq-q listening-part4ChoiceQuestion" id="listening-q33" data-q="33" tabindex="-1">
+                <div class="listening-part4ChoiceStem">
+                  <span class="listening-part4ChoiceNum">33</span>
+                  <span class="listening-part4ChoiceText">China has</span>
+                </div>
+                <div class="listening-part4ChoiceOptions" role="radiogroup" aria-label="Question 33 options">
+                  <label class="listening-part4ChoiceOpt"><input class="listening-mcq-input" type="radio" name="listening-part4-q33" value="Probably the most undiscovered caves" data-q="33" /> <span>Probably the most undiscovered caves</span></label>
+                  <label class="listening-part4ChoiceOpt"><input class="listening-mcq-input" type="radio" name="listening-part4-q33" value="A growing number of cave explorers" data-q="33" /> <span>A growing number of cave explorers</span></label>
+                  <label class="listening-part4ChoiceOpt"><input class="listening-mcq-input" type="radio" name="listening-part4-q33" value="Some of the best documented caves" data-q="33" /> <span>Some of the best documented caves</span></label>
+                </div>
+              </div>
+            </div>
+
+            <section class="listening-partBox listening-partBox--paperBreak" aria-label="Questions 34 to 40">
+              <div class="listening-partBox-sub listening-partBox-sub--solo">Questions 34-40</div>
+            </section>
+
+            <div class="listening-paper-instructionTitle">Complete the table and notes.</div>
+            <div class="listening-paper-instructionSub">Write <b>NO MORE THAN TWO WORDS OR A NUMBER</b> for each answer.</div>
+
+            <div class="listening-paper-blockTitle listening-paper-blockTitle--spaced">Three Main Reasons for Cave Formation</div>
+
+            <div class="listening-part4FormationBlock" aria-label="Questions 34 to 40 table and notes">
+              <div class="listening-part4FormationWrap" aria-label="Cave formation notes table">
+                <table class="listening-part4FormationTable" aria-label="Questions 34 to 40 cave formation table">
+                <tbody>
+                  <tr>
+                    <th>Dissolution</th>
+                    <th>Volcanic Lava Tubes</th>
+                    <th>Action of Waves</th>
+                  </tr>
+
+                  <tr>
+                    <td>
+                      mainly<br />
+                      involves<br />
+                      <span class="listening-paper-blankWrap listening-part4FormationBlank" data-q="34" aria-label="Answer box for Question 34">
+                        <span class="listening-paper-blankNumIn" aria-hidden="true">34</span>
+                        <input class="listening-paper-blank listening-paper-blank--formation" id="listening-q34" data-q="34" type="text" inputmode="text" aria-label="Answer 34" />
+                      </span>
+                    </td>
+                    <td>
+                      topmost surface<br />
+                      cools down and<br />
+                      <span class="listening-paper-blankWrap listening-part4FormationBlank" data-q="35" aria-label="Answer box for Question 35">
+                        <span class="listening-paper-blankNumIn" aria-hidden="true">35</span>
+                        <input class="listening-paper-blank listening-paper-blank--formation" id="listening-q35" data-q="35" type="text" inputmode="text" aria-label="Answer 35" />
+                      </span>
+                      hotter<br />
+                      lava continue to flow<br />
+                      beneath
+                    </td>
+                    <td>
+                      waves pound in to cliffs then<br />
+                      erode into
+                      <span class="listening-paper-blankWrap listening-part4FormationBlank" data-q="36" aria-label="Answer box for Question 36">
+                        <span class="listening-paper-blankNumIn" aria-hidden="true">36</span>
+                        <input class="listening-paper-blank listening-paper-blank--formation" id="listening-q36" data-q="36" type="text" inputmode="text" aria-label="Answer 36" />
+                      </span>
+                      or less<br />
+                      rigid rocks.
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td>Limestone<br />caves</td>
+                    <td colspan="2">
+                      often have formations made of
+                      <span class="listening-paper-blankWrap listening-part4FormationBlank" data-q="37" aria-label="Answer box for Question 37">
+                        <span class="listening-paper-blankNumIn" aria-hidden="true">37</span>
+                        <input class="listening-paper-blank listening-paper-blank--formation" id="listening-q37" data-q="37" type="text" inputmode="text" aria-label="Answer 37" />
+                      </span>
+                      carbonate<br />
+                      e.g. stalactites, stalagmites, and
+                      <span class="listening-paper-blankWrap listening-part4FormationBlank" data-q="38" aria-label="Answer box for Question 38">
+                        <span class="listening-paper-blankNumIn" aria-hidden="true">38</span>
+                        <input class="listening-paper-blank listening-paper-blank--formation" id="listening-q38" data-q="38" type="text" inputmode="text" aria-label="Answer 38" />
+                      </span>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td>e.g.<br />Lechuguilla</td>
+                    <td colspan="2">
+                      finally revealed in
+                      <span class="listening-paper-blankWrap listening-part4FormationBlank" data-q="39" aria-label="Answer box for Question 39">
+                        <span class="listening-paper-blankNumIn" aria-hidden="true">39</span>
+                        <input class="listening-paper-blank listening-paper-blank--formation" id="listening-q39" data-q="39" type="text" inputmode="text" aria-label="Answer 39" />
+                      </span>
+                      <br />
+                      interestingly, formed from the
+                      <span class="listening-paper-blankWrap listening-part4FormationBlank" data-q="40" aria-label="Answer box for Question 40">
+                        <span class="listening-paper-blankNumIn" aria-hidden="true">40</span>
+                        <input class="listening-paper-blank listening-paper-blank--formation" id="listening-q40" data-q="40" type="text" inputmode="text" aria-label="Answer 40" />
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <div class="listening-sideArrows" aria-label="Question navigation">
+      <button class="listening-sideArrow listening-sideArrow--prev" type="button" data-dir="prev" aria-label="Scroll up">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+      <button class="listening-sideArrow listening-sideArrow--next" type="button" data-dir="next" aria-label="Scroll down">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+    </div>
+
+    <nav class="listening-bottomBar" aria-label="Test navigation">
+      <div class="listening-bottomBar-inner" id="listeningBottomBar">
+        <div
+          class="listening-bottomPart listening-bottomPart--active listening-bottomPart--expanded"
+          data-part="1"
+          role="button"
+          tabindex="0"
+          aria-expanded="true"
+          aria-label="Part 1 navigation"
+        >
+          <span class="listening-bottomPart-label">Part 1</span>
+          <span class="listening-bottomPart-meta" hidden>0 of 10</span>
+          <div class="listening-bottomQuestions" aria-label="Questions 1 to 10">
+            <a class="listening-bottomQ listening-bottomQ--current" href="#listening-q1" data-q="1" aria-current="page">1</a>
+            <a class="listening-bottomQ" href="#listening-q2" data-q="2">2</a>
+            <a class="listening-bottomQ" href="#listening-q3" data-q="3">3</a>
+            <a class="listening-bottomQ" href="#listening-q4" data-q="4">4</a>
+            <a class="listening-bottomQ" href="#listening-q5" data-q="5">5</a>
+            <a class="listening-bottomQ" href="#listening-q6" data-q="6">6</a>
+            <a class="listening-bottomQ" href="#listening-q7" data-q="7">7</a>
+            <a class="listening-bottomQ" href="#listening-q8" data-q="8">8</a>
+            <a class="listening-bottomQ" href="#listening-q9" data-q="9">9</a>
+            <a class="listening-bottomQ" href="#listening-q10" data-q="10">10</a>
+          </div>
+        </div>
+
+        <div
+          class="listening-bottomPart"
+          data-part="2"
+          role="button"
+          tabindex="0"
+          aria-expanded="false"
+          aria-label="Part 2 status"
+        >
+          <span class="listening-bottomPart-label">Part 2</span>
+          <span class="listening-bottomPart-meta">11 of 20</span>
+          <div class="listening-bottomQuestions" aria-label="Questions 11 to 20" hidden>
+            <a class="listening-bottomQ" href="#listening-q11" data-q="11">11</a>
+            <a class="listening-bottomQ" href="#listening-q12" data-q="12">12</a>
+            <a class="listening-bottomQ" href="#listening-q13" data-q="13">13</a>
+            <a class="listening-bottomQ" href="#listening-q14" data-q="14">14</a>
+            <a class="listening-bottomQ" href="#listening-q15" data-q="15">15</a>
+            <a class="listening-bottomQ" href="#listening-q16" data-q="16">16</a>
+            <a class="listening-bottomQ" href="#listening-q17" data-q="17">17</a>
+            <a class="listening-bottomQ" href="#listening-q18" data-q="18">18</a>
+            <a class="listening-bottomQ" href="#listening-q19" data-q="19">19</a>
+            <a class="listening-bottomQ" href="#listening-q20" data-q="20">20</a>
+          </div>
+        </div>
+
+        <div
+          class="listening-bottomPart"
+          data-part="3"
+          role="button"
+          tabindex="0"
+          aria-expanded="false"
+          aria-label="Part 3 status"
+        >
+          <span class="listening-bottomPart-label">Part 3</span>
+          <span class="listening-bottomPart-meta">21 of 30</span>
+          <div class="listening-bottomQuestions" aria-label="Questions 21 to 30" hidden>
+            <a class="listening-bottomQ" href="#listening-q21" data-q="21">21</a>
+            <a class="listening-bottomQ" href="#listening-q22" data-q="22">22</a>
+            <a class="listening-bottomQ" href="#listening-q23" data-q="23">23</a>
+            <a class="listening-bottomQ" href="#listening-q24" data-q="24">24</a>
+            <a class="listening-bottomQ" href="#listening-q25" data-q="25">25</a>
+            <a class="listening-bottomQ" href="#listening-q26" data-q="26">26</a>
+            <a class="listening-bottomQ" href="#listening-q27" data-q="27">27</a>
+            <a class="listening-bottomQ" href="#listening-q28" data-q="28">28</a>
+            <a class="listening-bottomQ" href="#listening-q29" data-q="29">29</a>
+            <a class="listening-bottomQ" href="#listening-q30" data-q="30">30</a>
+          </div>
+        </div>
+
+        <div
+          class="listening-bottomPart"
+          data-part="4"
+          role="button"
+          tabindex="0"
+          aria-expanded="false"
+          aria-label="Part 4 status"
+        >
+          <span class="listening-bottomPart-label">Part 4</span>
+          <span class="listening-bottomPart-meta">31 of 40</span>
+          <div class="listening-bottomQuestions" aria-label="Questions 31 to 40" hidden>
+            <a class="listening-bottomQ" href="#listening-q31" data-q="31">31</a>
+            <a class="listening-bottomQ" href="#listening-q32" data-q="32">32</a>
+            <a class="listening-bottomQ" href="#listening-q33" data-q="33">33</a>
+            <a class="listening-bottomQ" href="#listening-q34" data-q="34">34</a>
+            <a class="listening-bottomQ" href="#listening-q35" data-q="35">35</a>
+            <a class="listening-bottomQ" href="#listening-q36" data-q="36">36</a>
+            <a class="listening-bottomQ" href="#listening-q37" data-q="37">37</a>
+            <a class="listening-bottomQ" href="#listening-q38" data-q="38">38</a>
+            <a class="listening-bottomQ" href="#listening-q39" data-q="39">39</a>
+            <a class="listening-bottomQ" href="#listening-q40" data-q="40">40</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <script>
+      (function () {
+        var listeningAudio = document.getElementById('listeningAudio');
+        var volumeEl = document.getElementById('volume');
+
+        var audioCtx = null;
+        var gainNode = null;
+        var mediaSource = null;
+
+        var VOLUME_KEY = 'ieltsListeningVolume';
+
+        var AUDIO_TIME_KEY = 'ieltsListeningAudioTime';
+        var AUDIO_PLAY_KEY = 'ieltsListeningAudioPlay';
+
+        function clamp01(n) {
+          var x = Number(n);
+          if (!Number.isFinite(x)) return 0;
+          if (x < 0) return 0;
+          if (x > 1) return 1;
+          return x;
+        }
+
+        function clamp100(n) {
+          var x = Number(n);
+          if (!Number.isFinite(x)) return 0;
+          if (x < 0) return 0;
+          if (x > 100) return 100;
+          return x;
+        }
+
+        function syncVolumeSliderUi() {
+          try {
+            if (!volumeEl) return;
+            volumeEl.style.setProperty('--vol', String(volumeEl.value || 0));
+          } catch (_) {}
+        }
+
+        function getStoredVolume() {
+          try {
+            var raw = sessionStorage.getItem(VOLUME_KEY);
+            if (raw === null) return null;
+            var v = Number.parseFloat(String(raw));
+            return Number.isFinite(v) ? clamp01(v) : null;
+          } catch (_) {
+            return null;
+          }
+        }
+
+        function setStoredVolume(v) {
+          try {
+            sessionStorage.setItem(VOLUME_KEY, String(clamp01(v)));
+          } catch (_) {}
+        }
+
+        function applyVolume01(v01) {
+          var v = clamp01(v01);
+
+          function ensureAudioGraph(allowCreate) {
+            if (!listeningAudio) return false;
+            if (gainNode) return true;
+            if (!allowCreate) return false;
+
+            try {
+              var Ctx = window.AudioContext || window.webkitAudioContext;
+              if (!Ctx) return false;
+
+              audioCtx = audioCtx || new Ctx();
+              try {
+                if (audioCtx && audioCtx.state === 'suspended' && audioCtx.resume) audioCtx.resume();
+              } catch (_) {}
+
+              // MediaElementSource can only be created once per element.
+              mediaSource = mediaSource || audioCtx.createMediaElementSource(listeningAudio);
+              gainNode = gainNode || audioCtx.createGain();
+              mediaSource.connect(gainNode);
+              gainNode.connect(audioCtx.destination);
+
+              // When using Web Audio gain, keep element volume at 1.
+              try {
+                listeningAudio.volume = 1;
+              } catch (_) {}
+
+              return true;
+            } catch (_) {
+              return false;
+            }
+          }
+
+          // If this call is triggered by a user gesture (e.g. slider input),
+          // Web Audio will be allowed in more browsers.
+          var haveGraph = ensureAudioGraph(false);
+          if (haveGraph && gainNode) {
+            try {
+              gainNode.gain.value = v;
+            } catch (_) {}
+          } else if (listeningAudio) {
+            try {
+              listeningAudio.volume = v;
+            } catch (_) {}
+          }
+
+          setStoredVolume(v);
+
+          if (volumeEl) {
+            try {
+              volumeEl.value = String(Math.round(v * 100));
+              syncVolumeSliderUi();
+            } catch (_) {}
+          }
+        }
+
+        (function initVolumeControl() {
+          var stored = getStoredVolume();
+          if (stored !== null) {
+            applyVolume01(stored);
+            return;
+          }
+
+          // Default: keep current audio volume (or slider's default 70).
+          var initial01 = 0.7;
+          try {
+            if (listeningAudio && typeof listeningAudio.volume === 'number') initial01 = clamp01(listeningAudio.volume);
+          } catch (_) {}
+          applyVolume01(initial01);
+        })();
+
+        if (volumeEl) {
+          try {
+            volumeEl.addEventListener('input', function () {
+              var v = clamp100(volumeEl.value);
+
+              // On user gesture, try to initialize Web Audio graph
+              // so volume control works across browsers.
+              try {
+                var Ctx = window.AudioContext || window.webkitAudioContext;
+                if (Ctx && listeningAudio && !gainNode) {
+                  audioCtx = audioCtx || new Ctx();
+                  try {
+                    if (audioCtx && audioCtx.state === 'suspended' && audioCtx.resume) audioCtx.resume();
+                  } catch (_) {}
+                  try {
+                    mediaSource = mediaSource || audioCtx.createMediaElementSource(listeningAudio);
+                    gainNode = gainNode || audioCtx.createGain();
+                    mediaSource.connect(gainNode);
+                    gainNode.connect(audioCtx.destination);
+                    try {
+                      listeningAudio.volume = 1;
+                    } catch (_) {}
+                  } catch (_) {}
+                }
+              } catch (_) {}
+
+              var v01 = v / 100;
+              if (gainNode) {
+                try {
+                  gainNode.gain.value = clamp01(v01);
+                } catch (_) {}
+                setStoredVolume(clamp01(v01));
+                syncVolumeSliderUi();
+              } else {
+                applyVolume01(v01);
+              }
+            });
+          } catch (_) {}
+        }
+
+        function getStoredTime() {
+          try {
+            var raw = sessionStorage.getItem(AUDIO_TIME_KEY);
+            var t = Number.parseFloat(String(raw || '0'));
+            return Number.isFinite(t) && t > 0 ? t : 0;
+          } catch (_) {
+            return 0;
+          }
+        }
+
+        function setStoredTime(t) {
+          try {
+            var n = Number(t);
+            if (!Number.isFinite(n) || n < 0) n = 0;
+            sessionStorage.setItem(AUDIO_TIME_KEY, String(n));
+          } catch (_) {}
+        }
+
+        // Audio must always play during the test. Avoid persisting a "paused" flag
+        // (it can get stuck if autoplay is blocked once).
+        function getStoredShouldPlay(_defaultValue) {
+          return true;
+        }
+
+        function setStoredShouldPlay(_shouldPlay) {
+          // No-op (kept for backwards compatibility with older saved state).
+        }
+
+        function snapshotAudioState() {
+          if (!listeningAudio) return;
+          try {
+            setStoredTime(listeningAudio.currentTime || 0);
+          } catch (_) {}
+        }
+
+        var firstGestureHooked = false;
+        function attachFirstGestureAudioStart() {
+          if (!listeningAudio) return;
+          if (firstGestureHooked) return;
+          firstGestureHooked = true;
+
+          var startOnce = function () {
+            try {
+              listeningAudio.play();
+            } catch (_) {}
+          };
+
+          try {
+            document.addEventListener('pointerdown', startOnce, { capture: true, once: true });
+            document.addEventListener('keydown', startOnce, { capture: true, once: true });
+          } catch (_) {
+            document.addEventListener('click', startOnce, true);
+          }
+        }
+
+        function tryPlayListeningAudio() {
+          if (!listeningAudio) return;
+          try {
+            var p = listeningAudio.play();
+            if (p && typeof p.catch === 'function') {
+              p.catch(function () {
+                // Autoplay is often blocked; fall back to first user gesture.
+                attachFirstGestureAudioStart();
+              });
+            }
+          } catch (_) {
+            attachFirstGestureAudioStart();
+          }
+        }
+
+        // Best-effort: autoplay on load.
+        (function initPersistentAudio() {
+          if (!listeningAudio) return;
+
+          // Restore position (if any) before attempting to play.
+          var desiredTime = getStoredTime();
+          // Part 1 is where audio starts on first entry.
+          var shouldPlay = getStoredShouldPlay(true);
+
+          try {
+            // Prevent starting from 0 before we restore time.
+            listeningAudio.pause();
+          } catch (_) {}
+
+          // If autoplay is blocked or metadata is delayed until interaction,
+          // ensure we have a user-gesture fallback ready.
+          if (shouldPlay) {
+            attachFirstGestureAudioStart();
+            try {
+              // Hint the browser to begin fetching metadata/data.
+              if (typeof listeningAudio.load === 'function') listeningAudio.load();
+            } catch (_) {}
+          }
+
+          function restoreAndMaybePlay() {
+            if (!listeningAudio) return;
+
+            var didSeek = false;
+            try {
+              if (desiredTime > 0 && Number.isFinite(listeningAudio.duration) && listeningAudio.duration > 0) {
+                var t = desiredTime;
+                if (t > listeningAudio.duration - 0.25) t = Math.max(0, listeningAudio.duration - 0.25);
+                try {
+                  listeningAudio.currentTime = t;
+                  didSeek = true;
+                } catch (_) {}
+              }
+            } catch (_) {}
+
+            if (!shouldPlay) return;
+
+            // If we sought, wait for seek to complete before playing.
+            if (didSeek) {
+              var played = false;
+              var playOnce = function () {
+                if (played) return;
+                played = true;
+                tryPlayListeningAudio();
+              };
+              try {
+                listeningAudio.addEventListener('seeked', playOnce, { once: true });
+              } catch (_) {}
+              window.setTimeout(playOnce, 200);
+              return;
+            }
+
+            tryPlayListeningAudio();
+          }
+
+          try {
+            // Attempt early, then again when metadata/canplay arrives.
+            window.setTimeout(restoreAndMaybePlay, 0);
+            listeningAudio.addEventListener('loadedmetadata', restoreAndMaybePlay, { once: true });
+            listeningAudio.addEventListener('canplay', restoreAndMaybePlay, { once: true });
+          } catch (_) {}
+
+          // Persist on navigation.
+          try {
+            window.addEventListener('pagehide', snapshotAudioState);
+            window.addEventListener('beforeunload', snapshotAudioState);
+          } catch (_) {}
+
+          // Persist when the tab is backgrounded (helps on mobile).
+          try {
+            document.addEventListener('visibilitychange', function () {
+              if (document.visibilityState === 'hidden') snapshotAudioState();
+            });
+          } catch (_) {}
+
+          // Persist right before clicking any link/navigation.
+          try {
+            document.addEventListener(
+              'click',
+              function (e) {
+                var el = e.target;
+                if (!el || !el.closest) return;
+                var a = el.closest('a');
+                if (!a) return;
+                snapshotAudioState();
+              },
+              true
+            );
+          } catch (_) {}
+
+          // Keep time fresh while playing (throttled).
+          var lastSave = 0;
+          try {
+            listeningAudio.addEventListener('timeupdate', function () {
+              var now = Date.now();
+              if (now - lastSave < 1500) return;
+              lastSave = now;
+              snapshotAudioState();
+            });
+            listeningAudio.addEventListener('play', snapshotAudioState);
+            listeningAudio.addEventListener('pause', snapshotAudioState);
+            listeningAudio.addEventListener(
+              'ended',
+              function () {
+                // Mark as complete and navigate to the end screen.
+                try {
+                  setStoredTime(0);
+                } catch (_) {}
+
+                try {
+                  window.location.href = 'ielts-listening-ended-basic-paper1.html';
+                } catch (_) {
+                  try {
+                    window.location.assign('ielts-listening-ended-basic-paper1.html');
+                  } catch (_) {}
+                }
+              },
+              { once: true }
+            );
+          } catch (_) {}
+        })();
+
+        var optionsButton = document.getElementById('optionsMenuButton');
+
+        var optionsModal = document.getElementById('optionsModal');
+        var optionsModalClose = document.getElementById('optionsModalClose');
+        var contrastBtn = document.getElementById('optionsContrast');
+        var textSizeBtn = document.getElementById('optionsTextSize');
+        var optionsBackBtn = document.getElementById('optionsModalBack');
+        var optionsHeaderTitle = document.getElementById('optionsModalHeaderTitle');
+        var optionsViewMain = document.getElementById('optionsViewMain');
+        var optionsViewContrast = document.getElementById('optionsViewContrast');
+
+        var CONTRAST_KEY = 'ieltsOptionsContrast';
+        var TEXT_SIZE_KEY = 'ieltsOptionsTextSize';
+
+        var CONTRAST_MODES = ['bw', 'wb', 'yb'];
+        var TEXT_SIZES = ['default', 'lg', 'xl'];
+
+        function normalizeContrast(value) {
+          var v = String(value || 'bw');
+          return CONTRAST_MODES.indexOf(v) >= 0 ? v : 'bw';
+        }
+
+        function normalizeTextSize(value) {
+          var v = String(value || 'default');
+          return TEXT_SIZES.indexOf(v) >= 0 ? v : 'default';
+        }
+
+        function setView(name) {
+          if (!optionsViewMain || !optionsViewContrast) return;
+
+          var isContrast = name === 'contrast';
+          optionsViewMain.hidden = isContrast;
+          optionsViewContrast.hidden = !isContrast;
+
+          if (optionsBackBtn) optionsBackBtn.hidden = !isContrast;
+          if (optionsHeaderTitle) optionsHeaderTitle.textContent = isContrast ? 'Contrast' : 'Options';
+        }
+
+        function getStoredContrast() {
+          try {
+            return normalizeContrast(window.localStorage.getItem(CONTRAST_KEY) || 'bw');
+          } catch (_) {
+            return 'bw';
+          }
+        }
+
+        function setStoredContrast(mode) {
+          try {
+            window.localStorage.setItem(CONTRAST_KEY, normalizeContrast(mode));
+          } catch (_) {}
+        }
+
+        function getStoredTextSize() {
+          try {
+            return normalizeTextSize(window.localStorage.getItem(TEXT_SIZE_KEY) || 'default');
+          } catch (_) {
+            return 'default';
+          }
+        }
+
+        function setStoredTextSize(value) {
+          try {
+            window.localStorage.setItem(TEXT_SIZE_KEY, normalizeTextSize(value));
+          } catch (_) {}
+        }
+
+        function updateContrastChecks() {
+          if (!optionsViewContrast) return;
+          var selected = getStoredContrast();
+          var choices = optionsViewContrast.querySelectorAll('[data-contrast]');
+          for (var i = 0; i < choices.length; i++) {
+            var el = choices[i];
+            var mode = el.getAttribute('data-contrast');
+            var isSelected = mode === selected;
+            el.classList.toggle('is-selected', isSelected);
+            el.setAttribute('aria-checked', isSelected ? 'true' : 'false');
+          }
+        }
+
+        function applyPreferences() {
+          var root = document.documentElement;
+          if (!root) return;
+
+          var contrast = getStoredContrast();
+          var textSize = getStoredTextSize();
+
+          root.classList.remove('options-contrast-bw', 'options-contrast-wb', 'options-contrast-yb');
+          root.classList.add('options-contrast-' + contrast);
+
+          root.classList.remove('options-text-lg', 'options-text-xl');
+          if (textSize === 'lg') root.classList.add('options-text-lg');
+          if (textSize === 'xl') root.classList.add('options-text-xl');
+        }
+
+        function closeOptions() {
+          if (!optionsModal) return;
+          optionsModal.hidden = true;
+          if (optionsButton) optionsButton.setAttribute('aria-expanded', 'false');
+          setView('main');
+        }
+
+        function openOptions() {
+          if (!optionsModal) return;
+          optionsModal.hidden = false;
+          if (optionsButton) optionsButton.setAttribute('aria-expanded', 'true');
+          if (optionsModalClose) optionsModalClose.focus();
+          setView('main');
+          updateContrastChecks();
+        }
+
+        function toggleOptions() {
+          if (!optionsModal) return;
+          if (optionsModal.hidden) openOptions();
+          else closeOptions();
+        }
+
+        applyPreferences();
+        updateContrastChecks();
+
+        if (optionsButton && optionsModal) {
+          optionsButton.setAttribute('aria-haspopup', 'dialog');
+          optionsButton.setAttribute('aria-controls', 'optionsModal');
+          optionsButton.setAttribute('aria-expanded', 'false');
+
+          optionsButton.addEventListener('click', function (e) {
+            e.preventDefault();
+            toggleOptions();
+          });
+        }
+
+        if (optionsModalClose) {
+          optionsModalClose.addEventListener('click', function (e) {
+            e.preventDefault();
+            closeOptions();
+          });
+        }
+
+        if (optionsBackBtn) {
+          optionsBackBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            setView('main');
+          });
+        }
+
+        document.addEventListener('keydown', function (e) {
+          if (e.key !== 'Escape') return;
+          closeOptions();
+        });
+
+        if (contrastBtn) {
+          contrastBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            setView('contrast');
+            updateContrastChecks();
+          });
+        }
+
+        if (optionsViewContrast) {
+          optionsViewContrast.addEventListener('click', function (e) {
+            var target = e.target;
+            if (!(target instanceof Element)) return;
+            var choice = target.closest('[data-contrast]');
+            if (!choice) return;
+            e.preventDefault();
+            var mode = choice.getAttribute('data-contrast');
+            setStoredContrast(mode);
+            applyPreferences();
+            updateContrastChecks();
+          });
+        }
+
+        if (textSizeBtn) {
+          textSizeBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            var current = getStoredTextSize();
+            var idx = TEXT_SIZES.indexOf(current);
+            var next = TEXT_SIZES[(idx + 1) % TEXT_SIZES.length] || 'default';
+            setStoredTextSize(next);
+            applyPreferences();
+          });
+        }
+
+        function syncPaperBlankState(input) {
+          if (!input) return;
+          var wrap = input.closest('.listening-paper-blankWrap');
+          if (!wrap) return;
+          var hasValue = String(input.value || '').trim().length > 0;
+          wrap.classList.toggle('listening-paper-blankWrap--filled', hasValue);
+        }
+
+        function setActiveQuestionBox(q) {
+          var n = Number.parseInt(String(q || ''), 10);
+          if (!Number.isFinite(n)) return;
+
+          try {
+            var prevActive = document.querySelectorAll('.listening-paper-blankWrap--active');
+            for (var i = 0; i < prevActive.length; i++) prevActive[i].classList.remove('listening-paper-blankWrap--active');
+          } catch (_) {}
+
+          try {
+            var prevMcq = document.querySelectorAll('.listening-mcq-q.is-current');
+            for (var j = 0; j < prevMcq.length; j++) prevMcq[j].classList.remove('is-current');
+          } catch (_) {}
+
+          // Prefer highlighting the actual blank wrap (input box).
+          var wrap = null;
+          try {
+            wrap = document.querySelector('.listening-paper-blankWrap[data-q="' + String(n) + '"]');
+          } catch (_) {
+            wrap = null;
+          }
+
+          if (wrap && wrap.classList) {
+            wrap.classList.add('listening-paper-blankWrap--active');
+            return;
+          }
+
+          // MCQ questions don't have a single blank wrap; highlight the MCQ block.
+          try {
+            var mcq = document.querySelector('.listening-mcq-q[data-q="' + String(n) + '"]');
+            if (mcq && mcq.classList) mcq.classList.add('is-current');
+          } catch (_) {}
+        }
+
+        function setCurrentBottomQuestion(q) {
+          var n = Number.parseInt(String(q || ''), 10);
+          if (!Number.isFinite(n)) return;
+
+          var bottomKeys = document.querySelectorAll('.listening-bottomQ[data-q]');
+          for (var i = 0; i < bottomKeys.length; i++) {
+            var el = bottomKeys[i];
+            var isCurrent = String(el.getAttribute('data-q')) === String(n);
+            el.classList.toggle('listening-bottomQ--current', isCurrent);
+            if (isCurrent) el.setAttribute('aria-current', 'page');
+            else el.removeAttribute('aria-current');
+          }
+
+          setActiveQuestionBox(n);
+        }
+
+        function getPartForQuestionNumber(q) {
+          var n = Number.parseInt(String(q || ''), 10);
+          if (!Number.isFinite(n)) return 1;
+          if (n >= 1 && n <= 10) return 1;
+          if (n >= 11 && n <= 20) return 2;
+          if (n >= 21 && n <= 30) return 3;
+          if (n >= 31 && n <= 40) return 4;
+          return 1;
+        }
+
+        function setVisiblePart(partNum) {
+          var p = Number.parseInt(String(partNum || ''), 10);
+          if (!Number.isFinite(p)) p = 1;
+          if (p < 1) p = 1;
+          if (p > 4) p = 4;
+
+          for (var i = 1; i <= 4; i++) {
+            var el = document.getElementById('listening-part-' + i);
+            if (!el) continue;
+            el.hidden = i !== p;
+          }
+        }
+
+        function getQuestionAlign(qNum) {
+          var n = Number.parseInt(String(qNum || ''), 10);
+          if (!Number.isFinite(n)) return 'start';
+          if (n >= 1 && n <= 6) return 'start';
+          if (n >= 7 && n <= 10) return 'end';
+          if (n >= 11 && n <= 15) return 'start';
+          if (n >= 16 && n <= 20) return 'end';
+          if (n >= 21 && n <= 25) return 'start';
+          if (n >= 26 && n <= 30) return 'end';
+          if (n >= 31 && n <= 33) return 'start';
+          if (n >= 34 && n <= 40) return 'end';
+          return 'start';
+        }
+
+        function focusQuestionControl(qNum) {
+          var n = Number.parseInt(String(qNum || ''), 10);
+          if (!Number.isFinite(n)) return false;
+
+          var root = document.getElementById('listening-q' + n);
+          if (!root) return false;
+
+          // MCQ blocks (e.g. Q11–15) should not auto-focus a radio option,
+          // otherwise the first option appears "selected" due to focus styles.
+          try {
+            if (root.classList && root.classList.contains('listening-mcq-q')) {
+              if (!root.hasAttribute('tabindex')) root.setAttribute('tabindex', '-1');
+              if (typeof root.focus === 'function') root.focus({ preventScroll: true });
+              return true;
+            }
+          } catch (_) {}
+
+          var el = root;
+          try {
+            // If the id is on a container (e.g. MCQ blocks), focus the first control inside.
+            if (!(el instanceof HTMLInputElement) && !(el instanceof HTMLTextAreaElement) && !(el instanceof HTMLSelectElement)) {
+              var found = el.querySelector('input, textarea, select, button, [tabindex]:not([tabindex="-1"])');
+              if (found) el = found;
+            }
+          } catch (_) {}
+
+          try {
+            if (el && typeof el.focus === 'function') el.focus({ preventScroll: true });
+            return true;
+          } catch (_) {
+            try {
+              if (el && typeof el.focus === 'function') el.focus();
+              return true;
+            } catch (_) {
+              return false;
+            }
+          }
+        }
+
+        function navigateToQuestion(qNum) {
+          var n = Number.parseInt(String(qNum || ''), 10);
+          if (!Number.isFinite(n)) return;
+          if (n < 1) n = 1;
+          if (n > 40) n = 40;
+
+          var partNum = getPartForQuestionNumber(n);
+          activateBottomPart(partNum);
+          setVisiblePart(partNum);
+          setCurrentBottomQuestion(n);
+
+          try {
+            window.location.hash = '#listening-q' + n;
+          } catch (_) {}
+
+          window.setTimeout(function () {
+            var align = getQuestionAlign(n);
+            if (String(align) === 'end') scrollToBottom();
+            else scrollToTop();
+
+            window.setTimeout(function () {
+              focusQuestionControl(n);
+            }, 60);
+          }, 0);
+        }
+
+        function scrollToQuestion(qNum, align) {
+          var n = Number.parseInt(String(qNum || ''), 10);
+          if (!Number.isFinite(n)) return false;
+
+          var el = document.getElementById('listening-q' + n);
+          if (!el) return false;
+
+          var topbar = document.querySelector('.listening-topbar');
+          var offset = 0;
+          try {
+            offset = (topbar && topbar.getBoundingClientRect ? topbar.getBoundingClientRect().height : 0) + 16;
+          } catch (_) {
+            offset = 116;
+          }
+
+          var target = el;
+          try {
+            if (el.closest) {
+              var wrap = el.closest('.listening-paper-blankWrap');
+              if (wrap) target = wrap;
+            }
+          } catch (_) {}
+
+          try {
+            var r = target.getBoundingClientRect();
+            var base = (window.pageYOffset || document.documentElement.scrollTop || 0);
+            var y = 0;
+            if (String(align || '') === 'end') {
+              var padBottom = 24;
+              y = base + r.bottom - (window.innerHeight - padBottom);
+            } else {
+              y = base + r.top - offset;
+            }
+            if (y < 0) y = 0;
+            window.scrollTo({ top: y, behavior: 'smooth' });
+          } catch (_) {
+            try {
+              target.scrollIntoView({ behavior: 'smooth', block: String(align || '') === 'end' ? 'end' : 'start' });
+            } catch (_) {
+              try {
+                target.scrollIntoView(true);
+              } catch (_) {}
+            }
+          }
+          return true;
+        }
+
+        function focusQuestionIfExists(q) {
+          var n = Number.parseInt(String(q || ''), 10);
+          if (!Number.isFinite(n)) return false;
+
+          var input = document.getElementById('listening-q' + n);
+          if (!input) return false;
+
+          var topbar = document.querySelector('.listening-topbar');
+          var offset = 0;
+          try {
+            offset = (topbar && topbar.getBoundingClientRect ? topbar.getBoundingClientRect().height : 0) + 16;
+          } catch (_) {
+            offset = 116;
+          }
+
+          var scrollTarget = input;
+          try {
+            if (input.closest) {
+              var wrap = input.closest('.listening-paper-blankWrap');
+              if (wrap) scrollTarget = wrap;
+            }
+          } catch (_) {}
+
+          try {
+            var r = scrollTarget.getBoundingClientRect();
+            var y = (window.pageYOffset || document.documentElement.scrollTop || 0) + r.top - offset;
+            if (y < 0) y = 0;
+            window.scrollTo({ top: y, behavior: 'smooth' });
+          } catch (_) {
+            try {
+              scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } catch (_) {
+              try {
+                scrollTarget.scrollIntoView(true);
+              } catch (_) {}
+            }
+          }
+          try {
+            if (typeof input.focus === 'function') input.focus({ preventScroll: true });
+          } catch (_) {
+            try {
+              if (typeof input.focus === 'function') input.focus();
+            } catch (_) {}
+          }
+          return true;
+        }
+
+        function focusQuestionNoScrollIfExists(q) {
+          var n = Number.parseInt(String(q || ''), 10);
+          if (!Number.isFinite(n)) return false;
+
+          var input = document.getElementById('listening-q' + n);
+          if (!input) return false;
+
+          try {
+            if (typeof input.focus === 'function') input.focus({ preventScroll: true });
+          } catch (_) {
+            try {
+              if (typeof input.focus === 'function') input.focus();
+            } catch (_) {}
+          }
+          return true;
+        }
+
+        function getCurrentQuestionNumber() {
+          var active = document.activeElement;
+          if (active && active instanceof HTMLInputElement) {
+            var dq = active.getAttribute('data-q');
+            var dn = Number.parseInt(String(dq || ''), 10);
+            if (Number.isFinite(dn)) return dn;
+          }
+
+          var currentBtn = document.querySelector('.listening-bottomQ--current[data-q]');
+          if (currentBtn) {
+            var q = currentBtn.getAttribute('data-q');
+            var n = Number.parseInt(String(q || ''), 10);
+            if (Number.isFinite(n)) return n;
+          }
+
+          return 1;
+        }
+
+        var nextArrowClicks = 0;
+
+        function backshiftIsActive() {
+          try {
+            return sessionStorage.getItem('listeningBackshiftActive') === '1';
+          } catch (_) {
+            return false;
+          }
+        }
+
+        function backshiftGetStage() {
+          try {
+            var s = sessionStorage.getItem('listeningBackshiftStage');
+            var n = Number.parseInt(String(s || ''), 10);
+            return Number.isFinite(n) ? n : 0;
+          } catch (_) {
+            return 0;
+          }
+        }
+
+        function backshiftSetStage(stage) {
+          try {
+            sessionStorage.setItem('listeningBackshiftActive', '1');
+            sessionStorage.setItem('listeningBackshiftStage', String(stage));
+          } catch (_) {}
+        }
+
+        function backshiftClear() {
+          try {
+            sessionStorage.removeItem('listeningBackshiftActive');
+            sessionStorage.removeItem('listeningBackshiftStage');
+          } catch (_) {}
+        }
+
+        function scrollToTop() {
+          try {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          } catch (_) {
+            try {
+              window.scrollTo(0, 0);
+            } catch (_) {}
+          }
+
+          window.setTimeout(function () {
+            try {
+              document.documentElement.scrollTop = 0;
+              document.body.scrollTop = 0;
+            } catch (_) {}
+          }, 60);
+        }
+
+        function scrollToBottom() {
+          var se = document.scrollingElement || document.documentElement || document.body;
+          var top = 0;
+          try {
+            top = se && se.scrollHeight ? se.scrollHeight : document.body.scrollHeight;
+          } catch (_) {
+            top = document.body.scrollHeight;
+          }
+          try {
+            window.scrollTo({ top: top, behavior: 'smooth' });
+          } catch (_) {
+            try {
+              window.scrollTo(0, top);
+            } catch (_) {}
+          }
+
+          window.setTimeout(function () {
+            try {
+              if (se) se.scrollTop = top;
+              document.documentElement.scrollTop = top;
+              document.body.scrollTop = top;
+            } catch (_) {}
+          }, 60);
+        }
+
+        function moveToAdjacentQuestion(dir) {
+          var start = getCurrentQuestionNumber();
+          var startPart = getPartForQuestionNumber(start);
+
+          function goTo(qTarget) {
+            var qn = Number.parseInt(String(qTarget || ''), 10);
+            if (!Number.isFinite(qn)) return;
+            if (qn < 1) qn = 1;
+            if (qn > 40) qn = 40;
+
+            nextArrowClicks = 0;
+            navigateToQuestion(qn);
+          }
+
+          function isTopRange(qn) {
+            if (qn >= 1 && qn <= 6) return true;
+            if (qn >= 11 && qn <= 15) return true;
+            if (qn >= 21 && qn <= 24) return true;
+            if (qn >= 31 && qn <= 33) return true;
+            return false;
+          }
+
+          function bottomStartForPart(p) {
+            if (p === 1) return 7;
+            if (p === 2) return 16;
+            if (p === 3) return 25;
+            if (p === 4) return 34;
+            return 7;
+          }
+
+          function topStartForPart(p) {
+            if (p === 1) return 1;
+            if (p === 2) return 11;
+            if (p === 3) return 21;
+            if (p === 4) return 31;
+            return 1;
+          }
+
+          if (dir === 'next') {
+            if (isTopRange(start)) {
+              goTo(bottomStartForPart(startPart));
+              return;
+            }
+
+            if (startPart < 4) {
+              goTo(topStartForPart(startPart + 1));
+              return;
+            }
+
+            goTo(40);
+            return;
+          }
+
+          if (dir === 'prev') {
+            if (!isTopRange(start)) {
+              goTo(topStartForPart(startPart));
+              return;
+            }
+
+            if (startPart > 1) {
+              goTo(bottomStartForPart(startPart - 1));
+              return;
+            }
+
+            goTo(1);
+            return;
+          }
+        }
+
+        function activateBottomPart(part) {
+          var partNum = Number.parseInt(String(part || ''), 10);
+          if (!Number.isFinite(partNum)) return;
+          var root = document.getElementById('listeningBottomBar');
+          if (!root) return;
+
+          root.setAttribute('data-active-part', String(partNum));
+
+          var parts = root.querySelectorAll('.listening-bottomPart[data-part]');
+          var activeEl = null;
+
+          for (var i = 0; i < parts.length; i++) {
+            var el = parts[i];
+            var elPart = Number.parseInt(String(el.getAttribute('data-part') || ''), 10);
+            var shouldBeActive = elPart === partNum;
+
+            el.classList.toggle('listening-bottomPart--active', shouldBeActive);
+            el.classList.toggle('listening-bottomPart--expanded', shouldBeActive);
+            el.setAttribute('aria-expanded', shouldBeActive ? 'true' : 'false');
+
+            var meta = el.querySelector('.listening-bottomPart-meta');
+            var questions = el.querySelector('.listening-bottomQuestions');
+            if (questions) questions.hidden = !shouldBeActive;
+            if (meta) meta.hidden = shouldBeActive;
+
+            if (shouldBeActive) activeEl = el;
+          }
+
+          // Do not reorder parts. Keep Part 1/2/3/4 positions stable.
+        }
+
+        function setBottomPartExpanded(partNum, shouldExpand) {
+          var root = document.getElementById('listeningBottomBar');
+          if (!root) return;
+
+          var el = root.querySelector('.listening-bottomPart[data-part="' + String(partNum) + '"]');
+          if (!el) return;
+
+          el.classList.toggle('listening-bottomPart--active', !!shouldExpand);
+          el.classList.toggle('listening-bottomPart--expanded', !!shouldExpand);
+          el.setAttribute('aria-expanded', shouldExpand ? 'true' : 'false');
+
+          var meta = el.querySelector('.listening-bottomPart-meta');
+          var questions = el.querySelector('.listening-bottomQuestions');
+          if (questions) questions.hidden = !shouldExpand;
+          if (meta) meta.hidden = !!shouldExpand;
+        }
+
+        function collapseBottomPart(partNum) {
+          setBottomPartExpanded(partNum, false);
+        }
+
+        function toggleBottomPart(partNum) {
+          var root = document.getElementById('listeningBottomBar');
+          if (!root) return;
+
+          var el = root.querySelector('.listening-bottomPart[data-part="' + String(partNum) + '"]');
+          if (!el) return;
+
+          var isExpanded = el.classList.contains('listening-bottomPart--expanded');
+          var nextExpanded = !isExpanded;
+
+          // Only one of Part 2/3/4 expanded at a time.
+          collapseBottomPart(2);
+          collapseBottomPart(3);
+          collapseBottomPart(4);
+
+          if (nextExpanded) {
+            root.setAttribute('data-active-part', String(partNum));
+            setBottomPartExpanded(1, false);
+            setBottomPartExpanded(partNum, true);
+            try {
+              setVisiblePart(Number.parseInt(String(partNum || ''), 10));
+            } catch (_) {}
+          } else {
+            // If the selected part is collapsed, return to Part 1.
+            activateBottomPart(1);
+            setVisiblePart(1);
+          }
+        }
+
+        var paperBlanks = document.querySelectorAll('.listening-paper-blankWrap .listening-paper-blank');
+        for (var i = 0; i < paperBlanks.length; i++) {
+          (function (input) {
+            try {
+              // Prevent Chrome/Edge from suggesting previous "answers".
+              input.setAttribute('autocomplete', 'off');
+              input.setAttribute('autocorrect', 'off');
+              input.setAttribute('autocapitalize', 'off');
+              input.setAttribute('spellcheck', 'false');
+              var qName = input.getAttribute('data-q');
+              if (qName && !input.getAttribute('name')) input.setAttribute('name', 'ielts_listening_q' + String(qName));
+            } catch (_) {}
+
+            syncPaperBlankState(input);
+            input.addEventListener('input', function () {
+              syncPaperBlankState(input);
+            });
+            input.addEventListener('change', function () {
+              syncPaperBlankState(input);
+            });
+
+            input.addEventListener('focus', function () {
+              var q = input.getAttribute('data-q');
+              if (q) setCurrentBottomQuestion(q);
+            });
+          })(paperBlanks[i]);
+        }
+
+        function normalizePlanValue(value) {
+          var s = String(value || '').trim();
+          if (!s) return '';
+          return s.replace(/\s+/g, ' ');
+        }
+
+        function getPlanSlotInput(slotEl) {
+          if (!slotEl) return null;
+          var input = slotEl.querySelector('.listening-paper-blank');
+          return input instanceof HTMLInputElement ? input : null;
+        }
+
+        function clearPlanSlot(slotEl) {
+          var input = getPlanSlotInput(slotEl);
+          if (!input) return;
+          input.value = '';
+          input.readOnly = false;
+          if (slotEl && slotEl.classList) slotEl.classList.remove('listening-paper-blankWrap--hasTile');
+          try {
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+          } catch (_) {
+            syncPaperBlankState(input);
+          }
+        }
+
+        function setPlanSlotValue(slotEl, value) {
+          var input = getPlanSlotInput(slotEl);
+          if (!input) return;
+          var val = normalizePlanValue(value);
+          input.value = val;
+          input.readOnly = !!val;
+          try {
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+          } catch (_) {
+            syncPaperBlankState(input);
+          }
+        }
+
+        (function initPlanDragDrop() {
+          var bank = document.getElementById('listening-planChoiceBank');
+          if (!bank) return;
+
+          var bankTiles = bank.querySelectorAll('.listening-choiceTile[draggable="true"][data-value]');
+          var slots = document.querySelectorAll('.listening-paper-planAnswers .listening-paper-blankWrap[data-q]');
+
+          function getSlotTile(slotEl) {
+            if (!slotEl) return null;
+            var t = slotEl.querySelector('.listening-planTile--placed');
+            return t instanceof HTMLElement ? t : null;
+          }
+
+          function getTileValue(tileEl) {
+            if (!tileEl) return '';
+            return normalizePlanValue(tileEl.getAttribute('data-value') || tileEl.textContent || '');
+          }
+
+          function attachTileDragHandlers(tileEl, sourceKind) {
+            if (!tileEl) return;
+            tileEl.addEventListener('dragstart', function (e) {
+              var value = getTileValue(tileEl);
+              if (!value) return;
+              try {
+                e.dataTransfer.setData('text/plain', 'plan:' + String(sourceKind) + ':' + encodeURIComponent(value));
+              } catch (_) {}
+              try {
+                e.dataTransfer.effectAllowed = 'move';
+              } catch (_) {}
+              tileEl.classList.add('is-dragging');
+            });
+            tileEl.addEventListener('dragend', function () {
+              tileEl.classList.remove('is-dragging');
+            });
+          }
+
+          function createPlacedTile(value) {
+            var v = normalizePlanValue(value);
+            if (!v) return null;
+            var el = document.createElement('div');
+            el.className = 'listening-choiceTile listening-planTile--placed';
+            el.setAttribute('draggable', 'true');
+            el.setAttribute('data-value', v);
+            el.setAttribute('aria-label', 'Selected option ' + v);
+            el.textContent = v;
+            attachTileDragHandlers(el, 'placed');
+            return el;
+          }
+
+          function findPlacedTileByValue(value) {
+            var v = normalizePlanValue(value);
+            if (!v) return null;
+            var esc = cssEscapeAttrValue(v);
+            var el = document.querySelector('.listening-paper-planAnswers .listening-planTile--placed[data-value="' + esc + '"]');
+            return el instanceof HTMLElement ? el : null;
+          }
+
+          function removePlacedTile(tileEl) {
+            if (!tileEl) return;
+            var parent = tileEl.parentElement;
+            if (parent && parent.classList && parent.classList.contains('listening-paper-blankWrap')) {
+              tileEl.remove();
+              clearPlanSlot(parent);
+            } else {
+              tileEl.remove();
+            }
+          }
+
+          function placeValueIntoSlot(value, slotEl) {
+            if (!slotEl) return;
+            var v = normalizePlanValue(value);
+            if (!v) return;
+
+            // If this option is already placed somewhere else, move it.
+            var existingPlaced = findPlacedTileByValue(v);
+            if (existingPlaced) {
+              var oldSlot = existingPlaced.parentElement;
+              if (oldSlot && oldSlot === slotEl) {
+                // Already in the correct slot.
+                return;
+              }
+              // Replace any tile currently in the destination.
+              var currentInDest = getSlotTile(slotEl);
+              if (currentInDest && currentInDest !== existingPlaced) {
+                removePlacedTile(currentInDest);
+              }
+
+              slotEl.appendChild(existingPlaced);
+              slotEl.classList.add('listening-paper-blankWrap--hasTile');
+              setPlanSlotValue(slotEl, v);
+
+              if (oldSlot && oldSlot.classList && oldSlot.classList.contains('listening-paper-blankWrap')) {
+                clearPlanSlot(oldSlot);
+              }
+              return;
+            }
+
+            // Otherwise create a new placed tile (palette stays intact).
+            var newTile = createPlacedTile(v);
+            if (!newTile) return;
+
+            var current = getSlotTile(slotEl);
+            if (current) removePlacedTile(current);
+
+            slotEl.appendChild(newTile);
+            slotEl.classList.add('listening-paper-blankWrap--hasTile');
+            setPlanSlotValue(slotEl, v);
+          }
+
+          // Palette tiles are fixed; they never move out of the palette.
+          for (var i = 0; i < bankTiles.length; i++) {
+            attachTileDragHandlers(bankTiles[i], 'bank');
+          }
+
+          for (var j = 0; j < slots.length; j++) {
+            (function (slot) {
+              slot.addEventListener('dragover', function (e) {
+                e.preventDefault();
+                try {
+                  e.dataTransfer.dropEffect = 'move';
+                } catch (_) {}
+                slot.classList.add('listening-paper-blankWrap--dropHover');
+              });
+
+              slot.addEventListener('dragleave', function () {
+                slot.classList.remove('listening-paper-blankWrap--dropHover');
+              });
+
+              slot.addEventListener('drop', function (e) {
+                e.preventDefault();
+                slot.classList.remove('listening-paper-blankWrap--dropHover');
+
+                var payload = '';
+                try {
+                  payload = e.dataTransfer.getData('text/plain');
+                } catch (_) {}
+
+                var m = String(payload || '').match(/^plan:(bank|placed):(.+)$/);
+                if (!m) return;
+                var value = '';
+                try {
+                  value = decodeURIComponent(m[2]);
+                } catch (_) {
+                  value = m[2];
+                }
+
+                placeValueIntoSlot(value, slot);
+
+                var q = slot.getAttribute('data-q');
+                if (q) setCurrentBottomQuestion(q);
+              });
+            })(slots[j]);
+          }
+
+          // Dropping a placed tile back onto the palette removes it from its slot.
+          bank.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            try {
+              e.dataTransfer.dropEffect = 'move';
+            } catch (_) {}
+          });
+
+          bank.addEventListener('drop', function (e) {
+            e.preventDefault();
+            var payload = '';
+            try {
+              payload = e.dataTransfer.getData('text/plain');
+            } catch (_) {}
+
+            var m = String(payload || '').match(/^plan:(bank|placed):(.+)$/);
+            if (!m) return;
+            var source = m[1];
+            var value = '';
+            try {
+              value = decodeURIComponent(m[2]);
+            } catch (_) {
+              value = m[2];
+            }
+
+            if (source !== 'placed') return;
+            var placed = findPlacedTileByValue(value);
+            if (!placed) return;
+            removePlacedTile(placed);
+          });
+        })();
+
+        function normalizeChoiceValue(value) {
+          var s = String(value || '').trim();
+          if (!s) return '';
+          return s.replace(/\s+/g, ' ');
+        }
+
+        function cssEscapeAttrValue(value) {
+          var s = String(value || '');
+          try {
+            if (window.CSS && typeof window.CSS.escape === 'function') return window.CSS.escape(s);
+          } catch (_) {}
+          return s.replace(/\\/g, '\\\\').replace(/\"/g, '\\"');
+        }
+
+        function getChoiceSlotInput(slotEl) {
+          if (!slotEl) return null;
+          var input = slotEl.querySelector('.listening-paper-blank');
+          return input instanceof HTMLInputElement ? input : null;
+        }
+
+        function clearChoiceSlot(slotEl) {
+          var input = getChoiceSlotInput(slotEl);
+          if (!input) return;
+          input.value = '';
+          input.readOnly = false;
+          if (slotEl && slotEl.classList) slotEl.classList.remove('listening-paper-blankWrap--hasTile');
+          try {
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+          } catch (_) {
+            syncPaperBlankState(input);
+          }
+        }
+
+        function setChoiceSlotValue(slotEl, value) {
+          var input = getChoiceSlotInput(slotEl);
+          if (!input) return;
+          var val = normalizeChoiceValue(value);
+          input.value = val;
+          input.readOnly = !!val;
+          try {
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+          } catch (_) {
+            syncPaperBlankState(input);
+          }
+        }
+
+        (function initChoiceDragDrop() {
+          var bank = document.getElementById('listening-choiceBankPart3');
+          if (!bank) return;
+
+          var bankTiles = bank.querySelectorAll('.listening-choiceTile[draggable="true"][data-value]');
+          var slots = document.querySelectorAll('.listening-paper-blankWrap--tileSlot[data-q]');
+
+          function getSlotTile(slotEl) {
+            if (!slotEl) return null;
+            var t = slotEl.querySelector('.listening-planTile--placed[data-value]');
+            return t instanceof HTMLElement ? t : null;
+          }
+
+          function findPlacedTileByValue(value) {
+            var v = normalizeChoiceValue(value);
+            if (!v) return null;
+            var esc = cssEscapeAttrValue(v);
+            var el = document.querySelector('.listening-paper-blankWrap--tileSlot .listening-planTile--placed[data-value="' + esc + '"]');
+            return el instanceof HTMLElement ? el : null;
+          }
+
+          function removePlacedTile(tileEl) {
+            if (!tileEl) return;
+            var parent = tileEl.parentElement;
+            if (parent && parent.classList && parent.classList.contains('listening-paper-blankWrap--tileSlot')) {
+              tileEl.remove();
+              clearChoiceSlot(parent);
+            } else {
+              tileEl.remove();
+            }
+          }
+
+          function attachTileDragHandlers(tileEl, sourceKind) {
+            if (!tileEl) return;
+            tileEl.addEventListener('dragstart', function (e) {
+              var value = normalizeChoiceValue(tileEl.getAttribute('data-value') || tileEl.textContent || '');
+              if (!value) return;
+              try {
+                e.dataTransfer.setData('text/plain', 'choice:' + String(sourceKind) + ':' + encodeURIComponent(value));
+              } catch (_) {}
+              try {
+                e.dataTransfer.effectAllowed = 'move';
+              } catch (_) {}
+              tileEl.classList.add('is-dragging');
+            });
+            tileEl.addEventListener('dragend', function () {
+              tileEl.classList.remove('is-dragging');
+            });
+          }
+
+          function createPlacedTile(value) {
+            var v = normalizeChoiceValue(value);
+            if (!v) return null;
+            var el = document.createElement('div');
+            el.className = 'listening-planTile listening-planTile--placed';
+            el.setAttribute('draggable', 'true');
+            el.setAttribute('data-value', v);
+            el.setAttribute('aria-label', 'Selected option ' + v);
+            el.textContent = v;
+            attachTileDragHandlers(el, 'placed');
+            return el;
+          }
+
+          function placeValueIntoSlot(value, slotEl) {
+            if (!slotEl) return;
+            var v = normalizeChoiceValue(value);
+            if (!v) return;
+
+            var existingPlaced = findPlacedTileByValue(v);
+            if (existingPlaced) {
+              var oldSlot = existingPlaced.parentElement;
+              if (oldSlot && oldSlot === slotEl) return;
+
+              var currentInDest = getSlotTile(slotEl);
+              if (currentInDest && currentInDest !== existingPlaced) {
+                removePlacedTile(currentInDest);
+              }
+
+              slotEl.appendChild(existingPlaced);
+              slotEl.classList.add('listening-paper-blankWrap--hasTile');
+              setChoiceSlotValue(slotEl, v);
+
+              if (oldSlot && oldSlot.classList && oldSlot.classList.contains('listening-paper-blankWrap--tileSlot')) {
+                clearChoiceSlot(oldSlot);
+              }
+            } else {
+              var newTile = createPlacedTile(v);
+              if (!newTile) return;
+
+              var current = getSlotTile(slotEl);
+              if (current) removePlacedTile(current);
+
+              slotEl.appendChild(newTile);
+              slotEl.classList.add('listening-paper-blankWrap--hasTile');
+              setChoiceSlotValue(slotEl, v);
+            }
+
+            var q = slotEl.getAttribute('data-q');
+            if (q) setCurrentBottomQuestion(q);
+          }
+
+          for (var i = 0; i < bankTiles.length; i++) {
+            attachTileDragHandlers(bankTiles[i], 'bank');
+          }
+
+          for (var j = 0; j < slots.length; j++) {
+            (function (slot) {
+              slot.addEventListener('dragover', function (e) {
+                e.preventDefault();
+                try {
+                  e.dataTransfer.dropEffect = 'move';
+                } catch (_) {}
+                slot.classList.add('listening-paper-blankWrap--dropHover');
+              });
+
+              slot.addEventListener('dragleave', function () {
+                slot.classList.remove('listening-paper-blankWrap--dropHover');
+              });
+
+              slot.addEventListener('drop', function (e) {
+                e.preventDefault();
+                slot.classList.remove('listening-paper-blankWrap--dropHover');
+
+                var payload = '';
+                try {
+                  payload = e.dataTransfer.getData('text/plain');
+                } catch (_) {}
+
+                var m = String(payload || '').match(/^choice:(bank|placed):(.+)$/);
+                if (!m) return;
+                var value = '';
+                try {
+                  value = decodeURIComponent(m[2]);
+                } catch (_) {
+                  value = m[2];
+                }
+                placeValueIntoSlot(value, slot);
+              });
+            })(slots[j]);
+          }
+
+          bank.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            try {
+              e.dataTransfer.dropEffect = 'move';
+            } catch (_) {}
+          });
+
+          bank.addEventListener('drop', function (e) {
+            e.preventDefault();
+            var payload = '';
+            try {
+              payload = e.dataTransfer.getData('text/plain');
+            } catch (_) {}
+
+            var m = String(payload || '').match(/^choice:(bank|placed):(.+)$/);
+            if (!m) return;
+            var source = m[1];
+            var value = '';
+            try {
+              value = decodeURIComponent(m[2]);
+            } catch (_) {
+              value = m[2];
+            }
+
+            if (source !== 'placed') return;
+            var placed = findPlacedTileByValue(value);
+            if (!placed) return;
+            removePlacedTile(placed);
+          });
+        })();
+
+        var bottomBar = document.getElementById('listeningBottomBar');
+        if (bottomBar) {
+          bottomBar.addEventListener('click', function (e) {
+            var target = e.target;
+            if (target && target.nodeType === 3) target = target.parentElement;
+            if (!target || typeof target.closest !== 'function') return;
+
+            var qBtn = target.closest('.listening-bottomQ[data-q]');
+            if (qBtn) {
+              e.preventDefault();
+              var q = qBtn.getAttribute('data-q');
+              var qNum = Number.parseInt(String(q || ''), 10);
+              if (!Number.isFinite(qNum)) return;
+
+              backshiftClear();
+
+              navigateToQuestion(qNum);
+              return;
+            }
+
+            // Part 2/3/4: toggle showing their navigation numbers when clicking the tile.
+            var partToggleEl = target.closest('.listening-bottomPart[data-part="2"], .listening-bottomPart[data-part="3"], .listening-bottomPart[data-part="4"]');
+            if (partToggleEl) {
+              e.preventDefault();
+              toggleBottomPart(partToggleEl.getAttribute('data-part'));
+              return;
+            }
+
+            var partEl = target.closest('.listening-bottomPart[data-part]');
+            if (partEl) {
+              e.preventDefault();
+              // Clicking Part tiles: activate + show the part.
+              var p = Number.parseInt(String(partEl.getAttribute('data-part') || ''), 10);
+              if (Number.isFinite(p)) {
+                activateBottomPart(p);
+                setVisiblePart(p);
+                var startQ = (p - 1) * 10 + 1;
+                setCurrentBottomQuestion(startQ);
+                window.setTimeout(function () {
+                  scrollToTop();
+                }, 0);
+              }
+            }
+          });
+
+          bottomBar.addEventListener('keydown', function (e) {
+            var key = e.key;
+            if (key !== 'Enter' && key !== ' ') return;
+            var target = e.target;
+            if (target && target.nodeType === 3) target = target.parentElement;
+            if (!target || typeof target.closest !== 'function') return;
+            var partEl = target.closest('.listening-bottomPart[data-part]');
+            if (!partEl) return;
+            e.preventDefault();
+
+            var partNum = String(partEl.getAttribute('data-part') || '');
+            if (partNum === '2' || partNum === '3' || partNum === '4') {
+              toggleBottomPart(partNum);
+              return;
+            }
+
+            // Keyboard: allow Part 1 activation.
+            if (partNum === '1') activateBottomPart(1);
+          });
+        }
+
+        var sideArrows = document.querySelector('.listening-sideArrows');
+        if (sideArrows) {
+          sideArrows.addEventListener('click', function (e) {
+            var target = e.target;
+            if (target && target.nodeType === 3) target = target.parentElement;
+            if (!target || typeof target.closest !== 'function') return;
+            var btn = target.closest('.listening-sideArrow[data-dir]');
+            if (!btn) return;
+            e.preventDefault();
+            moveToAdjacentQuestion(btn.getAttribute('data-dir'));
+          });
+        }
+
+        window.setTimeout(function () {
+          for (var i = 0; i < paperBlanks.length; i++) {
+            syncPaperBlankState(paperBlanks[i]);
+          }
+        }, 0);
+
+        collapseBottomPart(2);
+        collapseBottomPart(3);
+        collapseBottomPart(4);
+        activateBottomPart(1);
+        setVisiblePart(1);
+        setCurrentBottomQuestion(1);
+
+        (function () {
+          // If navigating via bottom bar from another part, honor the hash.
+          // (Skip if the special backshift chain is controlling initial landing.)
+          if (backshiftIsActive() && (backshiftGetStage() === 8 || backshiftGetStage() === 9)) return;
+
+          var hash = String(window.location.hash || '').trim();
+          var match = hash.match(/^#listening-q(\d{1,2})$/);
+          if (!match) return;
+          var qNum = Number.parseInt(match[1], 10);
+          if (!Number.isFinite(qNum)) return;
+          if (qNum < 1 || qNum > 40) return;
+
+          navigateToQuestion(qNum);
+        })();
+
+        // Ensure MCQ interactions update the bottom highlight.
+        try {
+          var mcqInputs = document.querySelectorAll('.listening-mcq-input[data-q]');
+          for (var mi = 0; mi < mcqInputs.length; mi++) {
+            (function (el) {
+              el.addEventListener('focus', function () {
+                var q = el.getAttribute('data-q');
+                if (q) setCurrentBottomQuestion(q);
+              });
+              el.addEventListener('change', function () {
+                var q = el.getAttribute('data-q');
+                if (q) setCurrentBottomQuestion(q);
+              });
+            })(mcqInputs[mi]);
+          }
+        } catch (_) {}
+
+        (function initChooseThree() {
+          var chooseInputs = document.querySelectorAll('.listening-chooseThree-input');
+          if (!chooseInputs || chooseInputs.length === 0) return;
+
+          var maxChoices = 3;
+
+          function syncChooseThreeState() {
+            var checkedCount = 0;
+            for (var i = 0; i < chooseInputs.length; i++) {
+              if (chooseInputs[i].checked) checkedCount += 1;
+            }
+
+            for (var j = 0; j < chooseInputs.length; j++) {
+              var input = chooseInputs[j];
+              var item = input.closest('.listening-chooseThree-item');
+              var isChecked = !!input.checked;
+              var shouldDisable = !isChecked && checkedCount >= maxChoices;
+
+              input.disabled = shouldDisable;
+              if (item) {
+                item.classList.toggle('is-selected', isChecked);
+                item.classList.toggle('is-disabled', shouldDisable);
+              }
+            }
+          }
+
+          for (var k = 0; k < chooseInputs.length; k++) {
+            (function (el) {
+              el.addEventListener('focus', function () {
+                var q = el.getAttribute('data-q');
+                if (q) setCurrentBottomQuestion(q);
+              });
+
+              el.addEventListener('change', function () {
+                var q = el.getAttribute('data-q');
+                if (q) setCurrentBottomQuestion(q);
+                syncChooseThreeState();
+              });
+            })(chooseInputs[k]);
+          }
+
+          syncChooseThreeState();
+        })();
+
+        var totalSeconds = 30 * 60;
+        var start = Date.now();
+        var timerEl = document.getElementById('listening-timer');
+
+        function format(seconds) {
+          var s = Math.max(0, Math.floor(seconds));
+          var mm = String(Math.floor(s / 60)).padStart(2, '0');
+          var ss = String(s % 60).padStart(2, '0');
+          return mm + ':' + ss;
+        }
+
+        function tick() {
+          var elapsed = Math.floor((Date.now() - start) / 1000);
+          var remaining = totalSeconds - elapsed;
+          if (timerEl) timerEl.textContent = format(remaining);
+          if (remaining <= 0) {
+            window.clearInterval(interval);
+          }
+        }
+
+        var interval = window.setInterval(tick, 1000);
+        tick();
+      })();
+    </script>
+  </body>
+</html>
+

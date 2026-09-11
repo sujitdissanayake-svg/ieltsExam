@@ -1,0 +1,160 @@
+﻿<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IELTS Academic Reading</title>
+    <link rel="stylesheet" href="styles.css?v=20260304" />
+    <script src="ielts-flow-guard.js?v=20260310-2" defer></script>
+    <script src="listening-score.js?v=20260615-1"></script>
+  </head>
+  <body class="listening-soundcheck listening-instructions">
+    <header class="academic-topbar" aria-label="IELTS top bar">
+      <div class="academic-topbar-inner">
+        <img
+          class="academic-topbar-ielts"
+          src="assets/IELTS%20Exam%20logo%202-trim.png?v=20260226b"
+          alt="IELTS"
+        />
+
+        <div class="academic-topbar-partners" aria-label="IELTS partners">
+          <img
+            class="academic-topbar-partner"
+            src="assets/british-council-trim-no-official.png?v=20260226"
+            alt="British Council"
+            loading="lazy"
+          />
+          <img
+            class="academic-topbar-partner"
+            src="assets/IDP-trim-no-official.png?v=20260226"
+            alt="IDP"
+            loading="lazy"
+          />
+          <span class="academic-topbar-cambridge" aria-label="Cambridge Assessment English">Cambridge Assessment English</span>
+        </div>
+      </div>
+      <div class="academic-topbar-under" aria-hidden="true"></div>
+    </header>
+
+    <main class="soundcheck-main" aria-label="IELTS Academic Reading instructions">
+      <div
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:connect="http://connect.ucles.org.uk/ns/ConnectDeliveryEngine"
+        connect:class="container"
+        class="container"
+      >
+        <div connect:class="instructions" class="instructions">
+          <h1>IELTS Academic Reading</h1>
+
+          <div class="preTestInfo">
+            <p>Time: 1 hour</p>
+
+            <h2>INSTRUCTIONS TO CANDIDATES</h2>
+            <ul>
+              <li>Answer <b>all</b> the questions.</li>
+              <li>You can change your answers at any time during the test.</li>
+            </ul>
+
+            <h2>INFORMATION FOR CANDIDATES</h2>
+            <ul>
+              <li>There are 40 questions in this test.</li>
+              <li>Each question carries one mark.</li>
+              <li>The test clock will show you when there are 30 minutes, 10 minutes and 5 minutes remaining.</li>
+            </ul>
+          </div>
+
+          <div class="textCentre">
+            <p class="info central">Do not click 'Start test' until you are told to do so.</p>
+            <input type="submit" id="readingInstructionsConfirm" value="Start test" class="button green" />
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      (function () {
+        try {
+          if (window.__ieltsListeningScore && typeof window.__ieltsListeningScore.submitListeningResult === 'function') {
+            // Fallback: if listening end-page submit was interrupted, retry here.
+            window.__ieltsListeningScore.submitListeningResult().catch(function () {});
+          }
+        } catch (_) {}
+
+        var startBtn = document.getElementById('readingInstructionsConfirm');
+        if (!startBtn) return;
+
+        var autoRedirectId = null;
+
+        function usesHtmlRoutes() {
+          return /\.html$/i.test(window.location.pathname || '');
+        }
+
+        function readValue(key) {
+          try {
+            var localValue = String(window.localStorage.getItem(key) || '').trim();
+            if (localValue) return localValue;
+          } catch (_) {}
+          try {
+            return String(window.sessionStorage.getItem(key) || '').trim();
+          } catch (_) {
+            return '';
+          }
+        }
+
+        function normalizePackage(value) {
+          var raw = String(value || '').trim();
+          return /^(Lite|Basic|Standard|Pro)$/i.test(raw) ? (raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase()) : '';
+        }
+
+        function startReadingTimer() {
+          // Start a fresh 60-minute Reading timer.
+          try {
+            var END_AT_KEY = 'ieltsReadingEndAt';
+            var WARN_30_KEY = 'ieltsReadingWarn30Shown';
+            var WARN_10_KEY = 'ieltsReadingWarn10Shown';
+            var WARN_5_KEY = 'ieltsReadingWarn5Shown';
+            var ANSWERS_KEY = 'ieltsReadingAnswersV1';
+            var SUBMISSION_FLAG_KEY = 'ieltsReadingResultSubmittedV1';
+            var ATTEMPT_ID_KEY = 'ieltsReadingAttemptId';
+            var DURATION_MS = 60 * 60 * 1000;
+            window.localStorage.setItem(END_AT_KEY, String(Date.now() + DURATION_MS));
+            window.localStorage.removeItem(WARN_30_KEY);
+            window.localStorage.removeItem(WARN_10_KEY);
+            window.localStorage.removeItem(WARN_5_KEY);
+            window.localStorage.removeItem(ANSWERS_KEY);
+            window.localStorage.removeItem(SUBMISSION_FLAG_KEY);
+            window.localStorage.setItem(ATTEMPT_ID_KEY, String(Date.now()));
+          } catch (_) {}
+        }
+
+        function goToReadingTest() {
+          var usesHtml = usesHtmlRoutes();
+          var target = usesHtml ? 'ielts-reading-test-basic-paper1.html' : 'ielts-reading-test-basic-paper1';
+          window.location.href = target;
+        }
+
+        function startAndGo() {
+          if (autoRedirectId) {
+            try {
+              window.clearTimeout(autoRedirectId);
+            } catch (_) {}
+            autoRedirectId = null;
+          }
+          startReadingTimer();
+          goToReadingTest();
+        }
+
+        startBtn.addEventListener('click', function (e) {
+          e.preventDefault();
+          startAndGo();
+        });
+
+        // Auto-advance after 45 seconds.
+        autoRedirectId = window.setTimeout(function () {
+          startAndGo();
+        }, 45 * 1000);
+      })();
+    </script>
+  </body>
+</html>
+

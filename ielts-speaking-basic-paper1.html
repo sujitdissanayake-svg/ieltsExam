@@ -1,0 +1,98 @@
+﻿<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IELTS Speaking Test</title>
+    <link rel="stylesheet" href="styles.css?v=20260308" />
+  </head>
+  <body class="speaking-page">
+    <header class="academic-topbar" aria-label="IELTS top bar">
+      <div class="academic-topbar-inner">
+        <img class="academic-topbar-ielts" src="assets/IELTS%20Exam%20logo%202-trim.png?v=20260226b" alt="IELTS" />
+        <div class="academic-topbar-partners" aria-label="IELTS partners">
+          <img
+            class="academic-topbar-partner"
+            src="assets/british-council-trim-no-official.png?v=20260226"
+            alt="British Council"
+            loading="lazy"
+          />
+          <img class="academic-topbar-partner" src="assets/IDP-trim-no-official.png?v=20260226" alt="IDP" loading="lazy" />
+          <span class="academic-topbar-cambridge" aria-label="Cambridge Assessment English">Cambridge Assessment English</span>
+        </div>
+      </div>
+      <div class="academic-topbar-under" aria-hidden="true"></div>
+    </header>
+
+    <main class="speaking-session-main" aria-label="Speaking session notice">
+      <section class="speaking-session-card" aria-label="Speaking availability">
+        <p class="speaking-session-kicker">Speaking Session</p>
+        <h1 class="speaking-session-title">Speaking is not available under Free Mock Test.</h1>
+        <p class="speaking-session-subtitle"><span class="speaking-inline-blue">Speaking Test with an Examiner is Available under Mock Test.</span></p>
+
+        <div class="speaking-session-alert" role="status" aria-live="polite">
+          <p>
+            To book a speaking session with an examiner, <span class="speaking-inline-red"><strong>continue to Mock Test</strong></span>.
+          </p>
+          <p>
+            To view results of tests you already took, <span class="speaking-inline-green"><strong>open the Test Taker Portal</strong></span>.
+          </p>
+        </div>
+
+        <div class="speaking-session-actions" aria-label="Next actions">
+          <a class="speaking-session-btn speaking-session-btn-primary" data-mock-link href="packages.html">Mock Test</a>
+          <a class="speaking-session-btn speaking-session-btn-secondary" data-portal-link href="free-mock-portal.html">Test Taker Portal</a>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      (function () {
+        function readValue(key) {
+          try {
+            var localValue = String(window.localStorage.getItem(key) || '').trim();
+            if (localValue) return localValue;
+          } catch (_) {}
+          try {
+            return String(window.sessionStorage.getItem(key) || '').trim();
+          } catch (_) {
+            return '';
+          }
+        }
+
+        function normalizePackage(value) {
+          var raw = String(value || '').trim();
+          return /^(Lite|Basic|Standard|Pro)$/i.test(raw) ? raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase() : '';
+        }
+
+        var usesHtmlRoutes = /\.html$/i.test(window.location.pathname || '');
+        var params = new URLSearchParams(window.location.search || '');
+        var mode = String(params.get('testMode') || readValue('ieltsTestMode') || '').trim().toLowerCase();
+        var pkg = normalizePackage(params.get('package') || readValue('ieltsMockPackage') || '');
+        var paper = String(params.get('paper') || readValue('ieltsMockPaper') || '').trim();
+
+        // Keep this page dedicated to Basic package paper 1 only.
+        if (mode === 'mock' && (pkg !== 'Basic' || paper !== '1')) {
+          try {
+            window.location.replace(usesHtmlRoutes ? 'ielts-speaking.html' : 'ielts-speaking');
+          } catch (_) {
+            window.location.href = usesHtmlRoutes ? 'ielts-speaking.html' : 'ielts-speaking';
+          }
+          return;
+        }
+
+        var mockLink = document.querySelector('[data-mock-link]');
+        var portalLink = document.querySelector('[data-portal-link]');
+
+        if (mockLink) {
+          mockLink.href = usesHtmlRoutes ? 'packages.html' : 'packages';
+        }
+
+        if (portalLink) {
+          portalLink.href = usesHtmlRoutes ? 'free-mock-portal.html' : '/free-mock-portal';
+        }
+      })();
+    </script>
+  </body>
+</html>
+

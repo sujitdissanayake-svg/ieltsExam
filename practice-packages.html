@@ -112,12 +112,7 @@
               return;
             }
 
-            var portalUrl =
-              "portal.html?target=" +
-              encodeURIComponent(dest) +
-              "&package=" +
-              encodeURIComponent(pkg);
-            window.location.href = portalUrl;
+            window.location.href = dest;
           });
         }
       })();

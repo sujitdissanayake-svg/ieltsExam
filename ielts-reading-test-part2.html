@@ -208,6 +208,11 @@
               </div>
             </section>
 
+            <div class="reading-divider" role="separator" aria-orientation="vertical" aria-label="Resize panels">
+              <div class="reading-divider-line"></div>
+              <div class="reading-divider-handle">-</div>
+            </div>
+
             <section class="reading-pane" aria-label="Questions 14 to 26">
               <div class="reading-pane-body" id="readingQuestionsScrollPart2" tabindex="0">
                 <div class="reading-pane-title">Questions 14-26</div>
@@ -1259,6 +1264,7 @@
         var suffixEl = document.getElementById('timer-suffix');
         var valueEl = document.getElementById('timer-value');
         var timerEl = document.getElementById('timer');
+        var topbarEl = document.querySelector('.listening-topbar, .academic-topbar');
 
         var lastRemainingSeconds = null;
 
@@ -1354,9 +1360,11 @@
           var remainingSeconds = Math.max(0, Math.floor(remainingMs / 1000));
 
           applyTimerUI(remainingSeconds);
+          if (topbarEl) topbarEl.classList.toggle('topbar-last-minute', remainingSeconds <= 60 && remainingSeconds > 0);
 
           // At 0: blink red, then redirect to ended page after 3 seconds.
           if (remainingSeconds <= 0) {
+            if (topbarEl) topbarEl.classList.remove('topbar-last-minute');
             if (window.__ieltsReadingEndPending) return;
             window.__ieltsReadingEndPending = true;
             triggerWarn('zero');

@@ -1,8 +1,5 @@
 (() => {
-  const isLocalHost = () => {
-    const host = window.location.hostname;
-    return host === 'localhost' || host === '127.0.0.1' || host === '::1';
-  };
+  const usesHtmlRoutes = () => /\.html$/i.test(window.location.pathname || '');
 
   const mulberry32 = (seed) => {
     let t = seed >>> 0;
@@ -136,8 +133,7 @@
     const resetButton = document.querySelector('[data-current-students-reset]');
     if (resetButton instanceof HTMLButtonElement) {
       // Never expose this control on the public site.
-      // (If it exists in markup, keep it hidden; allow only on localhost if needed.)
-      const allowAdminUi = isLocalHost();
+      const allowAdminUi = false;
       if (!allowAdminUi) {
         try {
           window.localStorage.removeItem(adminKey);
@@ -244,7 +240,35 @@
 
   const lecturerForm = document.querySelector('[data-lecturer-form]');
   if (lecturerForm instanceof HTMLFormElement) {
-    lecturerForm.addEventListener('submit', (event) => {
+    const status = document.createElement('p');
+    status.setAttribute('aria-live', 'polite');
+    status.style.margin = '8px 0 0';
+    status.style.fontSize = '0.92rem';
+    status.style.color = 'var(--muted)';
+    status.style.display = 'none';
+    lecturerForm.appendChild(status);
+
+    let statusHideTimer = 0;
+
+    const showStatus = (message, color) => {
+      if (statusHideTimer) {
+        window.clearTimeout(statusHideTimer);
+        statusHideTimer = 0;
+      }
+      status.textContent = message;
+      status.style.color = color;
+      status.style.display = 'block';
+    };
+
+    const hideStatusLater = () => {
+      if (statusHideTimer) window.clearTimeout(statusHideTimer);
+      statusHideTimer = window.setTimeout(() => {
+        status.textContent = '';
+        status.style.display = 'none';
+      }, 5000);
+    };
+
+    lecturerForm.addEventListener('submit', async (event) => {
       event.preventDefault();
 
       const data = new FormData(lecturerForm);
@@ -253,18 +277,45 @@
       const institute = String(data.get('institute') ?? '').trim();
       const message = String(data.get('message') ?? '').trim();
 
-      const subject = 'IELTS Lecturer — Student Registration';
-      const bodyLines = [
-        'Register your students to help them improve their skills, receive detailed performance reports, and tailor your teaching accordingly.',
-        '',
-        `Lecturer name: ${name || '-'}`,
-        `Email: ${email || '-'}`,
-        `Institute / Class: ${institute || '-'}`,
-        `Message: ${message || '-'}`,
-      ];
+      const submitButton = lecturerForm.querySelector('.footer-submit');
+      const originalButtonText = submitButton instanceof HTMLButtonElement ? submitButton.textContent : null;
 
-      const mailto = `mailto:info@ieltscambridge.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyLines.join('\n'))}`;
-      window.location.href = mailto;
+      if (submitButton instanceof HTMLButtonElement) {
+        submitButton.disabled = true;
+        submitButton.textContent = 'Sending...';
+      }
+      showStatus('Sending registration...', 'var(--muted)');
+
+      try {
+        const response = await fetch('/api/lecturer-registration', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name,
+            email,
+            institute,
+            message,
+          }),
+        });
+
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          throw new Error((payload && payload.error) || 'Unable to send registration.');
+        }
+
+        lecturerForm.reset();
+        showStatus('Registration sent successfully. We will contact you soon.', 'var(--accentGreen)');
+        hideStatusLater();
+      } catch (err) {
+        showStatus(err && err.message ? err.message : 'Unable to send registration.', 'var(--red)');
+      } finally {
+        if (submitButton instanceof HTMLButtonElement) {
+          submitButton.disabled = false;
+          submitButton.textContent = originalButtonText || 'Send registration';
+        }
+      }
     });
   }
   // Gate test access behind a one-time registration on the portal page.
@@ -301,8 +352,8 @@
       return true;
     }
 
-    // Free mock: always start fresh (never resume an in-progress stage).
-    window.location.replace(isLocalHost() ? 'free-mock-test.html?restart=1' : 'free-mock-test?restart=1');
+    // Free mock: start directly at the portal page and skip the removed chooser screen.
+    window.location.replace(usesHtmlRoutes() ? 'free-mock-portal.html?restart=1' : 'free-mock-portal?restart=1');
     return true;
   };
 
@@ -318,7 +369,9 @@
     if (!(link instanceof HTMLAnchorElement)) continue;
     link.addEventListener('click', (event) => {
       event.preventDefault();
-      const target = isLocalHost() ? 'free-mock-test.html?restart=1' : 'free-mock-test?restart=1';
+      const target = usesHtmlRoutes()
+        ? 'free-mock-portal.html?restart=1'
+        : 'free-mock-portal?restart=1';
       window.location.replace(target);
     });
   }
@@ -331,6 +384,7 @@
     if (!(link instanceof HTMLAnchorElement)) continue;
     link.addEventListener('click', (event) => {
       event.preventDefault();
+
       const originalHref = link.getAttribute('href') || '#';
       let target = originalHref;
       if (originalHref.startsWith('#')) {
@@ -338,6 +392,30 @@
       }
       const packagesUrl = `packages.html?target=${encodeURIComponent(target)}`;
       window.location.href = packagesUrl;
+    });
+  }
+
+  // Mock Test list buttons (on the homepage).
+  const mockStartButtons = document.querySelectorAll('button[data-mock-test-start]');
+  for (const btn of mockStartButtons) {
+    if (!(btn instanceof HTMLButtonElement)) continue;
+    btn.addEventListener('click', () => {
+      const raw = btn.getAttribute('data-mock-test-start') || '1';
+      let testId = Number(raw);
+      if (!Number.isFinite(testId) || testId < 1 || testId > 4) testId = 1;
+
+      // Always keep Mock Tests behind the package/portal flow.
+      if (!isRegistered) {
+        const target = `./index.html#mock`;
+        const packagesUrl = `packages.html?target=${encodeURIComponent(target)}`;
+        window.location.href = packagesUrl;
+        return;
+      }
+
+      const runUrl = usesHtmlRoutes()
+        ? `mock-test-run.html?test=${encodeURIComponent(String(testId))}&section=listening`
+        : `mock-test-run?test=${encodeURIComponent(String(testId))}&section=listening`;
+      window.location.href = runUrl;
     });
   }
 
@@ -383,8 +461,8 @@
         if (originalHref.startsWith('#')) {
           target = `./index.html${originalHref}`;
         }
-        const portalUrl = `portal.html?target=${encodeURIComponent(target)}`;
-        window.location.href = portalUrl;
+        const packagesUrl = `packages.html?target=${encodeURIComponent(target)}`;
+        window.location.href = packagesUrl;
       });
     }
   }

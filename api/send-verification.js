@@ -1,19 +1,20 @@
 const crypto = require('crypto');
-const { sha256Hex, signToken, readJsonBody } = require('./_shared');
+const { sha256Hex, signToken, readJsonBody, requireVerificationTokenSecret, isValidEmailBasic } = require('./_shared');
+const { sendJson, enforceRateLimit } = require('./_http');
 const nodemailer = require('nodemailer');
-
-const isValidEmail = (email) => {
-  const value = String(email || '').trim();
-  if (!value) return false;
-  // Intentionally simple: just prevent obvious garbage.
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-};
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
-    res.statusCode = 405;
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify({ error: 'Method not allowed.' }));
+    sendJson(res, 405, { error: 'Method not allowed.' });
+    return;
+  }
+
+  if (await enforceRateLimit(req, res, {
+    key: 'send-verification',
+    limit: 12,
+    windowMs: 10 * 60 * 1000,
+    message: 'Too many verification requests. Please wait before requesting another code.',
+  })) {
     return;
   }
 
@@ -21,27 +22,23 @@ module.exports = async function handler(req, res) {
   try {
     body = await readJsonBody(req);
   } catch (err) {
-    res.statusCode = 400;
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify({ error: err && err.message ? err.message : 'Invalid request.' }));
+    sendJson(res, 400, { error: err && err.message ? err.message : 'Invalid request.' });
     return;
   }
 
   const name = String(body.name || '').trim();
   const email = String(body.email || '').trim();
 
-  if (!isValidEmail(email)) {
-    res.statusCode = 400;
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify({ error: 'Please enter a valid email address.' }));
+  if (!isValidEmailBasic(email)) {
+    sendJson(res, 400, { error: 'Please enter a valid email address.' });
     return;
   }
 
-  const tokenSecret = process.env.VERIFICATION_TOKEN_SECRET;
-  if (!tokenSecret) {
-    res.statusCode = 500;
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify({ error: 'Server not configured (missing VERIFICATION_TOKEN_SECRET).' }));
+  let tokenSecret;
+  try {
+    tokenSecret = requireVerificationTokenSecret();
+  } catch (err) {
+    sendJson(res, 500, { error: err && err.message ? err.message : 'Server not configured.' });
     return;
   }
 
@@ -52,13 +49,9 @@ module.exports = async function handler(req, res) {
   const smtpSecure = String(process.env.ZOHO_SMTP_SECURE || '').trim();
 
   if (!smtpUser || !smtpPass) {
-    res.statusCode = 500;
-    res.setHeader('Content-Type', 'application/json');
-    res.end(
-      JSON.stringify({
-        error: 'Email service not configured (missing ZOHO_SMTP_USER / ZOHO_SMTP_PASS).',
-      })
-    );
+    sendJson(res, 500, {
+      error: 'Email service not configured (missing ZOHO_SMTP_USER / ZOHO_SMTP_PASS).',
+    });
     return;
   }
 
@@ -79,6 +72,8 @@ module.exports = async function handler(req, res) {
 
   const defaultFrom = smtpUser || 'info@ieltscambridge.com';
   const from = String(process.env.SENDER_EMAIL || defaultFrom).trim() || defaultFrom;
+  const senderName = String(process.env.SENDER_NAME || 'IELTS Cambridge').trim() || 'IELTS Cambridge';
+  const formattedFrom = formatMailboxWithName(from, senderName);
   const replyTo = String(process.env.REPLY_TO_EMAIL || from).trim() || from;
 
   const subject = 'Your registration verification code';
@@ -125,7 +120,7 @@ module.exports = async function handler(req, res) {
     });
 
     await transport.sendMail({
-      from,
+      from: formattedFrom,
       to: email,
       subject,
       text: textLines.join('\n'),
@@ -134,23 +129,24 @@ module.exports = async function handler(req, res) {
     });
   } catch (err) {
     const hint = classifyEmailSendError(err);
-    res.statusCode = 502;
-    res.setHeader('Content-Type', 'application/json');
-    res.end(
-      JSON.stringify({
-        error: 'Failed to send email.',
-        hint,
-        code: err && err.code ? String(err.code) : undefined,
-        message: err && err.message ? String(err.message) : String(err),
-      })
-    );
+    sendJson(res, 502, {
+      error: 'Failed to send email.',
+      hint,
+      code: err && err.code ? String(err.code) : undefined,
+      message: err && err.message ? String(err.message) : String(err),
+    });
     return;
   }
 
-  res.statusCode = 200;
-  res.setHeader('Content-Type', 'application/json');
-  res.end(JSON.stringify({ token, expiresInSeconds }));
+  sendJson(res, 200, { token, expiresInSeconds });
 };
+
+function formatMailboxWithName(email, displayName) {
+  const mailbox = String(email || '').trim();
+  const name = String(displayName || '').trim();
+  if (!name) return mailbox;
+  return '"' + name.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '" <' + mailbox + '>';
+}
 
 function escapeHtml(input) {
   return String(input)

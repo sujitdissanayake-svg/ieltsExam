@@ -33,6 +33,7 @@
       </div>
     </main>
 
+    <script src="writing-score.js?v=20260609-1"></script>
     <script>
       (function () {
         // Clear the writing timer so a new run starts fresh.
@@ -52,10 +53,92 @@
           window.sessionStorage.removeItem('ieltsWritingSessionId');
         } catch (_) {}
 
-        // Move to Speaking after a short pause.
-        window.setTimeout(function () {
-          window.location.href = 'ielts-speaking.html';
-        }, 3000);
+        function readValue(key) {
+          try {
+            var localValue = String(window.localStorage.getItem(key) || '').trim();
+            if (localValue) return localValue;
+          } catch (_) {}
+          try {
+            return String(window.sessionStorage.getItem(key) || '').trim();
+          } catch (_) {
+            return '';
+          }
+        }
+
+        function normalizePackage(value) {
+          var raw = String(value || '').trim();
+          return /^(Lite|Basic|Standard|Pro)$/i.test(raw) ? raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase() : '';
+        }
+
+        function isLitePaperOneContext() {
+          var params = new URLSearchParams(window.location.search || '');
+          var mode = String(params.get('testMode') || readValue('ieltsTestMode') || '').trim().toLowerCase();
+          var pkg = normalizePackage(params.get('package') || readValue('ieltsMockPackage') || '');
+          var paper = String(params.get('paper') || readValue('ieltsMockPaper') || '').trim();
+          return mode === 'mock' && pkg === 'Lite' && paper === '1';
+        }
+
+        function getCurrentTestMode() {
+          var params = new URLSearchParams(window.location.search || '');
+          var mode = String(params.get('testMode') || readValue('ieltsTestMode') || '').trim().toLowerCase();
+          return mode === 'mock' ? 'mock' : 'free';
+        }
+
+        var redirected = false;
+        var goToSpeaking = function () {
+          if (redirected) return;
+          redirected = true;
+          var usesHtml = /\.html$/i.test(window.location.pathname || '');
+          var target = '';
+
+          if (isLitePaperOneContext()) {
+            target = usesHtml ? 'ielts-speaking-lite-paper1.html' : 'ielts-speaking-lite-paper1';
+          } else if (getCurrentTestMode() === 'free') {
+            // Free mock flow must always land on the speaking-unavailable page.
+            target = usesHtml ? 'ielts-speaking.html?testMode=free' : 'ielts-speaking?testMode=free';
+          } else {
+            target = usesHtml ? 'ielts-speaking.html' : 'ielts-speaking';
+          }
+
+          window.location.href = target;
+        };
+
+        var fallbackTimeout = window.setTimeout(goToSpeaking, 7000);
+
+        var submitWritingResult = function () {
+          try {
+            if (window.__ieltsWritingScore && typeof window.__ieltsWritingScore.submitWritingResult === 'function') {
+              return window.__ieltsWritingScore.submitWritingResult();
+            }
+          } catch (_) {}
+
+          return Promise.resolve({ ok: false, skipped: true });
+        };
+
+        submitWritingResult()
+          .then(function (payload) {
+            var result = payload && typeof payload === 'object' ? payload : {};
+            var freeMockAttempt = result.freeMockAttempt && typeof result.freeMockAttempt === 'object' ? result.freeMockAttempt : null;
+            var shouldRedirect = !!(result.redirectToPackages || (freeMockAttempt && freeMockAttempt.redirectToPackages));
+            if (shouldRedirect) {
+              var redirectPath = String(result.redirectPath || (freeMockAttempt && freeMockAttempt.redirectPath) || '/packages.html').trim();
+              window.location.href = redirectPath;
+              return false;
+            }
+            return true;
+          })
+          .catch(function () {
+            return true;
+          })
+          .then(function (shouldContinue) {
+            if (shouldContinue === false) return;
+            window.setTimeout(function () {
+              try {
+                window.clearTimeout(fallbackTimeout);
+              } catch (_) {}
+              goToSpeaking();
+            }, 1000);
+          });
       })();
     </script>
   </body>

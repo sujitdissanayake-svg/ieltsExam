@@ -1,0 +1,1213 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IELTS Academic Reading</title>
+    <link rel="stylesheet" href="styles.css?v=20260613-7" />
+    <script src="ielts-flow-guard.js?v=20260310-2" defer></script>
+    <script src="reading-score.js?v=20260616-2" defer></script>
+    <script>
+      (function () {
+        function readValue(key) {
+          try {
+            var localValue = String(window.localStorage.getItem(key) || '').trim();
+            if (localValue) return localValue;
+          } catch (_) {}
+          try {
+            return String(window.sessionStorage.getItem(key) || '').trim();
+          } catch (_) {
+            return '';
+          }
+        }
+
+        function normalizePackage(value) {
+          var raw = String(value || '').trim();
+          return /^(Lite|Basic|Standard|Pro)$/i.test(raw) ? raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase() : '';
+        }
+
+        var params = new URLSearchParams(window.location.search || '');
+        var mode = String(params.get('testMode') || readValue('ieltsTestMode') || '').trim().toLowerCase();
+        var pkg = normalizePackage(params.get('package') || readValue('ieltsMockPackage') || '');
+        var paper = String(params.get('paper') || readValue('ieltsMockPaper') || '').trim();
+        var isLitePaperOne = mode === 'mock' && pkg === 'Lite' && paper === '1';
+
+        if (!isLitePaperOne) {
+          try {
+            window.location.replace('ielts-reading-test.html');
+          } catch (_) {
+            window.location.href = 'ielts-reading-test.html';
+          }
+        }
+      })();
+    </script>
+  </head>
+  <body class="reading-test listening-soundcheck">
+    <header class="academic-topbar" aria-label="IELTS top bar">
+      <div class="academic-topbar-inner">
+        <img
+          class="academic-topbar-ielts"
+          src="assets/IELTS%20Exam%20logo%202-trim.png?v=20260226b"
+          alt="IELTS"
+        />
+
+        <div class="reading-topbar-timer" aria-label="Time remaining">
+          <p xmlns="http://www.w3.org/1999/xhtml" id="timer" class="test-banner-timer" style="display: inline-block;">
+            <span class="reader-only" id="timer-label">Time:</span>
+            <span class="reading-timerIcon" aria-hidden="true">
+              <img src="assets/clock%20-reading-transparent.png" alt="" />
+            </span>
+            <span
+              id="timer-value"
+              class="test-banner-timeValue"
+              aria-labelledby="timer-label"
+              xmlns:connect="http://connect.ucles.org.uk/ns/ConnectDeliveryEngine"
+              connect:function="timer"
+              title="60:00 left"
+              style="display: inline-block;"
+            >
+              <em id="timer-minutes">60</em>
+              <span id="timer-suffix"> minutes left</span>
+            </span>
+          </p>
+        </div>
+
+        <div class="academic-topbar-partners" aria-label="IELTS partners">
+          <img
+            class="academic-topbar-partner"
+            src="assets/british-council-trim-no-official.png?v=20260226"
+            alt="British Council"
+            loading="lazy"
+          />
+          <img class="academic-topbar-partner" src="assets/IDP-trim-no-official.png?v=20260226" alt="IDP" loading="lazy" />
+          <span class="academic-topbar-cambridge" aria-label="Cambridge Assessment English">Cambridge Assessment English</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="reading-test-page" aria-label="IELTS Academic Reading">
+      <section class="reading-test-shell" aria-label="Reading test shell">
+        <section class="reading-part" id="readingPart1" data-part="1" aria-label="Reading Part 1">
+          <section class="listening-partBox" aria-label="Part 1 instructions">
+            <div class="listening-partBox-title">Part 1</div>
+            <div class="listening-partBox-sub">Read the text and answer the questions 1-13.</div>
+          </section>
+
+          <section class="reading-split" aria-label="Part 1 content">
+            <section class="reading-pane" aria-label="Reading passage">
+              <div class="reading-pane-body" id="readingPassageScroll" tabindex="0">
+                <div class="reading-contextMenu" id="readingHighlightMenu" role="menu" aria-label="Highlight menu" hidden>
+                <button class="reading-contextItem" type="button" role="menuitem" data-action="highlight">
+                  <span class="reading-contextIcon" aria-hidden="true">
+                    <svg class="reading-contextBrush" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                      <path
+                        d="M14.2 3.3c1.1-1.1 2.9-1.1 4 0l2.5 2.5c1.1 1.1 1.1 2.9 0 4L11 19.5c-.2.2-.5.4-.8.4l-4.5 1c-.6.1-1.1-.4-1-1l1-4.5c.1-.3.2-.6.4-.8L14.2 3.3z"
+                      />
+                      <path d="M5 21c2.8 0 5-2.2 5-5H7.8c-1.8 0-3.3 1.5-3.3 3.3V21z" />
+                    </svg>
+                  </span>
+                  <span>Highlight</span>
+                </button>
+                <button class="reading-contextItem" type="button" role="menuitem" data-action="notes">
+                  <span class="reading-contextIcon" aria-hidden="true">✎</span>
+                  <span>Notes</span>
+                </button>
+                </div>
+                <div class="reading-pane-title">The development of the London underground railway</div>
+
+              <p>
+                During the first half of the nineteenth century, London's population expanded at an extraordinary pace,
+                and the central districts grew increasingly congested. Moreover, the rapid development of the overground
+                railway network brought a rising influx of passengers into the capital. Yet, in 1846, a Royal Commission
+                decreed that the railways should not penetrate the City, the historic and commercial heart of London.
+                Consequently, the overground railway stations were established in a ring encircling the City. Within
+                this perimeter lay densely packed, poorly constructed slums, while the streets teemed with horse drawn
+                vehicles. Traversing the City became a formidable ordeal: a journey of merely eight kilometres by
+                carriage or omnibus could consume an hour and a half. Numerous schemes were advanced to alleviate these
+                difficulties, but few achieved success.
+              </p>
+
+              <p>
+                Among the most ardent proponents of a remedy for London's traffic difficulties was Charles Pearson, who
+                served as a solicitor to the City of London. He perceived both social and economic benefits in
+                constructing an underground railway that would interconnect the overground stations while simultaneously
+                facilitating the clearance of London's slums. His vision was to resettle impoverished workers from the
+                inner city slums into newly developed suburban districts, and to provide them with inexpensive rail
+                transport to commute to their places of employment. Pearson's proposals attracted the support of certain
+                businessmen, and in 1851 he presented a scheme to Parliament. Although it was rejected, it coincided
+                with a separate proposal from another group for an underground connecting line, which Parliament
+                approved.
+              </p>
+
+              <p>
+                The two groups united and founded the Metropolitan Railway Company in August 1854. The company's
+                objective was to construct an underground railway extending from the Great Western Railway's (GWR)
+                station at Paddington to the boundary of the City at Farringdon Street-a distance of nearly five
+                kilometres. The organisation encountered considerable difficulty in securing the necessary capital for
+                such a bold and costly enterprise, not least because of the critical articles published in the press.
+                Opponents contended that the tunnels would collapse beneath the weight of traffic above, that buildings
+                would be destabilised, and that passengers would be poisoned by the emissions from the locomotive
+                engines. Nevertheless, Pearson and his associates remained steadfast in their determination.
+              </p>
+
+              <p>
+                The Great Western Railway (GWR), recognising that the new line would at last permit them to operate
+                trains directly into the heart of the City, invested nearly £250,000 in the enterprise. Ultimately, over
+                the course of five years, a total of £1 million was secured. The selected route passed beneath existing
+                principal roads in order to reduce the expense of demolishing buildings. Although originally scheduled
+                for completion within twenty one months, the construction of the underground line required three years.
+                It was built just below street level by means of a technique known as "cut and cover." A trench
+                approximately ten metres wide and six metres deep was excavated, its sides temporarily supported with
+                timber beams. Brick walls were then erected, followed by the addition of a brick arch to form the
+                tunnel. Finally, a two metre deep layer of soil was laid over the tunnel and the roadway above
+                reconstructed.
+              </p>
+
+              <p>
+                The Metropolitan line, inaugurated on 10 January 1863, was the world's first subterranean railway. On
+                its opening day, nearly 40,000 passengers travelled between Paddington and Farringdon, completing the
+                journey in approximately eighteen minutes. By the close of its first year of operation, the Metropolitan
+                had conveyed 9.5 million passengers. Even as services commenced, authorisation was granted for the
+                line's initial extensions; these were constructed over the following five years, reaching Moorgate in
+                London's east and Hammersmith in the west. The original intention had been to haul the trains with steam
+                locomotives employing firebricks in their boilers to generate steam, yet these engines were never
+                introduced. Instead, specially designed locomotives were utilised, equipped with water tanks in which
+                steam could be condensed. Nevertheless, smoke and fumes persisted as a difficulty, despite the addition
+                of ventilation shafts to the tunnels.
+              </p>
+
+              <p>
+                Despite the expansion of the underground railway, by the 1880s congestion on London's streets had
+                intensified. The difficulty lay partly in the fact that the existing underground lines formed a circuit
+                around the centre of London and extended outward to the suburbs, yet they did not traverse the capital's
+                core. In this central district, the "cut and cover" method of construction was impracticable. The sole
+                alternative was to drive tunnels deep beneath the ground.
+              </p>
+
+              <p>
+                Although the technology to construct such tunnels already existed, steam locomotives could not be
+                employed in so confined an environment. Only with the advent of a dependable electric motor, together
+                with a system for transmitting power from a generator to a moving train, did the world's first deep
+                level electric railway-the City &amp; South London-become feasible. The line opened in 1890, running from
+                the City to Stockwell, south of the River Thames. The trains comprised three carriages propelled by
+                electric engines. The carriages were narrow and fitted with diminutive windows positioned just below the
+                roof, as it was assumed that passengers would have no desire to gaze upon the tunnel walls. The line was
+                not without difficulties, most of which stemmed from an unreliable power supply. Although the City &amp;
+                South London Railway represented a remarkable technical achievement, it failed to yield a profit. In
+                1900, however, the Central London Railway-popularly known as the "Tuppenny Tube"-commenced operation
+                with newly designed electric locomotives. It proved highly successful, and soon thereafter additional
+                railways and extensions were incorporated into the expanding tube network. By 1907, the nucleus of
+                today's Underground system was firmly established.
+              </p>
+              </div>
+            </section>
+
+            <div class="reading-divider" role="separator" aria-orientation="vertical" aria-label="Resize panels">
+              <div class="reading-divider-line"></div>
+              <div class="reading-divider-handle">-</div>
+            </div>
+
+            <section class="reading-pane" aria-label="Questions 1 to 13">
+              <div class="reading-pane-body" id="readingQuestionsScroll" tabindex="0">
+              <div class="reading-pane-title">Questions 1-13</div>
+              <div class="reading-sectionTitle">Questions 1-6</div>
+              <div class="reading-q-instructions" aria-label="Questions 1 to 6 instructions">
+              </div>
+
+              <div class="reading-notesBlock reading-notesBlock--liteIntro" aria-label="Notes completion for questions 1 to 6">
+                <div class="reading-notesTitle">Notes Completion (Q1-Q6)</div>
+                <p class="reading-notesInstruction"><em>Choose <strong>ONE WORD ONLY</strong> from the passage for each answer.</em></p>
+
+                <p class="reading-notesTopic">The London underground railway</p>
+
+                <p class="reading-notesSubheading">The problem</p>
+                <ul class="reading-notesList">
+                  <li class="reading-q reading-notesItem" id="reading-q1" data-q="1">
+                    <div class="reading-notesStem">
+                      The
+                      <span class="reading-notesBlankWrap listening-paper-blankWrap--sentence">
+                        <input class="listening-paper-blank reading-notesBlankInput" id="reading-a1" data-q="1" type="text" inputmode="text" aria-label="Answer 1" placeholder="01" />
+                      </span>
+                      of London grew rapidly in the early nineteenth century.
+                    </div>
+                  </li>
+                  <li class="reading-notesItem">
+                    <div class="reading-notesStem">The streets were crowded with horse-drawn vehicles.</div>
+                  </li>
+                </ul>
+
+                <p class="reading-notesSubheading">The proposed solution</p>
+                <ul class="reading-notesList">
+                  <li class="reading-notesItem">
+                    <div class="reading-notesStem">Charles Pearson, a solicitor, suggested building an underground railway.</div>
+                  </li>
+                  <li class="reading-q reading-notesItem" id="reading-q2" data-q="2">
+                    <div class="reading-notesStem">
+                      His plan included moving poor workers to the
+                      <span class="reading-notesBlankWrap listening-paper-blankWrap--sentence">
+                        <input class="listening-paper-blank reading-notesBlankInput" id="reading-a2" data-q="2" type="text" inputmode="text" aria-label="Answer 2" placeholder="02" />
+                      </span>
+                      .
+                    </div>
+                  </li>
+                  <li class="reading-q reading-notesItem" id="reading-q3" data-q="3">
+                    <div class="reading-notesStem">
+                      Several
+                      <span class="reading-notesBlankWrap listening-paper-blankWrap--sentence">
+                        <input class="listening-paper-blank reading-notesBlankInput" id="reading-a3" data-q="3" type="text" inputmode="text" aria-label="Answer 3" placeholder="03" />
+                      </span>
+                      supported Pearson's vision.
+                    </div>
+                  </li>
+                  <li class="reading-q reading-notesItem" id="reading-q4" data-q="4">
+                    <div class="reading-notesStem">
+                      The company struggled to raise sufficient
+                      <span class="reading-notesBlankWrap listening-paper-blankWrap--sentence">
+                        <input class="listening-paper-blank reading-notesBlankInput" id="reading-a4" data-q="4" type="text" inputmode="text" aria-label="Answer 4" placeholder="04" />
+                      </span>
+                      for the project.
+                    </div>
+                  </li>
+                  <li class="reading-q reading-notesItem" id="reading-q5" data-q="5">
+                    <div class="reading-notesStem">
+                      Critical articles appeared in the
+                      <span class="reading-notesBlankWrap listening-paper-blankWrap--sentence reading-notesBlankWrap--narrow">
+                        <input class="listening-paper-blank reading-notesBlankInput" id="reading-a5" data-q="5" type="text" inputmode="text" aria-label="Answer 5" placeholder="05" />
+                      </span>
+                      opposing the scheme.
+                    </div>
+                  </li>
+                </ul>
+
+                <p class="reading-notesSubheading">The construction</p>
+                <ul class="reading-notesList">
+                  <li class="reading-notesItem">
+                    <div class="reading-notesStem">The route was chosen to avoid demolishing many buildings.</div>
+                  </li>
+                  <li class="reading-notesItem">
+                    <div class="reading-notesStem">The tunnels were built using the "cut and cover" method.</div>
+                  </li>
+                  <li class="reading-q reading-notesItem" id="reading-q6" data-q="6">
+                    <div class="reading-notesStem">
+                      After the brick arch was completed, the tunnel was covered with
+                      <span class="reading-notesBlankWrap listening-paper-blankWrap--sentence reading-notesBlankWrap--narrow">
+                        <input class="listening-paper-blank reading-notesBlankInput" id="reading-a6" data-q="6" type="text" inputmode="text" aria-label="Answer 6" placeholder="06" />
+                      </span>
+                      .
+                    </div>
+                  </li>
+                </ul>
+              </div>
+
+              <div class="reading-sectionTitle">Questions 7-13</div>
+              <div class="reading-q-instructions" aria-label="Questions 7 to 13 instructions">
+                <p>Do the following statements agree with the information in the passage?</p>
+                <p>Choose <strong>TRUE</strong> if the statement agrees with the information given in the text,</p>
+                <p>choose <strong>FALSE</strong> if the statement contradicts the information, or</p>
+                <p>choose <strong>NOT GIVEN</strong> if there is no information on this.</p>
+              </div>
+
+              <div class="reading-ynngBlock" aria-label="Questions 7 to 13 statements">
+                <div class="reading-q reading-q--ynngList" id="reading-q7" data-q="7">
+                  <div class="reading-ynng-statement"><span class="reading-ynng-num">7.</span><span>The Metropolitan Railway Company was founded in 1851.</span></div>
+                  <div class="listening-mcq-options reading-ynng-options" role="radiogroup" aria-label="Question 7 options">
+                    <label class="listening-mcq-opt reading-ynng-opt"><input class="listening-mcq-input" type="radio" name="reading-q7" value="TRUE" /> <span class="listening-mcq-text">True</span></label>
+                    <label class="listening-mcq-opt reading-ynng-opt"><input class="listening-mcq-input" type="radio" name="reading-q7" value="FALSE" /> <span class="listening-mcq-text">False</span></label>
+                    <label class="listening-mcq-opt reading-ynng-opt"><input class="listening-mcq-input" type="radio" name="reading-q7" value="NOT GIVEN" /> <span class="listening-mcq-text">Not Given</span></label>
+                  </div>
+                </div>
+
+                <div class="reading-q reading-q--ynngList" id="reading-q8" data-q="8">
+                  <div class="reading-ynng-statement"><span class="reading-ynng-num">8.</span><span>Opponents feared that passengers would be poisoned by emissions from train engines.</span></div>
+                  <div class="listening-mcq-options reading-ynng-options" role="radiogroup" aria-label="Question 8 options">
+                    <label class="listening-mcq-opt reading-ynng-opt"><input class="listening-mcq-input" type="radio" name="reading-q8" value="TRUE" /> <span class="listening-mcq-text">True</span></label>
+                    <label class="listening-mcq-opt reading-ynng-opt"><input class="listening-mcq-input" type="radio" name="reading-q8" value="FALSE" /> <span class="listening-mcq-text">False</span></label>
+                    <label class="listening-mcq-opt reading-ynng-opt"><input class="listening-mcq-input" type="radio" name="reading-q8" value="NOT GIVEN" /> <span class="listening-mcq-text">Not Given</span></label>
+                  </div>
+                </div>
+
+                <div class="reading-q reading-q--ynngList" id="reading-q9" data-q="9">
+                  <div class="reading-ynng-statement"><span class="reading-ynng-num">9.</span><span>The Metropolitan line opened in 1863 and carried nearly 40,000 passengers on its first day.</span></div>
+                  <div class="listening-mcq-options reading-ynng-options" role="radiogroup" aria-label="Question 9 options">
+                    <label class="listening-mcq-opt reading-ynng-opt"><input class="listening-mcq-input" type="radio" name="reading-q9" value="TRUE" /> <span class="listening-mcq-text">True</span></label>
+                    <label class="listening-mcq-opt reading-ynng-opt"><input class="listening-mcq-input" type="radio" name="reading-q9" value="FALSE" /> <span class="listening-mcq-text">False</span></label>
+                    <label class="listening-mcq-opt reading-ynng-opt"><input class="listening-mcq-input" type="radio" name="reading-q9" value="NOT GIVEN" /> <span class="listening-mcq-text">Not Given</span></label>
+                  </div>
+                </div>
+
+                <div class="reading-q reading-q--ynngList" id="reading-q10" data-q="10">
+                  <div class="reading-ynng-statement"><span class="reading-ynng-num">10.</span><span>The original steam locomotives using firebricks were successfully introduced.</span></div>
+                  <div class="listening-mcq-options reading-ynng-options" role="radiogroup" aria-label="Question 10 options">
+                    <label class="listening-mcq-opt reading-ynng-opt"><input class="listening-mcq-input" type="radio" name="reading-q10" value="TRUE" /> <span class="listening-mcq-text">True</span></label>
+                    <label class="listening-mcq-opt reading-ynng-opt"><input class="listening-mcq-input" type="radio" name="reading-q10" value="FALSE" /> <span class="listening-mcq-text">False</span></label>
+                    <label class="listening-mcq-opt reading-ynng-opt"><input class="listening-mcq-input" type="radio" name="reading-q10" value="NOT GIVEN" /> <span class="listening-mcq-text">Not Given</span></label>
+                  </div>
+                </div>
+
+                <div class="reading-q reading-q--ynngList" id="reading-q11" data-q="11">
+                  <div class="reading-ynng-statement"><span class="reading-ynng-num">11.</span><span>Ventilation shafts completely solved the problem of smoke and fumes.</span></div>
+                  <div class="listening-mcq-options reading-ynng-options" role="radiogroup" aria-label="Question 11 options">
+                    <label class="listening-mcq-opt reading-ynng-opt"><input class="listening-mcq-input" type="radio" name="reading-q11" value="TRUE" /> <span class="listening-mcq-text">True</span></label>
+                    <label class="listening-mcq-opt reading-ynng-opt"><input class="listening-mcq-input" type="radio" name="reading-q11" value="FALSE" /> <span class="listening-mcq-text">False</span></label>
+                    <label class="listening-mcq-opt reading-ynng-opt"><input class="listening-mcq-input" type="radio" name="reading-q11" value="NOT GIVEN" /> <span class="listening-mcq-text">Not Given</span></label>
+                  </div>
+                </div>
+
+                <div class="reading-q reading-q--ynngList" id="reading-q12" data-q="12">
+                  <div class="reading-ynng-statement"><span class="reading-ynng-num">12.</span><span>By the 1880s, underground lines crossed directly through the centre of London.</span></div>
+                  <div class="listening-mcq-options reading-ynng-options" role="radiogroup" aria-label="Question 12 options">
+                    <label class="listening-mcq-opt reading-ynng-opt"><input class="listening-mcq-input" type="radio" name="reading-q12" value="TRUE" /> <span class="listening-mcq-text">True</span></label>
+                    <label class="listening-mcq-opt reading-ynng-opt"><input class="listening-mcq-input" type="radio" name="reading-q12" value="FALSE" /> <span class="listening-mcq-text">False</span></label>
+                    <label class="listening-mcq-opt reading-ynng-opt"><input class="listening-mcq-input" type="radio" name="reading-q12" value="NOT GIVEN" /> <span class="listening-mcq-text">Not Given</span></label>
+                  </div>
+                </div>
+
+                <div class="reading-q reading-q--ynngList" id="reading-q13" data-q="13">
+                  <div class="reading-ynng-statement"><span class="reading-ynng-num">13.</span><span>The "Tuppenny Tube" opened in 1900 and quickly became popular.</span></div>
+                  <div class="listening-mcq-options reading-ynng-options" role="radiogroup" aria-label="Question 13 options">
+                    <label class="listening-mcq-opt reading-ynng-opt"><input class="listening-mcq-input" type="radio" name="reading-q13" value="TRUE" /> <span class="listening-mcq-text">True</span></label>
+                    <label class="listening-mcq-opt reading-ynng-opt"><input class="listening-mcq-input" type="radio" name="reading-q13" value="FALSE" /> <span class="listening-mcq-text">False</span></label>
+                    <label class="listening-mcq-opt reading-ynng-opt"><input class="listening-mcq-input" type="radio" name="reading-q13" value="NOT GIVEN" /> <span class="listening-mcq-text">Not Given</span></label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </section>
+      </section>
+    </main>
+
+    <nav class="listening-bottomBar" aria-label="Test navigation">
+      <div class="listening-bottomBar-inner reading-bottomBar-inner" id="readingBottomBar" data-active-part="1">
+        <div
+          class="listening-bottomPart listening-bottomPart--active listening-bottomPart--expanded reading-bottomPart"
+          data-part="1"
+          role="button"
+          tabindex="0"
+          aria-label="Part 1 navigation"
+          aria-expanded="true"
+        >
+          <span class="listening-bottomPart-label">Part 1</span>
+          <span class="listening-bottomPart-meta" hidden>1 of 13</span>
+          <div class="listening-bottomQuestions" aria-label="Questions 1 to 13">
+            <a class="listening-bottomQ listening-bottomQ--current reading-bottomQ" href="#reading-q1" data-q="1" aria-current="page">1</a>
+            <a class="listening-bottomQ reading-bottomQ" href="#reading-q2" data-q="2">2</a>
+            <a class="listening-bottomQ reading-bottomQ" href="#reading-q3" data-q="3">3</a>
+            <a class="listening-bottomQ reading-bottomQ" href="#reading-q4" data-q="4">4</a>
+            <a class="listening-bottomQ reading-bottomQ" href="#reading-q5" data-q="5">5</a>
+            <a class="listening-bottomQ reading-bottomQ" href="#reading-q6" data-q="6">6</a>
+            <a class="listening-bottomQ reading-bottomQ" href="#reading-q7" data-q="7">7</a>
+            <a class="listening-bottomQ reading-bottomQ" href="#reading-q8" data-q="8">8</a>
+            <a class="listening-bottomQ reading-bottomQ" href="#reading-q9" data-q="9">9</a>
+            <a class="listening-bottomQ reading-bottomQ" href="#reading-q10" data-q="10">10</a>
+            <a class="listening-bottomQ reading-bottomQ" href="#reading-q11" data-q="11">11</a>
+            <a class="listening-bottomQ reading-bottomQ" href="#reading-q12" data-q="12">12</a>
+            <a class="listening-bottomQ reading-bottomQ" href="#reading-q13" data-q="13">13</a>
+          </div>
+        </div>
+
+        <div
+          class="listening-bottomPart reading-bottomPart"
+          data-part="2"
+          role="button"
+          tabindex="0"
+          aria-label="Part 2 navigation"
+          aria-expanded="false"
+        >
+          <span class="listening-bottomPart-label">Part 2</span>
+          <span class="listening-bottomPart-meta">14 of 26</span>
+          <div class="listening-bottomQuestions" aria-label="Questions 14 to 26" hidden>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-part2-lite-paper1.html#reading-q14" data-q="14">14</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-part2-lite-paper1.html#reading-q15" data-q="15">15</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-part2-lite-paper1.html#reading-q16" data-q="16">16</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-part2-lite-paper1.html#reading-q17" data-q="17">17</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-part2-lite-paper1.html#reading-q18" data-q="18">18</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-part2-lite-paper1.html#reading-q19" data-q="19">19</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-part2-lite-paper1.html#reading-q20" data-q="20">20</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-part2-lite-paper1.html#reading-q21" data-q="21">21</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-part2-lite-paper1.html#reading-q22" data-q="22">22</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-part2-lite-paper1.html#reading-q23" data-q="23">23</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-part2-lite-paper1.html#reading-q24" data-q="24">24</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-part2-lite-paper1.html#reading-q25" data-q="25">25</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-part2-lite-paper1.html#reading-q26" data-q="26">26</a>
+          </div>
+        </div>
+
+        <div
+          class="listening-bottomPart reading-bottomPart"
+          data-part="3"
+          role="button"
+          tabindex="0"
+          aria-label="Part 3 navigation"
+          aria-expanded="false"
+        >
+          <span class="listening-bottomPart-label">Part 3</span>
+          <span class="listening-bottomPart-meta">27 of 40</span>
+          <div class="listening-bottomQuestions" aria-label="Questions 27 to 40" hidden>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-part3.html#reading-q27" data-q="27">27</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-part3.html#reading-q28" data-q="28">28</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-part3.html#reading-q29" data-q="29">29</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-part3.html#reading-q30" data-q="30">30</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-part3.html#reading-q31" data-q="31">31</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-part3.html#reading-q32" data-q="32">32</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-part3.html#reading-q33" data-q="33">33</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-part3.html#reading-q34" data-q="34">34</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-part3.html#reading-q35" data-q="35">35</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-part3.html#reading-q36" data-q="36">36</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-part3.html#reading-q37" data-q="37">37</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-part3.html#reading-q38" data-q="38">38</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-part3.html#reading-q39" data-q="39">39</a>
+            <a class="listening-bottomQ reading-bottomQ" href="ielts-reading-test-part3.html#reading-q40" data-q="40">40</a>
+          </div>
+        </div>
+
+        <div class="writing-bottomArrows reading-bottomArrows" aria-label="Navigation arrows">
+          <button class="listening-sideArrow listening-sideArrow--prev" id="readingPrev" type="button" aria-label="Previous" disabled>
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+          <button class="listening-sideArrow listening-sideArrow--next" id="readingNext" type="button" aria-label="Next">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <script>
+      (function () {
+        var headerEl = document.querySelector('.academic-topbar');
+        var bottomBarEl = document.querySelector('.listening-bottomBar');
+
+        function applyViewportSizing() {
+          try {
+            var headerH = headerEl && headerEl.offsetHeight ? headerEl.offsetHeight : 0;
+            var bottomH = bottomBarEl && bottomBarEl.offsetHeight ? bottomBarEl.offsetHeight : 0;
+            document.documentElement.style.setProperty('--readingHeaderHeight', headerH + 'px');
+            document.documentElement.style.setProperty('--readingBottomBarHeight', bottomH + 'px');
+          } catch (_) {}
+        }
+
+        function setCurrentQuestion(q) {
+          try {
+            var links = document.querySelectorAll('.reading-bottomQ');
+            for (var i = 0; i < links.length; i++) {
+              var a = links[i];
+              var isCurrent = String(a.getAttribute('data-q') || '') === String(q);
+              if (isCurrent) {
+                a.classList.add('listening-bottomQ--current');
+                a.setAttribute('aria-current', 'page');
+              } else {
+                a.classList.remove('listening-bottomQ--current');
+                a.removeAttribute('aria-current');
+              }
+            }
+
+            var blocks = document.querySelectorAll('.reading-q');
+            for (var j = 0; j < blocks.length; j++) {
+              var b = blocks[j];
+              var isBlockCurrent = String(b.getAttribute('data-q') || '') === String(q);
+              if (isBlockCurrent) {
+                b.classList.add('is-current');
+              } else {
+                b.classList.remove('is-current');
+              }
+            }
+          } catch (_) {}
+        }
+
+        function scrollToQuestion(q) {
+          var questionsScrollEl = document.getElementById('readingQuestionsScroll');
+          if (!questionsScrollEl) return;
+          var el = document.getElementById('reading-q' + String(q));
+          if (!el) return;
+          try {
+            el.scrollIntoView({ block: 'start', behavior: 'smooth' });
+          } catch (_) {
+            try {
+              el.scrollIntoView(true);
+            } catch (_) {}
+          }
+          setCurrentQuestion(q);
+        }
+
+        function setActivePart(partNum) {
+          var p = Number.parseInt(String(partNum || ''), 10);
+          if (!Number.isFinite(p)) p = 1;
+
+          var root = document.getElementById('readingBottomBar');
+          if (!root) return;
+          root.setAttribute('data-active-part', String(p));
+
+          var parts = root.querySelectorAll('.listening-bottomPart[data-part]');
+          for (var i = 0; i < parts.length; i++) {
+            var el = parts[i];
+            var elPart = Number.parseInt(String(el.getAttribute('data-part') || ''), 10);
+            var isActive = elPart === p;
+
+            el.classList.toggle('listening-bottomPart--active', isActive);
+            el.classList.toggle('listening-bottomPart--expanded', isActive);
+            el.setAttribute('aria-expanded', isActive ? 'true' : 'false');
+
+            var meta = el.querySelector('.listening-bottomPart-meta');
+            var questions = el.querySelector('.listening-bottomQuestions');
+            if (questions) questions.hidden = !isActive;
+            if (meta) meta.hidden = isActive;
+          }
+        }
+
+        applyViewportSizing();
+        window.addEventListener('resize', applyViewportSizing);
+
+        var bottomQs = document.querySelectorAll('.reading-bottomQ');
+        for (var i = 0; i < bottomQs.length; i++) {
+          (function (a) {
+            a.addEventListener('click', function (e) {
+              var href = a.getAttribute('href') || '';
+              if (href && href.charAt(0) !== '#') return; // allow cross-page navigation
+              e.preventDefault();
+              var q = a.getAttribute('data-q');
+              if (!q) return;
+              scrollToQuestion(q);
+            });
+          })(bottomQs[i]);
+        }
+
+        var questionBlocks = document.querySelectorAll('.reading-q[data-q]');
+        for (var k = 0; k < questionBlocks.length; k++) {
+          (function (block) {
+            function activateFromBlock() {
+              var q = block.getAttribute('data-q');
+              if (!q) return;
+              setCurrentQuestion(q);
+            }
+
+            block.addEventListener('click', activateFromBlock);
+
+            block.addEventListener('focusin', function () {
+              activateFromBlock();
+            });
+          })(questionBlocks[k]);
+        }
+
+        var bottomParts = document.querySelectorAll('#readingBottomBar .listening-bottomPart[data-part]');
+        for (var j = 0; j < bottomParts.length; j++) {
+          (function (partEl) {
+            function activatePart(e) {
+              try {
+                if (e && e.target && e.target.closest && e.target.closest('.reading-bottomQ')) return;
+              } catch (_) {}
+              var part = partEl.getAttribute('data-part');
+              if (!part) return;
+              var p = Number.parseInt(String(part), 10);
+              if (!Number.isFinite(p)) return;
+              setActivePart(p);
+              jumpToPartStart(p);
+            }
+
+            partEl.addEventListener('click', activatePart);
+            partEl.addEventListener('keydown', function (e) {
+              if (e.key !== 'Enter' && e.key !== ' ') return;
+              e.preventDefault();
+              activatePart(e);
+            });
+          })(bottomParts[j]);
+        }
+
+        function jumpToPartStart(partNum) {
+          var p = Number.parseInt(String(partNum || ''), 10);
+          if (!Number.isFinite(p)) return;
+
+          var startQByPart = { 1: 1, 2: 14, 3: 27 };
+          var urlByPart = {
+            1: 'ielts-reading-test-lite-paper1.html#reading-q1',
+            2: 'ielts-reading-test-part2-lite-paper1.html#reading-q14',
+            3: 'ielts-reading-test-part3.html#reading-q27',
+          };
+
+          var startQ = startQByPart[p];
+          var url = urlByPart[p];
+          if (!startQ || !url) return;
+
+          // This page is Part 1.
+          if (p === 1) {
+            setActivePart(1);
+            scrollToQuestion(startQ);
+            return;
+          }
+
+          window.location.href = url;
+        }
+
+        (function initArrowNav() {
+          var CURRENT_PART = 1;
+          var prevBtn = document.getElementById('readingPrev');
+          var nextBtn = document.getElementById('readingNext');
+
+          if (prevBtn) {
+            prevBtn.disabled = true;
+            prevBtn.addEventListener('click', function () {
+              jumpToPartStart(CURRENT_PART - 1);
+            });
+          }
+
+          if (nextBtn) {
+            nextBtn.disabled = false;
+            nextBtn.addEventListener('click', function () {
+              jumpToPartStart(CURRENT_PART + 1);
+            });
+          }
+        })();
+
+        // On first load, ensure panel starts at Q1.
+        window.setTimeout(function () {
+          var hash = String(window.location.hash || '').trim();
+          var m = /^#reading-q(\d{1,2})$/.exec(hash);
+          var q = m ? Number.parseInt(m[1], 10) : 1;
+          if (!Number.isFinite(q) || q < 1 || q > 13) q = 1;
+          setActivePart(1);
+          scrollToQuestion(q);
+        }, 0);
+      })();
+    </script>
+
+    <script>
+      (function () {
+        function initPassage(passageEl, contextMenuEl) {
+          if (!passageEl) return;
+          var lastContextRange = null;
+
+        function isNodeInside(node, container) {
+          try {
+            if (!node || !container) return false;
+            return container === node || container.contains(node.nodeType === 1 ? node : node.parentNode);
+          } catch (_) {
+            return false;
+          }
+        }
+
+        function getSelectionRangeInPassage() {
+          var sel = window.getSelection ? window.getSelection() : null;
+          if (!sel || sel.rangeCount === 0) return null;
+          var range = sel.getRangeAt(0);
+          if (!range) return null;
+
+          var startOk = isNodeInside(range.startContainer, passageEl);
+          var endOk = isNodeInside(range.endContainer, passageEl);
+          if (!startOk || !endOk) return null;
+          return range;
+        }
+
+        function hideContextMenu() {
+          if (!contextMenuEl) return;
+          contextMenuEl.hidden = true;
+          contextMenuEl.style.left = '';
+          contextMenuEl.style.top = '';
+          lastContextRange = null;
+        }
+
+        function showContextMenu(x, y) {
+          if (!contextMenuEl) return;
+          contextMenuEl.hidden = false;
+          contextMenuEl.style.left = x + 'px';
+          contextMenuEl.style.top = y + 'px';
+
+          // Keep within viewport.
+          try {
+            var rect = contextMenuEl.getBoundingClientRect();
+            var pad = 8;
+            var nx = x;
+            var ny = y;
+            if (rect.right > window.innerWidth - pad) nx = Math.max(pad, window.innerWidth - rect.width - pad);
+            if (rect.bottom > window.innerHeight - pad) ny = Math.max(pad, window.innerHeight - rect.height - pad);
+            contextMenuEl.style.left = nx + 'px';
+            contextMenuEl.style.top = ny + 'px';
+          } catch (_) {}
+        }
+
+        function unwrapSpan(span) {
+          if (!span || !span.parentNode) return;
+          var parent = span.parentNode;
+          var children = Array.prototype.slice.call(span.childNodes);
+          for (var i = 0; i < children.length; i++) parent.insertBefore(children[i], span);
+          parent.removeChild(span);
+          parent.normalize();
+        }
+
+        function removeHighlights(range) {
+          var sel = window.getSelection ? window.getSelection() : null;
+
+          // If user just has a caret inside an existing highlight, remove that single one.
+          if (sel && sel.isCollapsed) {
+            var node = sel.anchorNode;
+            var el = node && node.nodeType === 1 ? node : node && node.parentElement;
+            while (el && el !== passageEl) {
+              if (el.classList && el.classList.contains('reading-highlight')) {
+                unwrapSpan(el);
+                break;
+              }
+              el = el.parentElement;
+            }
+            return;
+          }
+
+          var spans = passageEl.querySelectorAll('.reading-highlight');
+          for (var i = 0; i < spans.length; i++) {
+            var s = spans[i];
+            try {
+              if (range && range.intersectsNode && range.intersectsNode(s)) {
+                unwrapSpan(s);
+              }
+            } catch (_) {
+              // ignore
+            }
+          }
+        }
+
+        function wrapTextPortion(textNode, startOffset, endOffset, color) {
+          if (!textNode || textNode.nodeType !== 3) return;
+          var text = textNode.nodeValue || '';
+          if (startOffset < 0) startOffset = 0;
+          if (endOffset > text.length) endOffset = text.length;
+          if (endOffset <= startOffset) return;
+
+          // Split into [before][selected][after]
+          var middle = textNode;
+          if (startOffset > 0) {
+            middle = middle.splitText(startOffset);
+          }
+          if (endOffset - startOffset < middle.nodeValue.length) {
+            middle.splitText(endOffset - startOffset);
+          }
+
+          // If already highlighted, just change color.
+          var parent = middle.parentNode;
+          if (parent && parent.nodeType === 1 && parent.classList && parent.classList.contains('reading-highlight')) {
+            parent.setAttribute('data-hl', color);
+            return;
+          }
+
+          var span = document.createElement('span');
+          span.className = 'reading-highlight';
+          span.setAttribute('data-hl', color);
+          parent.insertBefore(span, middle);
+          span.appendChild(middle);
+        }
+
+        function applyHighlight(color) {
+          var sel = window.getSelection ? window.getSelection() : null;
+          var range = getSelectionRangeInPassage();
+          if (!sel || !range) return;
+          if (sel.isCollapsed) return;
+
+          // Remove any existing highlights in the selected range first.
+          removeHighlights(range);
+
+          // Collect all text nodes that intersect the range.
+          var walker = document.createTreeWalker(
+            passageEl,
+            NodeFilter.SHOW_TEXT,
+            {
+              acceptNode: function (node) {
+                if (!node || !node.nodeValue || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+                try {
+                  if (range.intersectsNode && range.intersectsNode(node)) return NodeFilter.FILTER_ACCEPT;
+                } catch (_) {}
+                return NodeFilter.FILTER_REJECT;
+              },
+            },
+            false
+          );
+
+          var nodes = [];
+          var n;
+          while ((n = walker.nextNode())) nodes.push(n);
+
+          for (var i = 0; i < nodes.length; i++) {
+            var tn = nodes[i];
+            var start = 0;
+            var end = tn.nodeValue.length;
+
+            if (tn === range.startContainer) start = range.startOffset;
+            if (tn === range.endContainer) end = range.endOffset;
+
+            wrapTextPortion(tn, start, end, color);
+          }
+
+          // Clear selection highlight after applying.
+          try {
+            sel.removeAllRanges();
+          } catch (_) {}
+        }
+
+        function onToolbarClick(e) {
+          var btn = e.target && e.target.closest ? e.target.closest('[data-hl]') : null;
+          if (!btn) return;
+          var mode = btn.getAttribute('data-hl');
+          var range = getSelectionRangeInPassage();
+          if (!range && mode !== 'clear') return;
+
+          if (mode === 'clear') {
+            var sel = window.getSelection ? window.getSelection() : null;
+            removeHighlights(range);
+            if (sel) {
+              try {
+                sel.removeAllRanges();
+              } catch (_) {}
+            }
+            return;
+          }
+
+          applyHighlight(mode);
+        }
+
+        function onPassageContextMenu(e) {
+          // Only show our menu for an actual text selection in the passage.
+          var range = getSelectionRangeInPassage();
+          var sel = window.getSelection ? window.getSelection() : null;
+          if (!range || !sel || sel.isCollapsed) {
+            hideContextMenu();
+            return;
+          }
+
+          e.preventDefault();
+          lastContextRange = range.cloneRange ? range.cloneRange() : range;
+          showContextMenu(e.clientX, e.clientY);
+        }
+
+        function restoreSelectionFromLastRange() {
+          if (!lastContextRange) return;
+          var sel = window.getSelection ? window.getSelection() : null;
+          if (!sel) return;
+          try {
+            sel.removeAllRanges();
+            sel.addRange(lastContextRange);
+          } catch (_) {}
+        }
+
+        function onContextMenuClick(e) {
+          var item = e.target && e.target.closest ? e.target.closest('[data-action]') : null;
+          if (!item) return;
+          var action = item.getAttribute('data-action');
+          if (!action) return;
+
+          if (action === 'highlight') {
+            restoreSelectionFromLastRange();
+            applyHighlight('yellow');
+            hideContextMenu();
+            return;
+          }
+
+          if (action === 'notes') {
+            // Not implemented yet; keep UX consistent by just closing.
+            hideContextMenu();
+            return;
+          }
+        }
+
+          passageEl.addEventListener('contextmenu', onPassageContextMenu);
+          passageEl.addEventListener('scroll', hideContextMenu, { passive: true });
+
+        document.addEventListener('click', function (e) {
+          if (!contextMenuEl || contextMenuEl.hidden) return;
+          if (contextMenuEl.contains(e.target)) return;
+          hideContextMenu();
+        });
+
+        document.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape') hideContextMenu();
+        });
+
+          var bar = passageEl.querySelector('.reading-highlightBar');
+          if (bar) bar.addEventListener('click', onToolbarClick);
+
+          if (contextMenuEl) contextMenuEl.addEventListener('click', onContextMenuClick);
+        }
+
+        initPassage(document.getElementById('readingPassageScroll'), document.getElementById('readingHighlightMenu'));
+      })();
+    </script>
+
+    <script>
+      (function () {
+        try {
+          var split = document.querySelector('.reading-split');
+          var divider = split ? split.querySelector('.reading-divider') : null;
+          if (!split || !divider || !window.PointerEvent) return;
+
+          var pointerId = null;
+          var dividerWidth = 16;
+
+          function isMobile() {
+            try {
+              return window.matchMedia('(max-width: 980px)').matches;
+            } catch (_) {
+              return window.innerWidth <= 980;
+            }
+          }
+
+          function clamp(n, min, max) {
+            return Math.min(max, Math.max(min, n));
+          }
+
+          function setColumns(leftPx) {
+            if (isMobile()) return;
+            var rect = split.getBoundingClientRect();
+            var available = rect.width - dividerWidth;
+            var minLeft = 320;
+            var minRight = 320;
+            var left = clamp(leftPx, minLeft, Math.max(minLeft, available - minRight));
+            var right = Math.max(minRight, available - left);
+            split.style.setProperty('--reading-left-col', left + 'px');
+            split.style.setProperty('--reading-right-col', right + 'px');
+          }
+
+          function updateFromEvent(e) {
+            if (!e) return;
+            var rect = split.getBoundingClientRect();
+            var x = e.clientX;
+            var leftPx = x - rect.left - dividerWidth / 2;
+            setColumns(leftPx);
+          }
+
+          divider.addEventListener('pointerdown', function (e) {
+            if (!e) return;
+            if (typeof e.button === 'number' && e.button !== 0) return;
+            pointerId = e.pointerId;
+            try {
+              divider.setPointerCapture(pointerId);
+            } catch (_) {}
+            document.body.classList.add('reading-resizing');
+            updateFromEvent(e);
+          });
+
+          divider.addEventListener('pointermove', function (e) {
+            if (!e) return;
+            if (pointerId === null || e.pointerId !== pointerId) return;
+            updateFromEvent(e);
+          });
+
+          var endDrag = function (e) {
+            if (!e) return;
+            if (pointerId === null || e.pointerId !== pointerId) return;
+            pointerId = null;
+            document.body.classList.remove('reading-resizing');
+            try {
+              divider.releasePointerCapture(e.pointerId);
+            } catch (_) {}
+          };
+
+          divider.addEventListener('pointerup', endDrag);
+          divider.addEventListener('pointercancel', endDrag);
+          divider.addEventListener('lostpointercapture', function () {
+            pointerId = null;
+            document.body.classList.remove('reading-resizing');
+          });
+
+          window.addEventListener('resize', function () {
+            if (!isMobile()) return;
+            split.style.removeProperty('--reading-left-col');
+            split.style.removeProperty('--reading-right-col');
+          });
+        } catch (_) {}
+      })();
+    </script>
+
+    <script>
+      (function () {
+        var END_AT_KEY = 'ieltsReadingEndAt';
+        var WARN_30_KEY = 'ieltsReadingWarn30Shown';
+        var WARN_10_KEY = 'ieltsReadingWarn10Shown';
+        var WARN_5_KEY = 'ieltsReadingWarn5Shown';
+        var DURATION_MS = 60 * 60 * 1000;
+        var WARN_30_AT_SECONDS = 30 * 60;
+        var WARN_10_AT_SECONDS = 10 * 60;
+        var WARN_5_AT_SECONDS = 5 * 60;
+        var WARN_WINDOW_SECONDS = 5;
+
+        var minutesEl = document.getElementById('timer-minutes');
+        var suffixEl = document.getElementById('timer-suffix');
+        var valueEl = document.getElementById('timer-value');
+        var timerEl = document.getElementById('timer');
+        var topbarEl = document.querySelector('.listening-topbar, .academic-topbar');
+
+        var lastRemainingSeconds = null;
+
+        function markWarnShown(key) {
+          try {
+            window.localStorage.setItem(key, '1');
+          } catch (_) {}
+        }
+
+        function isWarnShown(key) {
+          try {
+            return window.localStorage.getItem(key) === '1';
+          } catch (_) {
+            return false;
+          }
+        }
+
+        function triggerWarn(secondsKey) {
+          if (!timerEl) return;
+
+          // Restart animation if it's already active.
+          try {
+            timerEl.classList.remove('reading-timer-alert');
+            // force reflow
+            void timerEl.offsetWidth;
+          } catch (_) {}
+
+          timerEl.classList.add('reading-timer-alert');
+          window.setTimeout(function () {
+            try {
+              timerEl.classList.remove('reading-timer-alert');
+            } catch (_) {}
+          }, 5000);
+        }
+
+        function maybeTriggerWarnAt(targetSeconds, key, currentRemainingSeconds) {
+          if (isWarnShown(key)) return;
+
+          var crossed =
+            lastRemainingSeconds !== null && lastRemainingSeconds > targetSeconds && currentRemainingSeconds <= targetSeconds;
+          var inWindow =
+            lastRemainingSeconds === null && currentRemainingSeconds <= targetSeconds && currentRemainingSeconds >= targetSeconds - WARN_WINDOW_SECONDS;
+
+          if (crossed || currentRemainingSeconds === targetSeconds || inWindow) {
+            markWarnShown(key);
+            triggerWarn(key);
+          }
+        }
+
+        function formatMmSs(totalSeconds) {
+          var s = Math.max(0, Math.floor(totalSeconds));
+          var mm = String(Math.floor(s / 60)).padStart(2, '0');
+          var ss = String(s % 60).padStart(2, '0');
+          return mm + ':' + ss;
+        }
+
+        function applyTimerUI(remainingSeconds) {
+          var remainingMinutes = Math.max(0, Math.ceil(remainingSeconds / 60));
+          if (minutesEl) minutesEl.textContent = String(remainingMinutes);
+          if (suffixEl) suffixEl.textContent = remainingMinutes === 1 ? ' minute left' : ' minutes left';
+          if (valueEl) valueEl.title = formatMmSs(remainingSeconds) + ' left';
+        }
+
+        function getOrInitEndAt() {
+          var now = Date.now();
+          var endAt = 0;
+          try {
+            endAt = Number.parseInt(String(window.localStorage.getItem(END_AT_KEY) || ''), 10);
+          } catch (_) {
+            endAt = 0;
+          }
+
+          if (!Number.isFinite(endAt) || endAt <= 0) {
+            endAt = now + DURATION_MS;
+            try {
+              window.localStorage.setItem(END_AT_KEY, String(endAt));
+            } catch (_) {}
+          }
+
+          return endAt;
+        }
+
+        function redirectEnded() {
+          if (window.__ieltsReadingEnded) return;
+          window.__ieltsReadingEnded = true;
+          try {
+            window.location.href = 'ielts-reading-ended.html';
+          } catch (_) {
+            // ignore
+          }
+        }
+
+        function tick() {
+          if (window.__ieltsReadingEnded) return;
+          var endAt = getOrInitEndAt();
+          var remainingMs = endAt - Date.now();
+          var remainingSeconds = Math.max(0, Math.floor(remainingMs / 1000));
+
+          applyTimerUI(remainingSeconds);
+          if (topbarEl) topbarEl.classList.toggle('topbar-last-minute', remainingSeconds <= 60 && remainingSeconds > 0);
+
+          // At 0: blink red, then redirect to ended page after 3 seconds.
+          if (remainingSeconds <= 0) {
+            if (topbarEl) topbarEl.classList.remove('topbar-last-minute');
+            if (window.__ieltsReadingEndPending) return;
+            window.__ieltsReadingEndPending = true;
+            triggerWarn('zero');
+            try {
+              if (interval) window.clearInterval(interval);
+            } catch (_) {}
+            window.setTimeout(function () {
+              redirectEnded();
+            }, 3000);
+            return;
+          }
+
+          // Warnings: blink red for 5 seconds at 30, 10, and 5 minutes remaining.
+          maybeTriggerWarnAt(WARN_30_AT_SECONDS, WARN_30_KEY, remainingSeconds);
+          maybeTriggerWarnAt(WARN_10_AT_SECONDS, WARN_10_KEY, remainingSeconds);
+          maybeTriggerWarnAt(WARN_5_AT_SECONDS, WARN_5_KEY, remainingSeconds);
+          lastRemainingSeconds = remainingSeconds;
+        }
+
+        function runDemoWarnings() {
+          var stages = [WARN_30_AT_SECONDS, WARN_10_AT_SECONDS, WARN_5_AT_SECONDS];
+          var i = 0;
+
+          function next() {
+            if (i >= stages.length) return;
+            var s = stages[i];
+            applyTimerUI(s);
+            triggerWarn('demo');
+            i += 1;
+            window.setTimeout(next, 5600);
+          }
+
+          next();
+        }
+
+        var isDemo = false;
+        var isDemoZero = false;
+        try {
+          var qs = new URLSearchParams(window.location.search);
+          isDemo = qs.has('demoWarnings');
+          isDemoZero = qs.has('demoZero');
+        } catch (_) {}
+
+        if (isDemoZero) {
+          try {
+            window.localStorage.setItem(END_AT_KEY, String(Date.now()));
+          } catch (_) {}
+        }
+
+        var interval = null;
+        if (isDemo) {
+          runDemoWarnings();
+        } else {
+          interval = window.setInterval(tick, 1000);
+          tick();
+        }
+
+        // Keep accurate after tab inactivity.
+        try {
+          document.addEventListener('visibilitychange', function () {
+            if (!document.hidden) tick();
+          });
+        } catch (_) {}
+
+        // Safety: stop ticking once we leave.
+        try {
+          window.addEventListener('pagehide', function () {
+            if (interval) window.clearInterval(interval);
+          });
+        } catch (_) {}
+      })();
+    </script>
+  </body>
+</html>
+

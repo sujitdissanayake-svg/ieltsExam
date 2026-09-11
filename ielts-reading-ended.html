@@ -6,6 +6,7 @@
     <title>Test ended</title>
     <link rel="stylesheet" href="styles.css?v=20260304" />
     <script src="ielts-flow-guard.js?v=20260310-2" defer></script>
+    <script src="reading-score.js?v=20260616-2"></script>
   </head>
   <body class="listening-ended">
     <main class="listening-ended-main" aria-label="Test ended">
@@ -35,6 +36,15 @@
 
     <script>
       (function () {
+        function submitReadingResult() {
+          try {
+            if (window.__ieltsReadingScore && typeof window.__ieltsReadingScore.submitReadingResult === 'function') {
+              return window.__ieltsReadingScore.submitReadingResult();
+            }
+          } catch (_) {}
+          return Promise.resolve({ ok: false, skipped: true, error: 'Reading scorer not available.' });
+        }
+
         // Clear the reading timer so a new run starts fresh.
         try {
           window.localStorage.removeItem('ieltsReadingEndAt');
@@ -43,10 +53,66 @@
           window.localStorage.removeItem('ieltsReadingWarn5Shown');
         } catch (_) {}
 
-        // Move to Writing after a short pause.
-        window.setTimeout(function () {
-          window.location.href = 'ielts-writing.html';
-        }, 3000);
+        var hasNavigated = false;
+        function readValue(key) {
+          try {
+            var localValue = String(window.localStorage.getItem(key) || '').trim();
+            if (localValue) return localValue;
+          } catch (_) {}
+          try {
+            return String(window.sessionStorage.getItem(key) || '').trim();
+          } catch (_) {
+            return '';
+          }
+        }
+
+        function normalizePackage(value) {
+          var raw = String(value || '').trim();
+          return /^(Lite|Basic|Standard|Pro)$/i.test(raw) ? raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase() : '';
+        }
+
+        function isLitePaperOneContext() {
+          var params = new URLSearchParams(window.location.search || '');
+          var mode = String(params.get('testMode') || readValue('ieltsTestMode') || '').trim().toLowerCase();
+          var pkg = normalizePackage(params.get('package') || readValue('ieltsMockPackage') || '');
+          var paper = String(params.get('paper') || readValue('ieltsMockPaper') || '').trim();
+          return mode === 'mock' && pkg === 'Lite' && paper === '1';
+        }
+
+        function moveToWriting() {
+          if (hasNavigated) return;
+          hasNavigated = true;
+          var usesHtml = /\.html$/i.test(window.location.pathname || '');
+          var target = isLitePaperOneContext()
+            ? (usesHtml ? 'ielts-writing-lite-paper1.html' : 'ielts-writing-lite-paper1')
+            : (usesHtml ? 'ielts-writing.html' : 'ielts-writing');
+          window.location.href = target;
+        }
+
+        // Submit reading result while the user is on the ended page.
+        // We still move forward even if submission fails.
+        Promise.race([
+          submitReadingResult(),
+          new Promise(function (resolve) {
+            window.setTimeout(function () {
+              resolve({ ok: false, timeout: true });
+            }, 2200);
+          }),
+        ]).then(function (payload) {
+          var result = payload && typeof payload === 'object' ? payload : {};
+          var freeMockAttempt = result.freeMockAttempt && typeof result.freeMockAttempt === 'object' ? result.freeMockAttempt : null;
+          var shouldRedirect = !!(result.redirectToPackages || (freeMockAttempt && freeMockAttempt.redirectToPackages));
+
+          if (shouldRedirect) {
+            var redirectPath = String(result.redirectPath || (freeMockAttempt && freeMockAttempt.redirectPath) || '/packages.html').trim();
+            window.location.href = redirectPath;
+            return;
+          }
+
+          window.setTimeout(moveToWriting, 3000);
+        }).catch(function () {
+          window.setTimeout(moveToWriting, 3000);
+        });
       })();
     </script>
   </body>

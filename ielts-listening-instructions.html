@@ -57,7 +57,7 @@
                 <path d="M4 21a8 8 0 0 1 16 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
               </svg>
             </span>
-            <span>Candidate Number:217575</span>
+            <span id="instructionsCandidateNumber">Candidate Number:-</span>
           </div>
 
           <div class="soundcheck-volume" aria-label="Volume">
@@ -112,6 +112,85 @@
       (function () {
         var volumeEl = document.getElementById('volume');
         var startBtn = document.getElementById('instructionsConfirm');
+        var candidateEl = document.getElementById('instructionsCandidateNumber');
+        var AUTO_START_SECONDS = 40;
+        var autoStartTimerId = null;
+        var countdownTimerId = null;
+        var hasStarted = false;
+
+        function readPortalValue(key) {
+          try {
+            var localValue = String(window.localStorage.getItem(key) || '').trim();
+            if (localValue) return localValue;
+          } catch (_) {}
+          try {
+            return String(window.sessionStorage.getItem(key) || '').trim();
+          } catch (_) {
+            return '';
+          }
+        }
+
+        function normalizePaidPackageName(value) {
+          var raw = String(value || '').trim();
+          return /^(Lite|Basic|Standard|Pro)$/i.test(raw) ? (raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase()) : '';
+        }
+
+        function writePortalValue(key, value) {
+          var k = String(key || '').trim();
+          if (!k) return;
+          var v = String(value == null ? '' : value).trim();
+          if (!v) return;
+          try { window.localStorage.setItem(k, v); } catch (_) {}
+          try { window.sessionStorage.setItem(k, v); } catch (_) {}
+        }
+
+        function sanitizeCandidateNumber(value) {
+          var raw = String(value == null ? '' : value).trim();
+          if (!raw) return '';
+          var numeric = Number(raw);
+          if (!(numeric > 0)) return '';
+          return String(Math.trunc(numeric));
+        }
+
+        function setCandidateText(value) {
+          if (!candidateEl) return;
+          var candidate = sanitizeCandidateNumber(value);
+          candidateEl.textContent = 'Candidate Number:' + (candidate || '-');
+        }
+
+        function hydrateCandidateFromBackend() {
+          var authEmail = String(readPortalValue('ieltsPortalEmail') || '').trim();
+          var authHash = String(readPortalValue('ieltsPortalPasswordHash') || '').trim();
+          if (!authEmail || !authHash) return Promise.resolve('');
+
+          return fetch('/api/users/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: authEmail, passwordHash: authHash }),
+          })
+            .then(function (response) {
+              return response.json().catch(function () { return {}; }).then(function (data) {
+                return { ok: response.ok, data: data };
+              });
+            })
+            .then(function (result) {
+              if (!result.ok || !result.data || !result.data.user) return '';
+              var candidate = sanitizeCandidateNumber(result.data.user.candidateNumber);
+              if (candidate) writePortalValue('ieltsPortalCandidateNumber', candidate);
+              return candidate;
+            })
+            .catch(function () {
+              return '';
+            });
+        }
+
+        function isLitePaperOneContext() {
+          var params = new URLSearchParams(window.location.search || '');
+          var mode = String(params.get('testMode') || readPortalValue('ieltsTestMode') || '').trim().toLowerCase();
+          var pkg = normalizePaidPackageName(params.get('package') || readPortalValue('ieltsMockPackage') || '');
+          var paper = String(params.get('paper') || readPortalValue('ieltsMockPaper') || '').trim();
+          return mode === 'mock' && pkg === 'Lite' && paper === '1';
+        }
 
         function syncVolumeSliderUi() {
           try {
@@ -126,20 +205,81 @@
           volumeEl.addEventListener('change', syncVolumeSliderUi);
         }
 
+        (function installNoBackGuard() {
+          try {
+            window.history.pushState({ ieltsListeningInstructionsGuard: true }, '', window.location.href);
+          } catch (_) {}
+
+          window.addEventListener('popstate', function () {
+            try {
+              window.history.pushState({ ieltsListeningInstructionsGuard: true, t: Date.now() }, '', window.location.href);
+            } catch (_) {}
+            try {
+              window.history.go(1);
+            } catch (_) {}
+          });
+        })();
+
+        var storedCandidate = sanitizeCandidateNumber(readPortalValue('ieltsPortalCandidateNumber'));
+        setCandidateText(storedCandidate);
+        if (!storedCandidate) {
+          hydrateCandidateFromBackend().then(function (candidate) {
+            setCandidateText(candidate);
+          });
+        }
+
+        function resolveStartTarget() {
+          var usesHtmlRoutes = /\.html$/i.test(window.location.pathname || '');
+          var litePaperOne = isLitePaperOneContext();
+          return usesHtmlRoutes
+            ? (litePaperOne ? 'ielts-listening-test-lite-paper1.html' : 'ielts-listening-test.html')
+            : (litePaperOne ? 'ielts-listening-test-lite-paper1' : 'ielts-listening-test');
+        }
+
+        function goToListeningTest() {
+          if (hasStarted) return;
+          hasStarted = true;
+          if (autoStartTimerId) window.clearTimeout(autoStartTimerId);
+          if (countdownTimerId) window.clearInterval(countdownTimerId);
+
+          var target = resolveStartTarget();
+          try {
+            window.location.replace(target);
+          } catch (_) {
+            window.location.href = target;
+          }
+        }
+
+        function updateAutoStartLabel(remainingSeconds) {
+          if (!startBtn) return;
+          if (remainingSeconds > 0) {
+            startBtn.value = 'Start test (' + remainingSeconds + 's)';
+            return;
+          }
+          startBtn.value = 'Start test';
+        }
+
         if (startBtn) {
           startBtn.addEventListener('click', function (e) {
             e.preventDefault();
-            var isLocal =
-              window.location.hostname === 'localhost' ||
-              window.location.hostname === '127.0.0.1' ||
-              window.location.hostname === '::1';
-            var target = isLocal ? 'ielts-listening-test.html' : 'ielts-listening-test';
-            try {
-              window.location.replace(target);
-            } catch (_) {
-              window.location.href = target;
-            }
+            goToListeningTest();
           });
+
+          var startedAt = Date.now();
+          updateAutoStartLabel(AUTO_START_SECONDS);
+          countdownTimerId = window.setInterval(function () {
+            var elapsedSeconds = Math.floor((Date.now() - startedAt) / 1000);
+            var remainingSeconds = Math.max(0, AUTO_START_SECONDS - elapsedSeconds);
+            updateAutoStartLabel(remainingSeconds);
+            if (remainingSeconds <= 0 && countdownTimerId) {
+              window.clearInterval(countdownTimerId);
+              countdownTimerId = null;
+            }
+          }, 250);
+
+          autoStartTimerId = window.setTimeout(function () {
+            goToListeningTest();
+          }, AUTO_START_SECONDS * 1000);
         }
       })();
     </script>

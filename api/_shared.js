@@ -22,6 +22,19 @@ const sha256Hex = (input) => {
   return crypto.createHash('sha256').update(String(input), 'utf8').digest('hex');
 };
 
+const timingSafeEqualText = (left, right) => {
+  const a = Buffer.from(String(left || ''), 'utf8');
+  const b = Buffer.from(String(right || ''), 'utf8');
+  if (!a.length || a.length !== b.length) return false;
+  return crypto.timingSafeEqual(a, b);
+};
+
+const isValidEmailBasic = (email) => {
+  const value = String(email || '').trim();
+  if (!value) return false;
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+};
+
 const hmacSha256Base64Url = (secret, data) => {
   return base64UrlEncode(crypto.createHmac('sha256', String(secret)).update(String(data), 'utf8').digest());
 };
@@ -97,9 +110,28 @@ const readJsonBody = async (req, { maxBytes = 32 * 1024 } = {}) => {
   });
 };
 
+const getVerificationTokenSecret = () => {
+  const configured = String(process.env.VERIFICATION_TOKEN_SECRET || '').trim();
+  if (configured) return configured;
+
+  const onVercel = !!process.env.VERCEL;
+  if (onVercel) return '';
+  return 'dev-verification-secret-change-me';
+};
+
+const requireVerificationTokenSecret = () => {
+  const secret = getVerificationTokenSecret();
+  if (!secret) throw new Error('Server not configured (missing VERIFICATION_TOKEN_SECRET).');
+  return secret;
+};
+
 module.exports = {
   sha256Hex,
+  timingSafeEqualText,
+  isValidEmailBasic,
   signToken,
   verifyToken,
   readJsonBody,
+  getVerificationTokenSecret,
+  requireVerificationTokenSecret,
 };

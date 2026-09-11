@@ -68,18 +68,17 @@
 
         var autoRedirectId = null;
 
-        function isLocalHost() {
-          return (
-            window.location.hostname === 'localhost' ||
-            window.location.hostname === '127.0.0.1' ||
-            window.location.hostname === '::1'
-          );
+        function usesHtmlRoutes() {
+          return /\.html$/i.test(window.location.pathname || '');
         }
 
         function startWritingTimer() {
           try {
             var startAt = Date.now();
             var sessionId = String(startAt) + '-' + String(Math.random()).slice(2);
+            window.localStorage.removeItem('ieltsWritingResultSubmittedV1');
+            window.localStorage.removeItem('ieltsWritingAttemptId');
+            window.localStorage.removeItem('ieltsWritingAnswersV1');
             window.sessionStorage.setItem('ieltsWritingSessionId', sessionId);
             window.localStorage.setItem('ieltsWritingSessionId', sessionId);
             window.localStorage.setItem('ieltsWritingStartAt', String(startAt));
@@ -96,8 +95,8 @@
         }
 
         function goToPart1() {
-          var isLocal = isLocalHost();
-          var target = isLocal ? 'ielts-writing-test-part1.html' : 'ielts-writing-test-part1';
+          var usesHtml = usesHtmlRoutes();
+          var target = usesHtml ? 'ielts-writing-test-part1.html' : 'ielts-writing-test-part1';
           try {
             window.location.href = target;
           } catch (_) {

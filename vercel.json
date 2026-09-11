@@ -1,5 +1,41 @@
 {
   "cleanUrls": true,
   "trailingSlash": false,
-  "installCommand": "npm install --omit=dev"
+  "installCommand": "npm install --omit=dev",
+  "redirects": [
+    {
+      "source": "/portal",
+      "destination": "/free-mock-portal",
+      "permanent": false
+    },
+    {
+      "source": "/portal.html",
+      "destination": "/free-mock-portal",
+      "permanent": false
+    },
+    {
+      "source": "/free-mock-test",
+      "destination": "/ielts-academic?bypass=1&module=academic",
+      "permanent": false
+    },
+    {
+      "source": "/free-mock-test.html",
+      "destination": "/ielts-academic?bypass=1&module=academic",
+      "permanent": false
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/dashboard",
+      "destination": "https://student-portal-next-lilac.vercel.app/dashboard"
+    },
+    {
+      "source": "/dashboard/:path*",
+      "destination": "https://student-portal-next-lilac.vercel.app/dashboard/:path*"
+    },
+    {
+      "source": "/_next/:path*",
+      "destination": "https://student-portal-next-lilac.vercel.app/_next/:path*"
+    }
+  ]
 }

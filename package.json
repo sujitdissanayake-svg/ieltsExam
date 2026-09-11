@@ -4,6 +4,10 @@
   "description": "",
   "main": "script.js",
   "scripts": {
+    "dev": "node dev-server.mjs",
+    "student-portal:install": "npm --prefix student-portal-next install",
+    "student-portal:dev": "npm --prefix student-portal-next run dev",
+    "student-portal:build": "npm --prefix student-portal-next run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -11,7 +15,9 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "nodemailer": "^6.10.1"
+    "@vercel/postgres": "^0.10.0",
+    "nodemailer": "^6.10.1",
+    "stripe": "^22.2.1"
   },
   "devDependencies": {
     "sharp": "^0.34.5"

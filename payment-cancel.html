@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Payment Cancelled</title>
+    <link rel="stylesheet" href="styles.css?v=20260226" />
+  </head>
+  <body>
+    <main class="portal-page" aria-label="Payment cancelled">
+      <div class="portal-shell">
+        <section class="portal-card" aria-label="Payment cancelled card">
+          <h1 class="portal-card-title">Payment Cancelled</h1>
+          <p class="portal-card-intro" id="cancel-package">Package: -</p>
+          <p class="portal-card-intro">Your Stripe checkout was cancelled. No charge was made.</p>
+          <div class="portal-actions-row">
+            <a class="portal-submit" href="packages.html">Return to Packages</a>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      (function () {
+        var params = new URLSearchParams(window.location.search || '');
+        var packageName = String(params.get('package') || '').trim();
+        var packageNode = document.getElementById('cancel-package');
+        if (packageNode) packageNode.textContent = 'Package: ' + (packageName || '-');
+      })();
+    </script>
+  </body>
+</html>

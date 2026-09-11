@@ -76,6 +76,7 @@
 
                 <div class="modules-right" aria-label="Module actions panel">
                   <div class="modules-actions" id="modules-actions" aria-label="Module actions" hidden>
+                    <button class="module-action-btn" type="button" data-action="view-paper">View Paper</button>
                     <button class="module-action-btn" type="button" data-action="add-paper">Add a Paper</button>
                     <button class="module-action-btn" type="button" data-action="delete-add">Delete and Add</button>
                     <button class="module-action-btn" type="button" data-action="add-answers">Add Answers</button>
@@ -111,16 +112,12 @@
 
     <script>
       (function () {
-        function isLocalHost() {
-          return (
-            window.location.hostname === 'localhost' ||
-            window.location.hostname === '127.0.0.1' ||
-            window.location.hostname === '::1'
-          );
+        function usesHtmlRoutes() {
+          return /\.html$/i.test(window.location.pathname || '');
         }
 
         function directorPanelUrl() {
-          return isLocalHost() ? 'director-panel.html' : '/director-panel';
+          return usesHtmlRoutes() ? 'director-panel.html' : '/director-panel';
         }
 
         function buildFutureUrl(moduleNumber, action, component, style) {

@@ -1,0 +1,1325 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Book Speaking Test Sessions</title>
+    <link rel="stylesheet" href="styles.css?v=20260226" />
+    <style>
+      .speaking-booking-page {
+        min-height: 100vh;
+        padding: 20px;
+        background:
+          radial-gradient(circle at 8% 10%, rgba(244, 63, 94, 0.1), transparent 28%),
+          radial-gradient(circle at 92% 18%, rgba(56, 189, 248, 0.14), transparent 26%),
+          linear-gradient(140deg, #f7fafc 0%, #eef2f8 45%, #e8edf7 100%);
+      }
+
+      .booking-shell {
+        width: min(1160px, 100%);
+        margin: 0 auto;
+        display: grid;
+        gap: 16px;
+      }
+
+      .booking-header {
+        border: 1px solid #d8e0ec;
+        border-radius: 18px;
+        background: #ffffff;
+        box-shadow: 0 14px 36px rgba(15, 23, 42, 0.1);
+        padding: 18px;
+        display: grid;
+        gap: 12px;
+        position: relative;
+      }
+
+      .booking-title {
+        margin: 0;
+        font-size: clamp(1.45rem, 2.2vw, 2rem);
+        font-weight: 900;
+        color: #0f172a;
+      }
+
+      .booking-subtitle {
+        margin: 0;
+        color: #b91c1c;
+        font-weight: 700;
+      }
+
+      .booking-overview {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .booking-next-wrap {
+        margin-top: 8px;
+      }
+
+      .booking-next-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #1d4ed8;
+        border-radius: 8px;
+        background: #1d4ed8;
+        color: #ffffff;
+        font-weight: 800;
+        font-size: 0.9rem;
+        line-height: 1;
+        text-decoration: none;
+        padding: 10px 14px;
+      }
+
+      .booking-next-btn:hover {
+        background: #1e40af;
+      }
+
+      .booking-pill {
+        border-radius: 8px;
+        border: 1px solid #1d4ed8;
+        padding: 7px 12px;
+        font-weight: 700;
+        color: #ffffff;
+        background: #2563eb;
+      }
+
+      .booking-grid {
+        display: grid;
+        gap: 16px;
+        grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
+      }
+
+      .booking-card {
+        border: 1px solid #d8e0ec;
+        border-radius: 16px;
+        background: #ffffff;
+        box-shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
+        padding: 14px;
+      }
+
+      .booking-card-title {
+        margin: 0;
+        font-size: 1.08rem;
+        font-weight: 800;
+        color: #0f172a;
+      }
+
+      .booking-card-sub {
+        margin: 4px 0 0;
+        font-size: 0.9rem;
+        color: #64748b;
+      }
+
+      .session-progress {
+        margin-top: 12px;
+        border-radius: 999px;
+        height: 12px;
+        background: #e2e8f0;
+        overflow: hidden;
+      }
+
+      .session-progress-fill {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, #ef4444, #f97316);
+        transition: width 0.2s ease;
+      }
+
+      .session-progress-meta {
+        margin: 8px 0 0;
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #334155;
+      }
+
+      .booking-calendar {
+        margin-top: 14px;
+        border: 1px solid #dbe4f0;
+        border-radius: 12px;
+        background: #f8fbff;
+        padding: 10px;
+      }
+
+      .booking-calendar-title {
+        margin: 0;
+        font-size: 0.88rem;
+        font-weight: 800;
+        color: #1f2937;
+      }
+
+      .booking-calendar-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .booking-calendar-month {
+        margin: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 999px;
+        padding: 5px 12px;
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #1d4ed8;
+        border: 1px solid rgba(59, 130, 246, 0.32);
+        background: linear-gradient(180deg, rgba(219, 234, 254, 0.9), rgba(243, 249, 255, 0.95));
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+      }
+
+      .booking-calendar-legend {
+        margin-top: 8px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .calendar-legend-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.76rem;
+        font-weight: 700;
+        color: #334155;
+      }
+
+      .calendar-legend-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+      }
+
+      .calendar-legend-dot.available {
+        background: #16a34a;
+      }
+
+      .calendar-legend-dot.full {
+        background: #dc2626;
+      }
+
+      .calendar-legend-dot.empty {
+        background: #94a3b8;
+      }
+
+      .booking-calendar-weekdays,
+      .booking-calendar-grid {
+        margin-top: 8px;
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        gap: 6px;
+      }
+
+      .booking-calendar-weekdays span {
+        text-align: center;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: #64748b;
+      }
+
+      .booking-calendar-day {
+        min-height: 36px;
+        border-radius: 9px;
+        border: 1px solid #d5dfec;
+        background: #ffffff;
+        color: #334155;
+        font-size: 0.82rem;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .booking-calendar-day.is-out {
+        background: #f1f5f9;
+        color: #94a3b8;
+        cursor: default;
+      }
+
+      .booking-calendar-day.is-no-slot {
+        background: #f8fafc;
+        color: #64748b;
+      }
+
+      .booking-calendar-day.is-available {
+        background: #dcfce7;
+        border-color: #86efac;
+        color: #166534;
+      }
+
+      .booking-calendar-day.is-full {
+        background: #fee2e2;
+        border-color: #fca5a5;
+        color: #991b1b;
+      }
+
+      .booking-calendar-day.is-selected {
+        outline: 2px solid #1d4ed8;
+        outline-offset: 1px;
+      }
+
+      .booking-calendar-note {
+        margin: 10px 0 0;
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: #334155;
+      }
+
+      .slot-list {
+        margin-top: 14px;
+        display: grid;
+        gap: 12px;
+      }
+
+      .slot-date-group {
+        border: 1px dashed #cbd5e1;
+        border-radius: 12px;
+        padding: 10px;
+        background: #fcfdff;
+        display: grid;
+        gap: 10px;
+      }
+
+      .slot-date-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .slot-date-title {
+        margin: 0;
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: #1f2937;
+      }
+
+      .slot-scroll-controls {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .slot-scroll-btn {
+        border: 1px solid #cbd5e1;
+        border-radius: 999px;
+        background: #ffffff;
+        color: #1e293b;
+        font-size: 0.78rem;
+        font-weight: 800;
+        line-height: 1;
+        padding: 6px 10px;
+        cursor: pointer;
+      }
+
+      .slot-scroll-btn:hover {
+        background: #f1f5f9;
+      }
+
+      .slot-date-scroll {
+        display: grid;
+        gap: 8px;
+        max-height: 440px;
+        overflow-y: auto;
+        padding-right: 4px;
+        scroll-behavior: smooth;
+      }
+
+      .slot-item {
+        border: 1px solid #dbe3ef;
+        border-radius: 10px;
+        background: #ffffff;
+        padding: 10px;
+        display: grid;
+        gap: 8px;
+      }
+
+      .slot-meta {
+        margin: 0;
+        font-size: 0.92rem;
+        color: #334155;
+      }
+
+      .slot-time {
+        margin: 0;
+        font-size: 0.98rem;
+        font-weight: 800;
+        color: #0f172a;
+      }
+
+      .slot-actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      .slot-status {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #166534;
+        background: #dcfce7;
+        border: 1px solid #86efac;
+        padding: 4px 8px;
+        border-radius: 999px;
+      }
+
+      .slot-status.is-booked {
+        color: #991b1b;
+        background: #fee2e2;
+        border-color: #fca5a5;
+      }
+
+      .slot-book-btn {
+        border: none;
+        border-radius: 999px;
+        padding: 8px 12px;
+        font-weight: 700;
+        color: #ffffff;
+        background: linear-gradient(135deg, #dc2626, #911d21);
+        cursor: pointer;
+      }
+
+      .slot-book-btn:disabled {
+        opacity: 0.55;
+        cursor: default;
+      }
+
+      .booking-empty {
+        margin-top: 12px;
+        border: 1px dashed #c7d2e3;
+        border-radius: 10px;
+        background: #f8fafc;
+        color: #475569;
+        padding: 12px;
+      }
+
+      .my-bookings {
+        margin-top: 12px;
+        display: grid;
+        gap: 10px;
+      }
+
+      .my-booking-item {
+        border: 1px solid #cdd8ea;
+        border-radius: 12px;
+        background: #ffffff;
+        padding: 10px;
+      }
+
+      .my-booking-title {
+        margin: 0;
+        font-size: 0.97rem;
+        font-weight: 800;
+        color: #0f172a;
+      }
+
+      .my-booking-meta {
+        margin: 4px 0 0;
+        color: #475569;
+        font-size: 0.88rem;
+      }
+
+      .my-booking-link {
+        margin-top: 8px;
+        display: inline-flex;
+        color: #1d4ed8;
+        font-weight: 700;
+        font-size: 0.88rem;
+        text-decoration: none;
+      }
+
+      .my-booking-link:hover {
+        text-decoration: underline;
+      }
+
+      .booking-note {
+        margin: 12px 0 0;
+        font-size: 0.9rem;
+        color: #0f172a;
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        padding: 10px;
+        border-radius: 10px;
+      }
+
+      .booking-auto-note {
+        margin: 10px 0 0;
+        font-size: 0.88rem;
+        color: #1e3a8a;
+        font-weight: 700;
+      }
+
+      @media (max-width: 960px) {
+        .booking-grid {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
+
+      @media (max-width: 640px) {
+        .speaking-booking-page {
+          padding: 12px;
+        }
+
+        .slot-date-scroll {
+          max-height: 360px;
+        }
+
+        .slot-actions {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="speaking-booking-page" aria-label="Speaking booking page">
+      <div class="booking-shell">
+        <section class="booking-header" aria-label="Speaking booking header">
+          <h1 class="booking-title">Book Your Speaking Test Sessions</h1>
+          <p class="booking-subtitle">Book your speaking session before the exam; rescheduling is not permitted.</p>
+          <div class="booking-overview">
+            <span class="booking-pill" id="package-pill">Package: Lite</span>
+            <span class="booking-pill" id="sessions-pill">Speaking sessions: 1</span>
+            <span class="booking-pill" id="left-pill">Remaining: 1</span>
+            <a class="booking-next-btn" id="registration-next-btn" href="free-mock-portal.html?package=Lite&source=speaking-booking">Continue to Registration Form (Lite)</a>
+          </div>
+        </section>
+
+        <section class="booking-grid" aria-label="Speaking booking content">
+          <article class="booking-card" aria-label="Available speaking slots">
+            <h2 class="booking-card-title">Available Speaking Slots</h2>
+            <p class="booking-card-sub">Showing approved examiner slots for the next 14 days.</p>
+
+            <div class="session-progress" aria-hidden="true">
+              <div class="session-progress-fill" id="session-progress-fill"></div>
+            </div>
+            <p class="session-progress-meta" id="session-progress-meta">0 of 0 sessions booked</p>
+
+            <section class="booking-calendar" aria-label="Speaking slot calendar">
+              <div class="booking-calendar-top">
+                <p class="booking-calendar-title">Select speaking date</p>
+                <p class="booking-calendar-month" id="calendar-month-label">Month</p>
+              </div>
+              <div class="booking-calendar-legend" aria-hidden="true">
+                <span class="calendar-legend-item"><span class="calendar-legend-dot available"></span>Available</span>
+                <span class="calendar-legend-item"><span class="calendar-legend-dot full"></span>Fully booked</span>
+                <span class="calendar-legend-item"><span class="calendar-legend-dot empty"></span>No slots</span>
+              </div>
+              <div class="booking-calendar-weekdays" aria-hidden="true">
+                <span>Mon</span>
+                <span>Tue</span>
+                <span>Wed</span>
+                <span>Thu</span>
+                <span>Fri</span>
+                <span>Sat</span>
+                <span>Sun</span>
+              </div>
+              <div class="booking-calendar-grid" id="slot-calendar"></div>
+              <p class="booking-calendar-note" id="calendar-note">Select a green date to view available speaking times.</p>
+            </section>
+
+            <div class="slot-list" id="slot-list"></div>
+            <p class="booking-empty" id="slot-empty" hidden>No approved slots are available right now. Please check again later.</p>
+          </article>
+
+          <aside class="booking-card" aria-label="My speaking bookings">
+            <h2 class="booking-card-title">My Booked Sessions</h2>
+            <p class="booking-card-sub">For each mock package, only the allowed speaking sessions can be booked.</p>
+
+            <div class="my-bookings" id="my-bookings"></div>
+            <p class="booking-empty" id="my-booking-empty">You have not booked any speaking session yet.</p>
+
+            <p class="booking-note">
+              Important: Lite includes 1 speaking session, Basic includes 3, Standard includes 6, and Pro includes 10. Booking limits are enforced automatically by package, booked slots cannot be changed, and two sessions cannot be booked at the same time.
+            </p>
+          </aside>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      (function () {
+        var SESSION_LIMITS = {
+          Lite: 1,
+          Basic: 3,
+          Standard: 6,
+          Pro: 10,
+        };
+
+        var BOOKING_KEY = 'ieltsCandidateSpeakingBookingsV1';
+        var PACKAGE_KEY = 'ieltsLastPaymentPackage';
+
+        var packagePill = document.getElementById('package-pill');
+        var sessionsPill = document.getElementById('sessions-pill');
+        var leftPill = document.getElementById('left-pill');
+        var nextBtn = document.getElementById('registration-next-btn');
+        var autoNote = document.getElementById('registration-auto-note');
+        var progressFill = document.getElementById('session-progress-fill');
+        var progressMeta = document.getElementById('session-progress-meta');
+        var slotCalendar = document.getElementById('slot-calendar');
+        var calendarNote = document.getElementById('calendar-note');
+        var calendarMonthLabel = document.getElementById('calendar-month-label');
+        var slotList = document.getElementById('slot-list');
+        var slotEmpty = document.getElementById('slot-empty');
+        var myBookings = document.getElementById('my-bookings');
+        var myBookingEmpty = document.getElementById('my-booking-empty');
+        var params = new URLSearchParams(window.location.search || '');
+        var sessionIdFromQuery = String(params.get('session_id') || params.get('sessionId') || '').trim();
+        var authBridge = String(params.get('auth') || '').trim();
+        var profileBridge = String(params.get('profile') || '').trim();
+        if (sessionIdFromQuery) {
+          writeStorage('ieltsStripeSessionId', sessionIdFromQuery);
+        }
+        var packageFromQuery = normalizePackageName(params.get('package'));
+        var packageFromPortal = normalizePackageName(readStorage(PACKAGE_KEY) || readStorage('ieltsMockPackage'));
+        var packageName = packageFromPortal || packageFromQuery || 'Lite';
+        var sessionId = sessionIdFromQuery || readStorage('ieltsStripeSessionId');
+        var sessionLimit = SESSION_LIMITS[packageName] || 1;
+        var calendarDates = getNextDates(14);
+        var selectedDate = calendarDates.length ? calendarDates[0] : '';
+        var approvedSlots = [];
+        var bookedSlots = readBookings(packageName);
+        var bookingInFlight = {};
+
+        function normalizePackageName(value) {
+          var raw = String(value || '').trim();
+          return Object.prototype.hasOwnProperty.call(SESSION_LIMITS, raw) ? raw : '';
+        }
+
+        function readStorage(key) {
+          try {
+            return String(window.localStorage.getItem(key) || '').trim();
+          } catch (_) {
+            return '';
+          }
+        }
+
+        function writeStorage(key, value) {
+          try {
+            window.localStorage.setItem(String(key || ''), String(value || ''));
+          } catch (_) {}
+        }
+
+        function readBookingStore() {
+          try {
+            var raw = String(window.localStorage.getItem(BOOKING_KEY) || '').trim();
+            if (!raw) return {};
+            var parsed = JSON.parse(raw);
+            return parsed && typeof parsed === 'object' ? parsed : {};
+          } catch (_) {
+            return {};
+          }
+        }
+
+        function writeBookingStore(store) {
+          try {
+            window.localStorage.setItem(BOOKING_KEY, JSON.stringify(store || {}));
+          } catch (_) {}
+        }
+
+        function readBookings(pkg) {
+          var store = readBookingStore();
+          return Array.isArray(store[pkg]) ? store[pkg] : [];
+        }
+
+        function readAllBookings() {
+          var store = readBookingStore();
+          var merged = [];
+          Object.keys(store).forEach(function (pkg) {
+            var list = Array.isArray(store[pkg]) ? store[pkg] : [];
+            list.forEach(function (item) {
+              merged.push(item);
+            });
+          });
+          return merged;
+        }
+
+        function saveBookings(pkg, bookings) {
+          var store = readBookingStore();
+          store[pkg] = Array.isArray(bookings) ? bookings : [];
+          writeBookingStore(store);
+        }
+
+        function dateKey(dt) {
+          return dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0');
+        }
+
+        function getNextDates(days) {
+          var list = [];
+          var today = new Date();
+          for (var i = 0; i < days; i++) {
+            var d = new Date(today.getFullYear(), today.getMonth(), today.getDate() + i);
+            list.push(dateKey(d));
+          }
+          return list;
+        }
+
+        function formatDateHeading(value) {
+          var dt = new Date(value + 'T00:00:00');
+          if (Number.isNaN(dt.valueOf())) return value;
+          return dt.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+        }
+
+        function formatMonthLabel(value) {
+          var dt = new Date(String(value || '') + 'T00:00:00');
+          if (Number.isNaN(dt.valueOf())) return 'Month';
+          return dt.toLocaleDateString([], { month: 'long', year: 'numeric' });
+        }
+
+        function formatDateTime(value) {
+          var dt = new Date(value);
+          if (Number.isNaN(dt.valueOf())) return 'Invalid time';
+          return dt.toLocaleString([], {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+          });
+        }
+
+        function formatTimeRange(startTs, endTs) {
+          var start = new Date(startTs);
+          var end = new Date(endTs);
+          if (Number.isNaN(start.valueOf()) || Number.isNaN(end.valueOf())) return 'Time pending';
+          return start.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) + ' - ' + end.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+        }
+
+        function slotIdentity(slot) {
+          var id = String((slot && slot.id) || '').trim();
+          if (id) return id;
+          return [slot && slot.examinerId, slot && slot.start, slot && slot.end].join('|');
+        }
+
+        function toTimeValue(value) {
+          var ts = new Date(value).valueOf();
+          return Number.isNaN(ts) ? 0 : ts;
+        }
+
+        function timesOverlap(startA, endA, startB, endB) {
+          return startA < endB && startB < endA;
+        }
+
+        function hasTimeConflict(slot) {
+          var slotStart = toTimeValue(slot && slot.start);
+          var slotEnd = toTimeValue(slot && slot.end);
+          if (!slotStart || !slotEnd) return false;
+
+          return bookedSlots.some(function (booking) {
+            var bookedStart = toTimeValue(booking && booking.start);
+            var bookedEnd = toTimeValue(booking && booking.end);
+            if (!bookedStart || !bookedEnd) return false;
+            return timesOverlap(slotStart, slotEnd, bookedStart, bookedEnd);
+          });
+        }
+
+        function getBookedIdentityLookup() {
+          var lookup = {};
+          readAllBookings().forEach(function (entry) {
+            lookup[slotIdentity(entry)] = true;
+          });
+          return lookup;
+        }
+
+        function getDateSlotsMap() {
+          var map = {};
+          approvedSlots.forEach(function (slot) {
+            var dt = new Date(slot.start);
+            var key = Number.isNaN(dt.valueOf()) ? '' : dateKey(dt);
+            if (!key) return;
+            if (!map[key]) map[key] = [];
+            map[key].push(slot);
+          });
+          return map;
+        }
+
+        function getDateStatus(dateValue, slotsByDate, bookedLookup) {
+          var daySlots = slotsByDate[dateValue] || [];
+          if (!daySlots.length) return 'no-slot';
+
+          var freeCount = daySlots.filter(function (slot) {
+            return !bookedLookup[slotIdentity(slot)] && !hasTimeConflict(slot);
+          }).length;
+
+          return freeCount > 0 ? 'available' : 'full';
+        }
+
+        function getCalendarBounds() {
+          if (!calendarDates.length) return null;
+
+          var first = new Date(calendarDates[0] + 'T00:00:00');
+          var last = new Date(calendarDates[calendarDates.length - 1] + 'T00:00:00');
+          if (Number.isNaN(first.valueOf()) || Number.isNaN(last.valueOf())) return null;
+
+          var firstShift = (first.getDay() + 6) % 7;
+          var start = new Date(first.getFullYear(), first.getMonth(), first.getDate() - firstShift);
+
+          var lastShift = (last.getDay() + 6) % 7;
+          var end = new Date(last.getFullYear(), last.getMonth(), last.getDate() + (6 - lastShift));
+
+          return { start: start, end: end };
+        }
+
+        function chooseDefaultDate(slotsByDate, bookedLookup) {
+          var firstAvailable = '';
+          var firstFull = '';
+          var firstWithSlots = '';
+
+          calendarDates.forEach(function (day) {
+            var status = getDateStatus(day, slotsByDate, bookedLookup);
+            if (!firstAvailable && status === 'available') firstAvailable = day;
+            if (!firstFull && status === 'full') firstFull = day;
+            if (!firstWithSlots && status !== 'no-slot') firstWithSlots = day;
+          });
+
+          return firstAvailable || firstFull || firstWithSlots || (calendarDates[0] || '');
+        }
+
+        function renderCalendar() {
+          if (!slotCalendar) return;
+
+          var slotsByDate = getDateSlotsMap();
+          var bookedLookup = getBookedIdentityLookup();
+          var dateSet = {};
+          calendarDates.forEach(function (day) { dateSet[day] = true; });
+
+          if (!selectedDate || !dateSet[selectedDate]) {
+            selectedDate = chooseDefaultDate(slotsByDate, bookedLookup);
+          }
+
+          if (calendarMonthLabel) {
+            calendarMonthLabel.textContent = formatMonthLabel(selectedDate);
+          }
+
+          var bounds = getCalendarBounds();
+          if (!bounds) {
+            slotCalendar.innerHTML = '';
+            return;
+          }
+
+          var html = [];
+          var cursor = new Date(bounds.start.getFullYear(), bounds.start.getMonth(), bounds.start.getDate());
+          while (cursor <= bounds.end) {
+            var key = dateKey(cursor);
+            var inRange = !!dateSet[key];
+            var status = inRange ? getDateStatus(key, slotsByDate, bookedLookup) : 'out';
+            var classes = ['booking-calendar-day'];
+
+            if (!inRange) {
+              classes.push('is-out');
+            } else if (status === 'available') {
+              classes.push('is-available');
+            } else if (status === 'full') {
+              classes.push('is-full');
+            } else {
+              classes.push('is-no-slot');
+            }
+
+            if (inRange && key === selectedDate) {
+              classes.push('is-selected');
+            }
+
+            html.push(
+              '<button type="button" class="' + classes.join(' ') + '" data-calendar-date="' + key + '" ' + (inRange ? '' : 'disabled') + '>' +
+              String(cursor.getDate()) +
+              '</button>'
+            );
+
+            cursor = new Date(cursor.getFullYear(), cursor.getMonth(), cursor.getDate() + 1);
+          }
+
+          slotCalendar.innerHTML = html.join('');
+
+          if (calendarNote) {
+            var selectedStatus = getDateStatus(selectedDate, slotsByDate, bookedLookup);
+            if (selectedStatus === 'available') {
+              calendarNote.textContent = 'Green date selected. Choose one of the available speaking times below.';
+            } else if (selectedStatus === 'full') {
+              calendarNote.textContent = 'Red date selected. All speaking slots for this day are already booked.';
+            } else {
+              calendarNote.textContent = 'No approved speaking slots are available on this date.';
+            }
+          }
+        }
+
+        function getRemaining() {
+          return Math.max(0, sessionLimit - bookedSlots.length);
+        }
+
+        function isReturningPortalUser() {
+          if (authBridge || profileBridge) return true;
+          var registered = String(readStorage('ieltsPortalRegistered') || '').trim().toLowerCase();
+          if (registered === 'true') return true;
+
+          var email = String(readStorage('ieltsPortalEmail') || '').trim();
+          var passwordHash = String(readStorage('ieltsPortalPasswordHash') || '').trim();
+          return !!(email && passwordHash);
+        }
+
+        function ensurePortalAccess() {
+          if (isReturningPortalUser()) return true;
+
+          var fallbackPackage = packageName || packageFromQuery || 'Lite';
+          var nextUrl = 'free-mock-portal.html?source=speaking-booking&intent=book-speaking';
+          if (fallbackPackage) {
+            nextUrl += '&package=' + encodeURIComponent(fallbackPackage);
+          }
+
+          window.alert('Please access speaking slot booking from the Test Taker Portal.');
+          window.location.replace(nextUrl);
+          return false;
+        }
+
+        function buildDashboardBridgeUrl() {
+          var hashParams = new URLSearchParams();
+          if (authBridge) hashParams.set('auth', authBridge);
+          if (profileBridge) hashParams.set('profile', profileBridge);
+          if (packageName) hashParams.set('package', packageName);
+          if (sessionId) hashParams.set('session_id', sessionId);
+
+          var hash = hashParams.toString();
+          return hash ? ('/dashboard#' + hash) : '/dashboard';
+        }
+
+        function refreshMeta() {
+          var remaining = getRemaining();
+          var booked = bookedSlots.length;
+          var percent = sessionLimit > 0 ? Math.min(100, Math.round((booked / sessionLimit) * 100)) : 0;
+          var returningPortalUser = isReturningPortalUser();
+
+          if (packagePill) packagePill.textContent = 'Package: ' + packageName;
+          if (sessionsPill) sessionsPill.textContent = 'Speaking sessions: ' + sessionLimit;
+          if (leftPill) leftPill.textContent = 'Remaining: ' + remaining;
+          if (nextBtn) {
+            var nextUrl = '';
+            if (returningPortalUser) {
+              nextUrl = buildDashboardBridgeUrl();
+            } else {
+              nextUrl = 'free-mock-portal.html?package=' + encodeURIComponent(packageName) + '&source=speaking-booking';
+              if (sessionId) {
+                nextUrl += '&session_id=' + encodeURIComponent(sessionId);
+              }
+              if (authBridge) {
+                nextUrl += '&auth=' + encodeURIComponent(authBridge);
+              }
+              if (profileBridge) {
+                nextUrl += '&profile=' + encodeURIComponent(profileBridge);
+              }
+            }
+            nextBtn.href = nextUrl;
+            nextBtn.textContent = returningPortalUser
+              ? ('Continue to Test Taker Portal (' + packageName + ')')
+              : ('Continue to Registration Form (' + packageName + ')');
+          }
+          if (progressFill) progressFill.style.width = String(percent) + '%';
+          if (progressMeta) progressMeta.textContent = booked + ' of ' + sessionLimit + ' sessions booked';
+        }
+
+        function renderMyBookings() {
+          if (!myBookings) return;
+          myBookings.innerHTML = '';
+
+          if (!bookedSlots.length) {
+            if (myBookingEmpty) myBookingEmpty.hidden = false;
+            return;
+          }
+
+          if (myBookingEmpty) myBookingEmpty.hidden = true;
+
+          bookedSlots.forEach(function (booking, idx) {
+            var wrap = document.createElement('article');
+            wrap.className = 'my-booking-item';
+
+            var title = document.createElement('p');
+            title.className = 'my-booking-title';
+            title.textContent = 'Speaking Session ' + String(idx + 1);
+            wrap.appendChild(title);
+
+            var timeMeta = document.createElement('p');
+            timeMeta.className = 'my-booking-meta';
+            timeMeta.textContent = formatDateTime(booking.start) + ' | ' + formatTimeRange(booking.start, booking.end);
+            wrap.appendChild(timeMeta);
+
+            var examiner = document.createElement('p');
+            examiner.className = 'my-booking-meta';
+            examiner.textContent = 'Examiner: ' + String(booking.examinerId || 'Assigned');
+            wrap.appendChild(examiner);
+
+            if (booking.zoomLink) {
+              var link = document.createElement('a');
+              link.className = 'my-booking-link';
+              link.href = String(booking.zoomLink);
+              link.target = '_blank';
+              link.rel = 'noopener noreferrer';
+              link.textContent = 'Open session link';
+              wrap.appendChild(link);
+            }
+
+            myBookings.appendChild(wrap);
+          });
+        }
+
+        function renderAvailableSlots() {
+          if (!slotList) return;
+          slotList.innerHTML = '';
+
+          if (!approvedSlots.length) {
+            if (slotEmpty) slotEmpty.hidden = false;
+            return;
+          }
+
+          var slotsByDate = getDateSlotsMap();
+          var selectedSlots = (slotsByDate[selectedDate] || []).slice();
+          var bookedLookup = getBookedIdentityLookup();
+
+          if (!selectedSlots.length) {
+            if (slotEmpty) {
+              slotEmpty.hidden = false;
+              slotEmpty.textContent = 'No approved speaking slots are available on ' + formatDateHeading(selectedDate) + '.';
+            }
+            return;
+          }
+
+          if (slotEmpty) {
+            slotEmpty.hidden = true;
+            slotEmpty.textContent = 'No approved slots are available right now. Please check again later.';
+          }
+
+          var groupWrap = document.createElement('section');
+          groupWrap.className = 'slot-date-group';
+
+          var groupHead = document.createElement('div');
+          groupHead.className = 'slot-date-head';
+
+          var title = document.createElement('h3');
+          title.className = 'slot-date-title';
+          title.textContent = formatDateHeading(selectedDate);
+          groupHead.appendChild(title);
+
+          var scrollControls = document.createElement('div');
+          scrollControls.className = 'slot-scroll-controls';
+
+          var upBtn = document.createElement('button');
+          upBtn.className = 'slot-scroll-btn';
+          upBtn.type = 'button';
+          upBtn.textContent = 'Up';
+
+          var downBtn = document.createElement('button');
+          downBtn.className = 'slot-scroll-btn';
+          downBtn.type = 'button';
+          downBtn.textContent = 'Down';
+
+          scrollControls.appendChild(upBtn);
+          scrollControls.appendChild(downBtn);
+          groupHead.appendChild(scrollControls);
+          groupWrap.appendChild(groupHead);
+
+          var scrollWrap = document.createElement('div');
+          scrollWrap.className = 'slot-date-scroll';
+          groupWrap.appendChild(scrollWrap);
+
+          selectedSlots
+            .sort(function (a, b) { return new Date(a.start).valueOf() - new Date(b.start).valueOf(); })
+            .forEach(function (slot) {
+              var slotWrap = document.createElement('article');
+              slotWrap.className = 'slot-item';
+
+              var heading = document.createElement('p');
+              heading.className = 'slot-time';
+              heading.textContent = formatTimeRange(slot.start, slot.end);
+              slotWrap.appendChild(heading);
+
+              var meta = document.createElement('p');
+              meta.className = 'slot-meta';
+              meta.textContent = 'Examiner: ' + String(slot.examinerId || 'Assigned') + ' | Duration: ' + String(slot.durationMinutes || 12) + ' mins';
+              slotWrap.appendChild(meta);
+
+              if (slot.sessionNote) {
+                var note = document.createElement('p');
+                note.className = 'slot-meta';
+                note.textContent = 'Note: ' + String(slot.sessionNote);
+                slotWrap.appendChild(note);
+              }
+
+              var actions = document.createElement('div');
+              actions.className = 'slot-actions';
+
+              var status = document.createElement('span');
+              status.className = 'slot-status';
+              actions.appendChild(status);
+
+              var btn = document.createElement('button');
+              btn.className = 'slot-book-btn';
+              btn.type = 'button';
+
+              var slotKey = slotIdentity(slot);
+              var alreadyBooked = !!bookedLookup[slotKey];
+              var isConflicting = hasTimeConflict(slot);
+              var isBooking = !!bookingInFlight[slotKey];
+
+              if (alreadyBooked) {
+                status.classList.add('is-booked');
+                status.textContent = 'Booked';
+                btn.textContent = 'Booked';
+                btn.disabled = true;
+              } else if (isBooking) {
+                status.textContent = 'Reserving';
+                btn.textContent = 'Booking...';
+                btn.disabled = true;
+              } else if (isConflicting) {
+                status.classList.add('is-booked');
+                status.textContent = 'Time conflict';
+                btn.textContent = 'Time Clash';
+                btn.disabled = true;
+              } else if (getRemaining() <= 0) {
+                status.textContent = 'Available';
+                btn.textContent = 'Limit Reached';
+                btn.disabled = true;
+              } else {
+                status.textContent = 'Available';
+                btn.textContent = 'Book Session';
+                btn.disabled = false;
+                btn.addEventListener('click', function () {
+                  bookSlot(slot);
+                });
+              }
+
+              actions.appendChild(btn);
+              slotWrap.appendChild(actions);
+              scrollWrap.appendChild(slotWrap);
+            });
+
+          upBtn.addEventListener('click', function () {
+            scrollWrap.scrollBy({ top: -220, behavior: 'smooth' });
+          });
+
+          downBtn.addEventListener('click', function () {
+            scrollWrap.scrollBy({ top: 220, behavior: 'smooth' });
+          });
+
+          slotList.appendChild(groupWrap);
+
+          window.requestAnimationFrame(function () {
+            var hasOverflow = scrollWrap.scrollHeight > (scrollWrap.clientHeight + 2);
+            scrollControls.hidden = !hasOverflow;
+          });
+        }
+
+        function bookSlot(slot) {
+          var slotKey = slotIdentity(slot);
+          var bookedLookup = getBookedIdentityLookup();
+          if (bookedLookup[slotKey]) {
+            window.alert('This speaking slot is already booked. Please choose another time.');
+            return;
+          }
+
+          if (bookingInFlight[slotKey]) {
+            return;
+          }
+
+          if (hasTimeConflict(slot)) {
+            window.alert('You already have a speaking session at this time. Please choose a different time slot.');
+            return;
+          }
+
+          if (getRemaining() <= 0) {
+            window.alert('You already booked all speaking sessions for your ' + packageName + ' package.');
+            return;
+          }
+
+          var sessionNumber = bookedSlots.length + 1;
+          var ok = window.confirm('Book speaking session ' + sessionNumber + ' of ' + sessionLimit + '?');
+          if (!ok) return;
+
+          bookingInFlight[slotKey] = true;
+          renderAvailableSlots();
+
+          bookSpeakingSlotOnServer(slot)
+            .then(function (result) {
+              if (!result.ok) {
+                throw new Error(result.error || 'Unable to book this speaking slot right now.');
+              }
+
+              var bookedSlot = result.slot || slot;
+              var booking = {
+                id: slotIdentity(bookedSlot),
+                packageName: packageName,
+                examinerId: bookedSlot.examinerId,
+                start: bookedSlot.start,
+                end: bookedSlot.end,
+                durationMinutes: bookedSlot.durationMinutes,
+                zoomLink: bookedSlot.zoomLink,
+                sessionNote: bookedSlot.sessionNote,
+                bookedAt: new Date().toISOString(),
+              };
+
+              bookedSlots.push(booking);
+              saveBookings(packageName, bookedSlots);
+
+              var bookedDate = new Date(bookedSlot.start);
+              if (!Number.isNaN(bookedDate.valueOf())) {
+                selectedDate = dateKey(bookedDate);
+              }
+
+              refreshMeta();
+              renderMyBookings();
+
+              return loadApprovedSlots().then(function () {
+                renderCalendar();
+                renderAvailableSlots();
+              });
+            })
+            .then(function () {
+              window.alert('Speaking session booked successfully.');
+            })
+            .catch(function (err) {
+              var message = err && err.message ? err.message : 'Unable to book this speaking slot right now.';
+              window.alert(message);
+              return loadApprovedSlots().then(function () {
+                renderCalendar();
+                renderAvailableSlots();
+              });
+            })
+            .finally(function () {
+              delete bookingInFlight[slotKey];
+              renderAvailableSlots();
+            });
+        }
+
+        function postJson(url, payload) {
+          return fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload || {}),
+          }).then(function (res) {
+            return res.json().catch(function () { return {}; }).then(function (data) {
+              return { ok: res.ok, status: res.status, data: data };
+            });
+          });
+        }
+
+        function readBookingAuth() {
+          var email = String(readStorage('ieltsPortalEmail') || '').trim();
+          var passwordHash = String(readStorage('ieltsPortalPasswordHash') || '').trim();
+
+          if (email && passwordHash) {
+            return { email: email, passwordHash: passwordHash };
+          }
+
+          if (!authBridge) return null;
+          try {
+            var parsed = JSON.parse(window.atob(decodeURIComponent(authBridge)));
+            var bridgeEmail = String(parsed && parsed.email ? parsed.email : '').trim();
+            var bridgeHash = String(parsed && parsed.passwordHash ? parsed.passwordHash : '').trim();
+            if (!bridgeEmail || !bridgeHash) return null;
+            return { email: bridgeEmail, passwordHash: bridgeHash };
+          } catch (_) {
+            return null;
+          }
+        }
+
+        function bookSpeakingSlotOnServer(slot) {
+          var slotId = String((slot && slot.id) || '').trim();
+          if (!slotId) {
+            return Promise.resolve({ ok: false, error: 'Unable to reserve this slot. Please refresh and try again.' });
+          }
+
+          var auth = readBookingAuth();
+          if (!auth) {
+            return Promise.resolve({ ok: false, error: 'Please sign in again from the Test Taker Portal before booking speaking slots.' });
+          }
+
+          return postJson('/api/speaking/book', {
+            slotId: slotId,
+            email: auth.email,
+            passwordHash: auth.passwordHash,
+            packageName: packageName,
+            sessionId: sessionId,
+          }).then(function (r) {
+            if (!r.ok) {
+              return {
+                ok: false,
+                error: (r.data && r.data.error) || 'This speaking slot is no longer available. Please choose another time.',
+              };
+            }
+
+            return {
+              ok: true,
+              slot: r.data && r.data.slot ? r.data.slot : null,
+            };
+          }).catch(function () {
+            return {
+              ok: false,
+              error: 'Unable to reach booking service. Please try again.',
+            };
+          });
+        }
+
+        function fetchSlotsForDate(dateValue) {
+          return fetch('/api/speaking/slots?date=' + encodeURIComponent(dateValue))
+            .then(function (res) {
+              return res.json().catch(function () { return {}; }).then(function (data) {
+                if (!res.ok || !data || !Array.isArray(data.slots)) return [];
+                return data.slots;
+              });
+            })
+            .catch(function () {
+              return [];
+            });
+        }
+
+        function loadApprovedSlots() {
+          var dates = getNextDates(14);
+          var requests = dates.map(function (dateValue) { return fetchSlotsForDate(dateValue); });
+
+          return Promise.all(requests).then(function (results) {
+            var flat = [];
+            results.forEach(function (chunk) {
+              if (Array.isArray(chunk)) flat = flat.concat(chunk);
+            });
+
+            approvedSlots = flat
+              .filter(function (slot) { return slot && slot.start && slot.end; })
+              .sort(function (a, b) { return new Date(a.start).valueOf() - new Date(b.start).valueOf(); });
+          });
+        }
+
+        function init() {
+          if (!ensurePortalAccess()) return;
+
+          writeStorage(PACKAGE_KEY, packageName);
+          refreshMeta();
+          if (autoNote) {
+            autoNote.textContent = 'Use the button above only if you need account access or to continue in the Test Taker Portal.';
+          }
+          renderMyBookings();
+          renderCalendar();
+          renderAvailableSlots();
+
+          if (slotCalendar) {
+            slotCalendar.addEventListener('click', function (event) {
+              var button = event.target && event.target.closest ? event.target.closest('[data-calendar-date]') : null;
+              if (!button) return;
+
+              var nextDate = String(button.getAttribute('data-calendar-date') || '').trim();
+              if (!nextDate) return;
+              selectedDate = nextDate;
+              renderCalendar();
+              renderAvailableSlots();
+            });
+          }
+
+          loadApprovedSlots().then(function () {
+            renderCalendar();
+            renderAvailableSlots();
+          });
+        }
+
+        init();
+      })();
+    </script>
+  </body>
+</html>
