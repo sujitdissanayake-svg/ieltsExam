@@ -116,6 +116,7 @@
           window.localStorage.removeItem('ieltsReadingAnswersV1__' + suffix);
           window.localStorage.removeItem('ieltsReadingResultSubmittedV1__' + suffix);
           window.localStorage.removeItem('ieltsReadingAttemptId__' + suffix);
+          window.localStorage.setItem('ieltsReadingDraftSessionV1__' + suffix, String(Date.now()));
         }
 
         function startReadingTimer() {

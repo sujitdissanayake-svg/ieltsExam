@@ -42,6 +42,7 @@
 
   var ANSWERS_KEY = scopedKey('ieltsReadingAnswersV1');
   var LEGACY_ANSWERS_KEY = 'ieltsReadingAnswersV1';
+  var DRAFT_SESSION_KEY = scopedKey('ieltsReadingDraftSessionV1');
   var SUBMISSION_FLAG_KEY = scopedKey('ieltsReadingResultSubmittedV1');
   var LEGACY_SUBMISSION_FLAG_KEY = 'ieltsReadingResultSubmittedV1';
   var ATTEMPT_ID_KEY = scopedKey('ieltsReadingAttemptId');
@@ -191,6 +192,14 @@
 
   function saveAnswersFromDom() {
     writeSavedAnswers(gatherAnswersFromDom());
+  }
+
+  function initializeDraftSession() {
+    if (safeGetStorage(DRAFT_SESSION_KEY)) return;
+
+    // A draft without a current test-start marker predates this attempt.
+    safeRemoveStorage(ANSWERS_KEY);
+    safeSetStorage(DRAFT_SESSION_KEY, String(Date.now()));
   }
 
   function restoreAnswersToDom() {
@@ -567,6 +576,7 @@
     safeRemoveStorage(SUBMISSION_FLAG_KEY);
     safeRemoveStorage(ATTEMPT_ID_KEY);
     safeRemoveStorage(UNIFIED_ATTEMPT_ID_KEY);
+    safeRemoveStorage(DRAFT_SESSION_KEY);
     safeRemoveStorage(LEGACY_ANSWERS_KEY);
     safeRemoveStorage(LEGACY_SUBMISSION_FLAG_KEY);
     safeRemoveStorage(LEGACY_ATTEMPT_ID_KEY);
@@ -574,6 +584,7 @@
   }
 
   function init() {
+    initializeDraftSession();
     clearStaleSubmittedAnswers();
     restoreAnswersToDom();
     blockAnswerSuggestions();
@@ -594,6 +605,7 @@
       safeRemoveStorage(SUBMISSION_FLAG_KEY);
       safeRemoveStorage(ATTEMPT_ID_KEY);
       safeRemoveStorage(UNIFIED_ATTEMPT_ID_KEY);
+      safeRemoveStorage(DRAFT_SESSION_KEY);
       safeRemoveStorage(LEGACY_ANSWERS_KEY);
       safeRemoveStorage(LEGACY_SUBMISSION_FLAG_KEY);
       safeRemoveStorage(LEGACY_ATTEMPT_ID_KEY);
