@@ -125,6 +125,20 @@
     );
   };
 
+  const blockAnswerSuggestions = (fileName) => {
+    if (!/^ielts-(listening|reading|writing)-test/i.test(String(fileName || ''))) return;
+
+    const answerInputs = document.querySelectorAll('input[type="text"][data-q], textarea[data-q]');
+    for (const input of answerInputs) {
+      const question = String(input.getAttribute('data-q') || '').trim();
+      input.setAttribute('autocomplete', 'off');
+      input.setAttribute('autocorrect', 'off');
+      input.setAttribute('autocapitalize', 'none');
+      input.setAttribute('spellcheck', 'false');
+      if (question) input.setAttribute('name', `ielts-answer-q${question}-nohistory`);
+    }
+  };
+
   const getPortalEmail = () => {
     try {
       const email = String(window.localStorage.getItem('ieltsPortalEmail') || '').trim();
@@ -383,6 +397,7 @@
     if (!fileName) return;
 
     installClipboardGuard(fileName);
+    blockAnswerSuggestions(fileName);
 
     const hasRestartFlag = () => {
       try {

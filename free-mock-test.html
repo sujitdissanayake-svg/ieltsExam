@@ -9,7 +9,9 @@
     <script>
       (function () {
         var params = new URLSearchParams(window.location.search || '');
-        var bypass = params.get('devBypass') === '1' || params.get('bypass') === '1';
+        var localHost = /^(localhost|127\.0\.0\.1|::1)$/i.test(String(window.location.hostname || ''));
+        var devBypass = localHost && params.get('devBypass') === '1';
+        var bypass = devBypass || params.get('bypass') === '1';
         var module = String(params.get('module') || '').trim().toLowerCase() === 'general' ? 'general' : 'academic';
 
         function withForwardParams(target) {
@@ -21,13 +23,66 @@
           return target;
         }
 
+        function openFreeMock() {
+          var nextTarget = 'ielts-academic.html?bypass=1&module=' + module;
+          window.location.replace(withForwardParams('free-mock-confirm.html?bypass=1&next=' + encodeURIComponent(nextTarget)));
+        }
+
+        function redirectToPaidMock(message) {
+          window.alert(message || 'Your one Free Mock Test has already been used. Please choose a paid mock test package, which includes a Speaking test.');
+          window.location.replace('index.html#mock');
+        }
+
+        function readAuth() {
+          try {
+            var decoded = window.atob(decodeURIComponent(String(params.get('auth') || '')));
+            var auth = JSON.parse(decoded);
+            var email = String((auth && auth.email) || '').trim();
+            var passwordHash = String((auth && auth.passwordHash) || '').trim();
+            return email && passwordHash ? { email: email, passwordHash: passwordHash } : null;
+          } catch (_) {
+            return null;
+          }
+        }
+
         if (!bypass) {
           window.location.replace(withForwardParams('free-mock-portal.html'));
           return;
         }
 
-        var nextTarget = 'ielts-academic.html?bypass=1&module=' + module;
-        window.location.replace(withForwardParams('free-mock-confirm.html?bypass=1&next=' + encodeURIComponent(nextTarget)));
+        if (devBypass) {
+          openFreeMock();
+          return;
+        }
+
+        var auth = readAuth();
+        if (!auth) {
+          window.location.replace(withForwardParams('free-mock-portal.html'));
+          return;
+        }
+
+        fetch('/api/users/free-mock-status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(auth),
+        })
+          .then(function (response) {
+            return response.json().catch(function () { return {}; }).then(function (data) {
+              return { ok: response.ok, data: data };
+            });
+          })
+          .then(function (result) {
+            var attempt = result && result.data && result.data.freeMockAttempt;
+            if (result && result.ok && attempt && attempt.canStart === false) {
+              redirectToPaidMock(attempt.message);
+              return;
+            }
+            openFreeMock();
+          })
+          .catch(function () {
+            // Submission endpoints remain authoritative if this availability check cannot be reached.
+            openFreeMock();
+          });
       })();
     </script>
   </body>

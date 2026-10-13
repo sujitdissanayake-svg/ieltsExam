@@ -58,7 +58,7 @@
 
             <label class="portal-field">
               <span class="portal-label">WhatsApp number</span>
-              <input class="portal-input" type="tel" name="whatsapp" autocomplete="off" required placeholder="e.g. +44 7123 456789" />
+              <input class="portal-input" type="tel" name="whatsapp" autocomplete="tel" inputmode="tel" required pattern="\+[1-9][0-9]{7,14}" title="Use an international WhatsApp number with country code." placeholder="e.g. +44 7123 456789" />
             </label>
 
             <label class="portal-field">
@@ -711,6 +711,41 @@
           });
         }
 
+        function paidMockPackagesUrl() {
+          return usesHtmlRoutes() ? 'index.html#mock' : '/#mock';
+        }
+
+        function redirectBlockedFreeMock(status) {
+          var details = status && typeof status === 'object' ? status : {};
+          var message = String(details.message || '').trim()
+            || 'Your one Free Mock Test has already been used. Please choose a paid mock test package, which includes a Speaking test.';
+          setNote(loginNote, message, 'error');
+          window.setTimeout(function () {
+            window.location.href = paidMockPackagesUrl();
+          }, 1200);
+        }
+
+        function continueAfterFreeMockStatus(authPayload) {
+          if (!authPayload || !authPayload.email || !authPayload.passwordHash) {
+            return Promise.resolve(false);
+          }
+
+          return postJson('/api/users/free-mock-status', {
+            email: String(authPayload.email).trim(),
+            passwordHash: String(authPayload.passwordHash).trim(),
+          }).then(function (result) {
+            var status = result && result.data && result.data.freeMockAttempt;
+            if (result && result.ok && status && status.canStart === false) {
+              redirectBlockedFreeMock(status);
+              return false;
+            }
+            return true;
+          }).catch(function () {
+            // Submission endpoints remain authoritative if this availability check cannot be reached.
+            return true;
+          });
+        }
+
         function defaultPostVerifyTarget() {
           return testTakerPortalUrl();
         }
@@ -817,6 +852,15 @@
           };
         }
 
+        function isValidWhatsAppNumber(value) {
+          var normalized = String(value || '').trim().replace(/[\s().-]/g, '');
+          if (!/^\+[1-9]\d{7,14}$/.test(normalized)) return false;
+
+          var digits = normalized.slice(1);
+          if (/^(\d)\1+$/.test(digits)) return false;
+          return !/^(0123456789|1234567890|9876543210|0987654321)/.test(digits);
+        }
+
         registerForm.addEventListener('submit', function (e) {
           e.preventDefault();
           var values = getRegisterFormValues();
@@ -826,11 +870,13 @@
           var dob = values.dob;
           var targetBandScore = Number(values.targetBandScore || 0);
 
-          persistRegistrationDraft(values);
-          applyPurchasedPackageContext();
-
           if (!email) {
             setNote(registerNote, 'Please enter your email address.', 'error');
+            return;
+          }
+
+          if (!isValidWhatsAppNumber(whatsapp)) {
+            setNote(registerNote, 'Enter a valid WhatsApp number with country code.', 'error');
             return;
           }
 
@@ -838,6 +884,9 @@
             setNote(registerNote, 'Please enter a target band score between 0 and 9.', 'error');
             return;
           }
+
+          persistRegistrationDraft(values);
+          applyPurchasedPackageContext();
 
           if (registerSubmitButton) registerSubmitButton.disabled = true;
           setNote(registerNote, 'Creating your account...', 'info');

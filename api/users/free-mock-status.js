@@ -60,7 +60,7 @@ module.exports = async function handler(req, res) {
     const canStart = !!freeMockAttemptSummary.canSubmit;
     const message = canStart
       ? ('You have remaining ' + String(freeMockAttemptSummary.remainingAttempts) + ' free attempts.')
-      : 'You have used the maximum free mock attempts. Free Mock Test is now blocked. Opening Mock Test.';
+      : 'Your one Free Mock Test has already been used. Please choose a paid mock test package, which includes a Speaking test.';
 
     sendJson(res, 200, {
       ok: true,

@@ -114,6 +114,7 @@
         var startBtn = document.getElementById('instructionsConfirm');
         var candidateEl = document.getElementById('instructionsCandidateNumber');
         var AUTO_START_SECONDS = 40;
+        var VOLUME_KEY = 'ieltsListeningVolume';
         var autoStartTimerId = null;
         var countdownTimerId = null;
         var hasStarted = false;
@@ -199,10 +200,34 @@
           } catch (_) {}
         }
 
+        function getStoredVolume() {
+          try {
+            var raw = sessionStorage.getItem(VOLUME_KEY);
+            var value = Number.parseFloat(String(raw));
+            return Number.isFinite(value) ? Math.max(0, Math.min(1, value)) : null;
+          } catch (_) {
+            return null;
+          }
+        }
+
+        function setStoredVolume(value) {
+          try {
+            sessionStorage.setItem(VOLUME_KEY, String(Math.max(0, Math.min(1, Number(value) || 0))));
+          } catch (_) {}
+        }
+
         if (volumeEl) {
+          var storedVolume = getStoredVolume();
+          if (storedVolume !== null) volumeEl.value = String(Math.round(storedVolume * 100));
           syncVolumeSliderUi();
-          volumeEl.addEventListener('input', syncVolumeSliderUi);
-          volumeEl.addEventListener('change', syncVolumeSliderUi);
+          volumeEl.addEventListener('input', function () {
+            syncVolumeSliderUi();
+            setStoredVolume(Number(volumeEl.value) / 100);
+          });
+          volumeEl.addEventListener('change', function () {
+            syncVolumeSliderUi();
+            setStoredVolume(Number(volumeEl.value) / 100);
+          });
         }
 
         (function installNoBackGuard() {

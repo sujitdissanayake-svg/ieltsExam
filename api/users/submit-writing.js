@@ -323,7 +323,7 @@ module.exports = async function handler(req, res) {
       });
       if (!freeMockAttemptSummary.canSubmit) {
         sendJson(res, 403, {
-          error: 'You have hit the maximum free mock attempts. Please choose a paid mock test package.',
+          error: 'Your one Free Mock Test has already been used. Please choose a paid mock test package, which includes a Speaking test.',
           freeMockAttempt: {
             limit: freeMockAttemptSummary.limit,
             usedAttempts: freeMockAttemptSummary.usedAttempts,
@@ -331,7 +331,7 @@ module.exports = async function handler(req, res) {
             status: 'blocked',
             redirectToPackages: true,
             redirectPath: '/#mock',
-            message: 'You have used the maximum free mock attempts. Free Mock Test is now blocked. Opening Mock Test.',
+            message: 'Your one Free Mock Test has already been used. Please choose a paid mock test package, which includes a Speaking test.',
           },
         });
         return;

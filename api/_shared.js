@@ -35,6 +35,15 @@ const isValidEmailBasic = (email) => {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 };
 
+const isValidWhatsAppNumber = (number) => {
+  const normalized = String(number || '').trim().replace(/[\s().-]/g, '');
+  if (!/^\+[1-9]\d{7,14}$/.test(normalized)) return false;
+
+  const digits = normalized.slice(1);
+  if (/^(\d)\1+$/.test(digits)) return false;
+  return !/^(0123456789|1234567890|9876543210|0987654321)/.test(digits);
+};
+
 const hmacSha256Base64Url = (secret, data) => {
   return base64UrlEncode(crypto.createHmac('sha256', String(secret)).update(String(data), 'utf8').digest());
 };
@@ -129,6 +138,7 @@ module.exports = {
   sha256Hex,
   timingSafeEqualText,
   isValidEmailBasic,
+  isValidWhatsAppNumber,
   signToken,
   verifyToken,
   readJsonBody,

@@ -113,6 +113,7 @@
         var audioCtx = null;
         var gainNode = null;
         var mediaSource = null;
+        var VOLUME_KEY = 'ieltsListeningVolume';
 
         function readPortalValue(key) {
           try {
@@ -187,6 +188,22 @@
           try {
             if (!volumeEl) return;
             volumeEl.style.setProperty('--vol', String(volumeEl.value || 0));
+          } catch (_) {}
+        }
+
+        function getStoredVolume() {
+          try {
+            var raw = sessionStorage.getItem(VOLUME_KEY);
+            var value = Number.parseFloat(String(raw));
+            return Number.isFinite(value) ? Math.max(0, Math.min(1, value)) : null;
+          } catch (_) {
+            return null;
+          }
+        }
+
+        function setStoredVolume(value) {
+          try {
+            sessionStorage.setItem(VOLUME_KEY, String(Math.max(0, Math.min(1, Number(value) || 0))));
           } catch (_) {}
         }
 
@@ -323,11 +340,13 @@
             var onVol = function () {
               syncVolumeSliderUi();
               applyVolume();
+              setStoredVolume(getVolume());
             };
             volumeEl.addEventListener('input', onVol);
             volumeEl.addEventListener('change', onVol);
 
-            // Set initial UI fill.
+            var storedVolume = getStoredVolume();
+            if (storedVolume !== null) volumeEl.value = String(Math.round(storedVolume * 100));
             syncVolumeSliderUi();
           }
         }

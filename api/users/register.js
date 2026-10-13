@@ -1,4 +1,4 @@
-const { readJsonBody, isValidEmailBasic, timingSafeEqualText } = require('../_shared');
+const { readJsonBody, isValidEmailBasic, isValidWhatsAppNumber, timingSafeEqualText } = require('../_shared');
 const { sendJson, enforceRateLimit } = require('../_http');
 const store = require('../_store');
 
@@ -34,6 +34,11 @@ module.exports = async function handler(req, res) {
 
   if (!isValidEmailBasic(email)) {
     sendJson(res, 400, { error: 'Email is required.' });
+    return;
+  }
+
+  if (!isValidWhatsAppNumber(whatsapp)) {
+    sendJson(res, 400, { error: 'Enter a valid WhatsApp number with country code.' });
     return;
   }
 

@@ -12,16 +12,6 @@
       "source": "/portal.html",
       "destination": "/free-mock-portal",
       "permanent": false
-    },
-    {
-      "source": "/free-mock-test",
-      "destination": "/ielts-academic?bypass=1&module=academic",
-      "permanent": false
-    },
-    {
-      "source": "/free-mock-test.html",
-      "destination": "/ielts-academic?bypass=1&module=academic",
-      "permanent": false
     }
   ],
   "rewrites": [
