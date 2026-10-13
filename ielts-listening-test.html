@@ -2045,6 +2045,27 @@
           })(paperBlanks[i]);
         }
 
+        function persistListeningAnswer(input) {
+          if (!input) return;
+          var q = String(input.getAttribute('data-q') || '').trim();
+          if (!/^(?:[1-9]|[1-3][0-9]|40)$/.test(q)) return;
+          if (String(input.type || '').toLowerCase() === 'radio' && !input.checked) return;
+
+          try {
+            window.localStorage.setItem('ieltsListeningAnswer:q' + q, String(input.value || '').trim());
+          } catch (_) {}
+        }
+
+        document.addEventListener('input', function (event) {
+          var target = event && event.target;
+          if (target && target.matches && target.matches('input[data-q]')) persistListeningAnswer(target);
+        });
+
+        document.addEventListener('change', function (event) {
+          var target = event && event.target;
+          if (target && target.matches && target.matches('input[data-q]')) persistListeningAnswer(target);
+        });
+
         function normalizePlanLetter(letter) {
           var s = String(letter || '').trim().toUpperCase();
           if (!s) return '';

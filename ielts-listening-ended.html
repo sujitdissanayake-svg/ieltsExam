@@ -27,7 +27,7 @@
           <div class="listening-ended-body">
             <p>Your test has finished.</p>
             <p>All of your answers have been stored.</p>
-            <p>Please wait for further instructions.</p>
+            <p id="listeningResultStatus">Calculating your Listening band score...</p>
           </div>
         </section>
       </div>
@@ -35,10 +35,130 @@
 
     <script>
       (function () {
-        // After a short pause, move to the next module (Reading).
-        window.setTimeout(function () {
+        var statusEl = document.getElementById('listeningResultStatus');
+        var redirected = false;
+
+        function setStatus(message) {
+          if (statusEl) statusEl.textContent = message;
+        }
+
+        function readPortalValue(key) {
+          try {
+            var localValue = String(window.localStorage.getItem(key) || '').trim();
+            if (localValue) return localValue;
+          } catch (_) {}
+          try {
+            return String(window.sessionStorage.getItem(key) || '').trim();
+          } catch (_) {
+            return '';
+          }
+        }
+
+        function normalizeContextToken(value, fallback) {
+          var raw = String(value == null ? '' : value).trim().toLowerCase();
+          if (!raw) return String(fallback || '').trim().toLowerCase();
+          return raw.replace(/[^a-z0-9_-]/g, '');
+        }
+
+        function getAttemptId() {
+          var params = new URLSearchParams(window.location.search || '');
+          var moduleType = normalizeContextToken(
+            params.get('module') || readPortalValue('ieltsExamModule') || readPortalValue('ieltsModuleType') || 'academic',
+            'academic'
+          );
+          var packageName = normalizeContextToken(params.get('package') || readPortalValue('ieltsMockPackage') || 'free', 'free');
+          var paperNumber = normalizeContextToken(params.get('paper') || readPortalValue('ieltsMockPaper') || '0', '0');
+          var scopedKey = 'ieltsMockAttemptId__' + moduleType + '__' + packageName + '__p' + paperNumber;
+          var existing = readPortalValue(scopedKey) || readPortalValue('ieltsMockAttemptId');
+          if (existing) return existing;
+
+          var created = String(Date.now());
+          try {
+            window.localStorage.setItem(scopedKey, created);
+          } catch (_) {}
+          return created;
+        }
+
+        function getTestMode() {
+          var params = new URLSearchParams(window.location.search || '');
+          return String(params.get('testMode') || readPortalValue('ieltsTestMode') || '').trim().toLowerCase() === 'mock'
+            ? 'mock'
+            : 'free';
+        }
+
+        function getAnswers() {
+          var answers = {};
+          for (var q = 1; q <= 40; q++) {
+            try {
+              var value = String(window.localStorage.getItem('ieltsListeningAnswer:q' + q) || '').trim();
+              if (value) answers[q] = value;
+            } catch (_) {}
+          }
+          return answers;
+        }
+
+        function goToReading() {
+          if (redirected) return;
+          redirected = true;
           window.location.href = 'ielts-reading-instructions.html';
-        }, 3000);
+        }
+
+        var fallbackTimeout = window.setTimeout(goToReading, 10000);
+        var email = readPortalValue('ieltsPortalEmail');
+        var passwordHash = readPortalValue('ieltsPortalPasswordHash');
+        var answers = getAnswers();
+
+        if (!email || !passwordHash) {
+          setStatus('Listening score could not be submitted because your student session is missing. Please contact support.');
+          window.setTimeout(goToReading, 3000);
+          return;
+        }
+
+        fetch('/api/users/submit-listening', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: email,
+            passwordHash: passwordHash,
+            answers: answers,
+            attemptId: getAttemptId(),
+            testMode: getTestMode(),
+          }),
+        })
+          .then(function (response) {
+            return response.json().catch(function () { return {}; }).then(function (data) {
+              return { ok: response.ok, data: data };
+            });
+          })
+          .then(function (result) {
+            if (!result.ok) {
+              var message = result.data && (result.data.error || result.data.message);
+              setStatus(message || 'Listening score could not be submitted. Please contact support.');
+              return;
+            }
+
+            if (result.data && result.data.skipped) {
+              setStatus('Listening score was not calculated because fewer than five answers were completed.');
+              return;
+            }
+
+            var score = result.data && result.data.result ? Number(result.data.result.bandScore) : NaN;
+            if (!Number.isFinite(score)) {
+              setStatus('Listening score could not be calculated. Please contact support.');
+              return;
+            }
+
+            setStatus('Your Listening band score is ' + score.toFixed(1) + '. Continuing to Reading...');
+          })
+          .catch(function () {
+            setStatus('Listening score could not be submitted. Please contact support.');
+          })
+          .then(function () {
+            window.setTimeout(function () {
+              window.clearTimeout(fallbackTimeout);
+              goToReading();
+            }, 2500);
+          });
       })();
     </script>
   </body>

@@ -6,7 +6,6 @@
     <title>IELTS Academic Reading</title>
     <link rel="stylesheet" href="styles.css?v=20260304" />
     <script src="ielts-flow-guard.js?v=20260310-2" defer></script>
-    <script src="listening-score.js?v=20260615-1"></script>
   </head>
   <body class="listening-soundcheck listening-instructions">
     <header class="academic-topbar" aria-label="IELTS top bar">
@@ -73,13 +72,6 @@
 
     <script>
       (function () {
-        try {
-          if (window.__ieltsListeningScore && typeof window.__ieltsListeningScore.submitListeningResult === 'function') {
-            // Fallback: if listening end-page submit was interrupted, retry here.
-            window.__ieltsListeningScore.submitListeningResult().catch(function () {});
-          }
-        } catch (_) {}
-
         var startBtn = document.getElementById('readingInstructionsConfirm');
         if (!startBtn) return;
 
@@ -157,4 +149,3 @@
     </script>
   </body>
 </html>
-
