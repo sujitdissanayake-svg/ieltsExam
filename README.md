@@ -84,6 +84,7 @@ node -e "const crypto=require('crypto'); const pwd='YOUR_DIRECTOR_PASSWORD'; con
 
 - Examiner login page: `/examiner-portal.html`
 - Examiners are created from the Admin Panel (Live Dashboard → Examiners).
+- Admins can select examiner rows and delete the selected examiner accounts after confirmation.
 - Local dev-server fallback: when no examiner record exists, the server can auto-bootstrap a dev examiner login (enabled by default with `ALLOW_EXAMINER_DEV_BOOTSTRAP=1`).
 - Default dev examiner credentials: `sujit.dissanayake@gmail.com` / `sujit@Exam001` (override via `EXAMINER_DEV_EMAIL` and `EXAMINER_DEV_PASSWORD`).
 

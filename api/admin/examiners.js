@@ -30,19 +30,29 @@ module.exports = async function handler(req, res) {
       return;
     }
 
-    const email = String(body && body.email || '').trim();
-    if (!email) {
-      sendJson(res, 400, { error: 'Email is required.' });
+    const requestedEmails = Array.isArray(body && body.emails)
+      ? body.emails
+      : [body && body.email];
+    const emails = Array.from(new Set(requestedEmails
+      .map((email) => String(email || '').trim().toLowerCase())
+      .filter(Boolean)))
+      .slice(0, 200);
+    if (!emails.length) {
+      sendJson(res, 400, { error: 'At least one examiner email is required.' });
       return;
     }
 
     try {
-      const result = await store.deleteExaminerByEmail(email);
-      if (!result || Number(result.deleted || 0) < 1) {
+      let deleted = 0;
+      for (const email of emails) {
+        const result = await store.deleteExaminerByEmail(email);
+        deleted += Number(result && result.deleted || 0);
+      }
+      if (deleted < 1) {
         sendJson(res, 404, { error: 'Examiner account not found.' });
         return;
       }
-      sendJson(res, 200, { ok: true, deleted: Number(result.deleted || 0) });
+      sendJson(res, 200, { ok: true, deleted, requested: emails.length });
     } catch (err) {
       sendJson(res, 500, { error: err && err.message ? err.message : 'Unable to delete examiner.' });
     }

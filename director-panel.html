@@ -1319,6 +1319,7 @@
                   </div>
                   <div class="panel2-speaking-actions">
                     <button id="panel2-examiner-delete" class="panel2-btn danger" type="button">Delete examiner account</button>
+                    <button id="panel2-delete-selected-examiners-btn" class="panel2-btn danger" type="button">Delete selected examiners</button>
                     <button id="panel2-examiner-submit" class="panel2-btn" type="submit">Create examiner account</button>
                   </div>
                   <p id="panel2-speaking-note" class="panel2-speaking-note"></p>
@@ -1517,6 +1518,7 @@
         var resultsNote = document.getElementById('panel2-results-note');
         var examinerForm = document.getElementById('panel2-examiner-form');
         var examinerDeleteBtn = document.getElementById('panel2-examiner-delete');
+        var examinerDeleteSelectedBtn = document.getElementById('panel2-delete-selected-examiners-btn');
         var examinerSubmitBtn = document.getElementById('panel2-examiner-submit');
         var examinerCount = document.getElementById('panel2-examiner-count');
         var examinerList = document.getElementById('panel2-examiner-list');
@@ -1547,6 +1549,7 @@
         var selectedResultReviewAttemptId = '';
         var speakingOverviewCache = null;
         var examinerPasswordCache = {};
+        var selectedExaminerEmails = {};
         var dashboardStarted = false;
         var UI_LOCKOUT_KEY = 'ieltsAdminUiLockoutUntil';
         var inactivityTimer = null;
@@ -2436,14 +2439,17 @@
             return;
           }
 
-          examinerList.innerHTML = '<p class="panel2-table-note">Stored passwords are hashed and cannot be viewed. This column shows only the last password set from this panel in the current session.</p><div class="panel2-candidates-table-wrap"><table class="panel2-table panel2-examiner-table" aria-label="Examiner accounts table"><thead><tr><th>Name</th><th>Email</th><th>Last set password</th><th>Created</th><th>Actions</th></tr></thead><tbody>' +
+          examinerList.innerHTML = '<p class="panel2-table-note">Stored passwords are hashed and cannot be viewed. This column shows only the last password set from this panel in the current session.</p><div class="panel2-candidates-table-wrap"><table class="panel2-table panel2-examiner-table" aria-label="Examiner accounts table"><thead><tr><th class="panel2-checkbox-col"><input id="panel2-examiner-select-all-checkbox" type="checkbox" aria-label="Select all examiners" /></th><th>Name</th><th>Email</th><th>Last set password</th><th>Created</th><th>Actions</th></tr></thead><tbody>' +
             examiners.map(function (examiner) {
               var email = String(examiner && examiner.email || '');
+              var normalizedEmail = normalizeExaminerEmail(email);
+              var checked = !!selectedExaminerEmails[normalizedEmail];
               var cachedPassword = getCachedExaminerPassword(email);
               var passwordCell = cachedPassword
                 ? escapeHtml(cachedPassword)
                 : '<span class="panel2-table-note">Not available (stored securely)</span>';
               return '<tr>' +
+                '<td class="panel2-checkbox-col"><input class="panel2-examiner-row-checkbox" type="checkbox" data-examiner-email="' + escapeHtml(email) + '" aria-label="Select examiner ' + escapeHtml(examiner && examiner.name || email) + '"' + (checked ? ' checked' : '') + ' /></td>' +
                 '<td>' + escapeHtml(examiner && examiner.name || 'Unnamed examiner') + '</td>' +
                 '<td>' + escapeHtml(email || '—') + '</td>' +
                 '<td>' + passwordCell + '</td>' +
@@ -2452,6 +2458,65 @@
               '</tr>';
             }).join('') +
             '</tbody></table></div>';
+          syncExaminerSelectionUi(examiners);
+        }
+
+        function syncExaminerSelectionUi(examiners) {
+          var selectAll = document.getElementById('panel2-examiner-select-all-checkbox');
+          if (!selectAll) return;
+
+          var rows = Array.isArray(examiners) ? examiners : [];
+          var selectedCount = rows.filter(function (examiner) {
+            return !!selectedExaminerEmails[normalizeExaminerEmail(examiner && examiner.email || '')];
+          }).length;
+          selectAll.checked = rows.length > 0 && selectedCount === rows.length;
+          selectAll.indeterminate = selectedCount > 0 && selectedCount < rows.length;
+        }
+
+        function getSelectedExaminerEmails() {
+          var examiners = speakingOverviewCache && Array.isArray(speakingOverviewCache.examiners)
+            ? speakingOverviewCache.examiners
+            : [];
+          return examiners.map(function (examiner) {
+            return String(examiner && examiner.email || '').trim();
+          }).filter(function (email) {
+            return !!selectedExaminerEmails[normalizeExaminerEmail(email)];
+          });
+        }
+
+        function deleteSelectedExaminers() {
+          var token = getToken();
+          if (!token) {
+            setSpeakingNote('Admin login required to delete examiner accounts.', 'error');
+            return Promise.resolve();
+          }
+
+          var emails = getSelectedExaminerEmails();
+          if (!emails.length) {
+            setSpeakingNote('Select at least one examiner to delete.', 'error');
+            return Promise.resolve();
+          }
+
+          if (!window.confirm('Delete ' + String(emails.length) + ' selected examiner account(s)? This cannot be undone.')) {
+            return Promise.resolve();
+          }
+
+          setSpeakingNote('Deleting selected examiner accounts...', 'info');
+          return deleteJson('/api/admin/examiners', { emails: emails }, token)
+            .then(function (result) {
+              if (!result.ok) {
+                throw new Error((result.data && (result.data.error || result.data.message)) || 'Unable to delete selected examiner accounts.');
+              }
+              emails.forEach(function (email) {
+                removeCachedExaminerPassword(email);
+              });
+              selectedExaminerEmails = {};
+              setSpeakingNote(String(result.data && result.data.deleted || 0) + ' examiner account(s) deleted.', 'info');
+              return loadSpeaking();
+            })
+            .catch(function (error) {
+              setSpeakingNote(error && error.message ? error.message : 'Unable to delete selected examiner accounts.', 'error');
+            });
         }
 
         function getExaminerCount(examiners) {
@@ -3314,7 +3379,42 @@
           });
         }
 
+        if (examinerDeleteSelectedBtn) {
+          examinerDeleteSelectedBtn.addEventListener('click', function () {
+            examinerDeleteSelectedBtn.disabled = true;
+            deleteSelectedExaminers().finally(function () {
+              examinerDeleteSelectedBtn.disabled = false;
+            });
+          });
+        }
+
         if (examinerList) {
+          examinerList.addEventListener('change', function (event) {
+            var target = event && event.target;
+            if (!target) return;
+
+            if (target.id === 'panel2-examiner-select-all-checkbox') {
+              var examiners = speakingOverviewCache && Array.isArray(speakingOverviewCache.examiners)
+                ? speakingOverviewCache.examiners
+                : [];
+              examiners.forEach(function (examiner) {
+                var email = normalizeExaminerEmail(examiner && examiner.email || '');
+                if (!email) return;
+                if (target.checked) selectedExaminerEmails[email] = true;
+                else delete selectedExaminerEmails[email];
+              });
+              renderSpeakingList();
+              return;
+            }
+
+            if (!target.classList || !target.classList.contains('panel2-examiner-row-checkbox')) return;
+            var email = normalizeExaminerEmail(target.getAttribute('data-examiner-email') || '');
+            if (!email) return;
+            if (target.checked) selectedExaminerEmails[email] = true;
+            else delete selectedExaminerEmails[email];
+            syncExaminerSelectionUi(speakingOverviewCache && speakingOverviewCache.examiners);
+          });
+
           examinerList.addEventListener('click', function (event) {
             var target = event && event.target;
             var resetBtn = target && target.closest ? target.closest('button[data-action="reset-examiner-password"]') : null;
