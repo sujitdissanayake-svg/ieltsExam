@@ -114,7 +114,7 @@
   }
 
   function readSavedAnswers() {
-    var raw = safeGetStorage(ANSWERS_KEY) || safeGetStorage(LEGACY_ANSWERS_KEY);
+    var raw = safeGetStorage(ANSWERS_KEY);
     if (!raw) return {};
     try {
       var parsed = JSON.parse(raw);
@@ -196,7 +196,21 @@
   function restoreAnswersToDom() {
     var saved = readSavedAnswers();
     var keys = Object.keys(saved || {});
-    if (!keys.length) return;
+
+    try {
+      var answerRadios = document.querySelectorAll('input[type="radio"][name^="reading-q"]');
+      for (var radioIndex = 0; radioIndex < answerRadios.length; radioIndex++) {
+        var answerRadio = answerRadios[radioIndex];
+        if (!answerRadio) continue;
+
+        var radioMatch = /^reading-q(\d{1,2})$/.exec(String(answerRadio.name || ''));
+        if (!radioMatch) continue;
+
+        var radioQuestion = Number(radioMatch[1]);
+        if (!(radioQuestion >= 1 && radioQuestion <= 40)) continue;
+        if (!normalizeSpaces(saved[radioQuestion] || '')) answerRadio.checked = false;
+      }
+    } catch (_) {}
 
     for (var i = 0; i < keys.length; i++) {
       var qNum = Number(keys[i]);
@@ -522,6 +536,11 @@
 
   function blockAnswerSuggestions() {
     try {
+      var answerRadios = document.querySelectorAll('input[type="radio"][name^="reading-q"]');
+      for (var radioIndex = 0; radioIndex < answerRadios.length; radioIndex++) {
+        answerRadios[radioIndex].setAttribute('autocomplete', 'off');
+      }
+
       var answerInputs = document.querySelectorAll('input[id^="reading-a"][data-q]:not([type="hidden"])');
       for (var i = 0; i < answerInputs.length; i += 1) {
         var input = answerInputs[i];
