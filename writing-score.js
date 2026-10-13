@@ -75,7 +75,7 @@
   }
 
   function readSavedAnswers() {
-    var raw = safeGetStorage(ANSWERS_KEY) || safeGetStorage(LEGACY_ANSWERS_KEY);
+    var raw = safeGetStorage(ANSWERS_KEY);
     if (!raw) return { part1: '', part2: '' };
 
     try {
@@ -122,8 +122,9 @@
 
     var partKey = getCurrentPartKey();
     var answers = readSavedAnswers();
-    if (!normalizeSpaces(textarea.value) && normalizeSpaces(answers[partKey])) {
-      textarea.value = answers[partKey];
+    var savedAnswer = String(answers[partKey] || '');
+    if (textarea.value !== savedAnswer) {
+      textarea.value = savedAnswer;
       try {
         textarea.dispatchEvent(new Event('input', { bubbles: true }));
       } catch (_) {}
