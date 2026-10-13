@@ -98,6 +98,26 @@
           return /^(Lite|Basic|Standard|Pro)$/i.test(raw) ? (raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase()) : '';
         }
 
+        function clearCurrentReadingDraft() {
+          var moduleType = String(readValue('ieltsExamModule') || readValue('ieltsModuleType') || 'academic')
+            .trim()
+            .toLowerCase()
+            .replace(/[^a-z0-9_-]/g, '');
+          var packageName = String(readValue('ieltsMockPackage') || 'free')
+            .trim()
+            .toLowerCase()
+            .replace(/[^a-z0-9_-]/g, '');
+          var paperNumber = String(readValue('ieltsMockPaper') || '0')
+            .trim()
+            .toLowerCase()
+            .replace(/[^a-z0-9_-]/g, '');
+          var suffix = (moduleType || 'academic') + '__' + (packageName || 'free') + '__p' + (paperNumber || '0');
+
+          window.localStorage.removeItem('ieltsReadingAnswersV1__' + suffix);
+          window.localStorage.removeItem('ieltsReadingResultSubmittedV1__' + suffix);
+          window.localStorage.removeItem('ieltsReadingAttemptId__' + suffix);
+        }
+
         function startReadingTimer() {
           // Start a fresh 60-minute Reading timer.
           try {
@@ -116,6 +136,7 @@
             window.localStorage.removeItem(ANSWERS_KEY);
             window.localStorage.removeItem(SUBMISSION_FLAG_KEY);
             window.localStorage.setItem(ATTEMPT_ID_KEY, String(Date.now()));
+            clearCurrentReadingDraft();
           } catch (_) {}
         }
 
