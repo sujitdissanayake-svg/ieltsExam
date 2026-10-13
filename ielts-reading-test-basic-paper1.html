@@ -5,6 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IELTS Academic Reading</title>
     <link rel="stylesheet" href="styles.css?v=20260310-1" />
+    <style>
+      #readingQuestionsScroll .reading-tf-instructions {
+        display: grid;
+        grid-template-columns: 108px minmax(0, 1fr);
+        gap: 0 10px;
+      }
+
+      #readingQuestionsScroll .reading-tf-instructions > p {
+        margin: 0;
+      }
+
+      #readingQuestionsScroll .reading-tf-options {
+        display: grid;
+        gap: 6px;
+      }
+
+      @media (max-width: 560px) {
+        #readingQuestionsScroll .reading-tf-instructions {
+          grid-template-columns: 1fr;
+          gap: 4px;
+        }
+      }
+    </style>
     <script src="ielts-flow-guard.js?v=20260310-2" defer></script>
   </head>
   <body class="reading-test listening-soundcheck">
@@ -196,10 +219,14 @@
               <div class="reading-sectionTitle">Questions 1-5</div>
               <div class="reading-q-instructions" aria-label="Questions 1 to 5 instructions">
                 <p>Do the following statements agree with the information given in Reading Passage 1?</p>
-                <p>
-                  Choose <strong>TRUE</strong> if the statement agrees with the information, <strong>FALSE</strong> if the statement
-                  contradicts the information, or <strong>NOT GIVEN</strong> if there is no information on this.
-                </p>
+                <div class="reading-tf-instructions">
+                  <p>Choose:</p>
+                  <div class="reading-tf-options">
+                    <p><strong>TRUE</strong> if the statement agrees with the information,</p>
+                    <p><strong>FALSE</strong> if the statement contradicts the information,</p>
+                    <p><strong>NOT GIVEN</strong> if there is no information on this</p>
+                  </div>
+                </div>
               </div>
 
               <div class="reading-q" id="reading-q1" data-q="1">
