@@ -90,6 +90,7 @@
           <div class="soundcheck-actions">
             <button class="soundcheck-btn" id="playSound" type="button">Play sound</button>
           </div>
+          <p id="soundStatus" role="status" aria-live="polite"></p>
 
           <p class="soundcheck-warning">
             <span class="soundcheck-warning-icon" aria-hidden="true">!</span>
@@ -109,10 +110,8 @@
         var continueBtn = document.getElementById('continueBtn');
         var volumeEl = document.getElementById('volume');
         var candidateEl = document.getElementById('soundcheckCandidateNumber');
+        var soundStatus = document.getElementById('soundStatus');
         var voiceAudio = null;
-        var audioCtx = null;
-        var gainNode = null;
-        var mediaSource = null;
 
         function readPortalValue(key) {
           try {
@@ -195,6 +194,10 @@
           playBtn.textContent = isPlaying ? 'Stop sound' : 'Play sound';
         }
 
+        function setSoundStatus(message) {
+          if (soundStatus) soundStatus.textContent = message;
+        }
+
         function ensureVoiceAudio() {
           if (voiceAudio) return voiceAudio;
           voiceAudio = new Audio('assets/IELTS%20Volume%20Checker.mp4?v=20260302');
@@ -203,48 +206,19 @@
 
           voiceAudio.addEventListener('ended', function () {
             setPlayButtonPlaying(false);
+            setSoundStatus('');
           });
 
-          voiceAudio.addEventListener('pause', function () {
-            // Some browsers fire pause on ended; keep label consistent.
-            if (voiceAudio && voiceAudio.ended) setPlayButtonPlaying(false);
+          voiceAudio.addEventListener('error', function () {
+            setPlayButtonPlaying(false);
+            setSoundStatus('The sample sound could not be played. Please tell the invigilator.');
           });
 
           return voiceAudio;
         }
 
-        function ensureAudioGraph() {
-          try {
-            var Ctx = window.AudioContext || window.webkitAudioContext;
-            if (!Ctx) return;
-            if (audioCtx) return;
-
-            audioCtx = new Ctx();
-            gainNode = audioCtx.createGain();
-            gainNode.gain.value = getVolume();
-            gainNode.connect(audioCtx.destination);
-
-            // Create media element source exactly once per audio element.
-            var audio = ensureVoiceAudio();
-            mediaSource = audioCtx.createMediaElementSource(audio);
-            mediaSource.connect(gainNode);
-          } catch (_) {
-            // If Web Audio setup fails, fall back to audio.volume.
-            audioCtx = null;
-            gainNode = null;
-            mediaSource = null;
-          }
-        }
-
         function applyVolume() {
           var v = getVolume();
-          try {
-            if (gainNode) {
-              gainNode.gain.value = v;
-              if (voiceAudio) voiceAudio.volume = 1;
-              return;
-            }
-          } catch (_) {}
           try {
             if (voiceAudio) voiceAudio.volume = v;
           } catch (_) {}
@@ -253,13 +227,6 @@
         function playRecordedVoice() {
           try {
             var audio = ensureVoiceAudio();
-
-            ensureAudioGraph();
-            try {
-              if (audioCtx && audioCtx.state === 'suspended' && typeof audioCtx.resume === 'function') {
-                audioCtx.resume().catch(function () {});
-              }
-            } catch (_) {}
 
             // Stop any previous playback so repeated clicks don't stack sounds.
             audio.pause();
@@ -282,6 +249,7 @@
             try {
               voiceAudio.currentTime = 0;
             } catch (_) {}
+            setSoundStatus('');
           } catch (_) {}
         }
 
@@ -307,6 +275,7 @@
             var playPromise = playRecordedVoice();
             if (!playPromise) {
               setPlayButtonPlaying(false);
+              setSoundStatus('The sample sound could not be played. Please tell the invigilator.');
               return;
             }
 
@@ -314,6 +283,7 @@
             if (typeof playPromise.catch === 'function') {
               playPromise.catch(function () {
                 setPlayButtonPlaying(false);
+                setSoundStatus('The sample sound could not be played. Please tell the invigilator.');
               });
             }
           });
@@ -351,4 +321,3 @@
     </script>
   </body>
 </html>
-
