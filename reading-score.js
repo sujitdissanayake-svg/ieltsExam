@@ -521,18 +521,23 @@
 
   function installAutosave() {
     try {
-      document.addEventListener('change', function (event) {
+      function saveAnswerChange(event) {
         var target = event && event.target;
         if (!target || !target.matches) return;
         if (target.matches('input[type="radio"][name^="reading-q"]')) saveAnswersFromDom();
         if (target.matches('input[id^="reading-a"][data-q]')) saveAnswersFromDom();
-      });
+      }
 
-      document.addEventListener('input', function (event) {
+      function saveAnswerInput(event) {
         var target = event && event.target;
         if (!target || !target.matches) return;
         if (target.matches('input[id^="reading-a"][data-q]')) saveAnswersFromDom();
-      });
+      }
+
+      // The test UI handles its own answer events. Capture them before any
+      // page-level handler can stop propagation during navigation.
+      document.addEventListener('change', saveAnswerChange, true);
+      document.addEventListener('input', saveAnswerInput, true);
 
       document.addEventListener('drop', function () {
         window.setTimeout(saveAnswersFromDom, 0);
