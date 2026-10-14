@@ -36,6 +36,12 @@
 
     <script>
       (function () {
+        var statusEl = document.querySelector('.listening-ended-body p:last-child');
+
+        function setStatus(message) {
+          if (statusEl) statusEl.textContent = message;
+        }
+
         function submitReadingResult() {
           try {
             if (window.__ieltsReadingScore && typeof window.__ieltsReadingScore.submitReadingResult === 'function') {
@@ -89,30 +95,51 @@
           window.location.href = target;
         }
 
-        // Submit reading result while the user is on the ended page.
-        // We still move forward even if submission fails.
-        Promise.race([
-          submitReadingResult(),
-          new Promise(function (resolve) {
-            window.setTimeout(function () {
-              resolve({ ok: false, timeout: true });
-            }, 2200);
-          }),
-        ]).then(function (payload) {
-          var result = payload && typeof payload === 'object' ? payload : {};
-          var freeMockAttempt = result.freeMockAttempt && typeof result.freeMockAttempt === 'object' ? result.freeMockAttempt : null;
-          var shouldRedirect = !!(result.redirectToPackages || (freeMockAttempt && freeMockAttempt.redirectToPackages));
+        function retrySubmission(message) {
+          setStatus(message + ' Retrying in 5 seconds...');
+          window.setTimeout(submitAndContinue, 5000);
+        }
 
-          if (shouldRedirect) {
-            var redirectPath = String(result.redirectPath || (freeMockAttempt && freeMockAttempt.redirectPath) || '/packages.html').trim();
-            window.location.href = redirectPath;
-            return;
-          }
+        function submitAndContinue() {
+          submitReadingResult().then(function (payload) {
+            var result = payload && typeof payload === 'object' ? payload : {};
+            var freeMockAttempt = result.freeMockAttempt && typeof result.freeMockAttempt === 'object' ? result.freeMockAttempt : null;
+            var shouldRedirect = !!(result.redirectToPackages || (freeMockAttempt && freeMockAttempt.redirectToPackages));
 
-          window.setTimeout(moveToWriting, 3000);
-        }).catch(function () {
-          window.setTimeout(moveToWriting, 3000);
-        });
+            if (shouldRedirect) {
+              var redirectPath = String(result.redirectPath || (freeMockAttempt && freeMockAttempt.redirectPath) || '/packages.html').trim();
+              window.location.href = redirectPath;
+              return;
+            }
+
+            if (!result.ok) {
+              retrySubmission(result.error || 'Reading result could not be saved.');
+              return;
+            }
+
+            var submission = result.result && typeof result.result === 'object' ? result.result : null;
+            var readingResult = submission && submission.result && typeof submission.result === 'object'
+              ? submission.result
+              : null;
+            var bandScore = readingResult ? Number(readingResult.bandScore) : NaN;
+            var rawScore = readingResult ? Number(readingResult.rawScore) : NaN;
+            var maxScore = readingResult ? Number(readingResult.maxScore) : NaN;
+            if (!Number.isFinite(bandScore) || !Number.isFinite(rawScore) || !Number.isFinite(maxScore)) {
+              retrySubmission('Reading score could not be calculated.');
+              return;
+            }
+
+            setStatus(
+              'Your Reading band score is ' + bandScore.toFixed(1)
+              + ' (' + rawScore + '/' + maxScore + '). Continuing to Writing...'
+            );
+            window.setTimeout(moveToWriting, 3000);
+          }).catch(function () {
+            retrySubmission('Reading result could not be saved.');
+          });
+        }
+
+        submitAndContinue();
       })();
     </script>
   </body>

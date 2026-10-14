@@ -70,15 +70,6 @@ function normalizeForCompare(q, value) {
     .trim();
 }
 
-function countMeaningfulAnswers(answers) {
-  let count = 0;
-  for (let q = 1; q <= 40; q += 1) {
-    const actual = normalizeForCompare(q, answers && answers[q]);
-    if (actual) count += 1;
-  }
-  return count;
-}
-
 function computeRawScore(answers) {
   let score = 0;
   for (let q = 1; q <= 40; q += 1) {
@@ -198,25 +189,6 @@ module.exports = async function handler(req, res) {
         });
         return;
       }
-    }
-
-    const attemptedAnswers = countMeaningfulAnswers(answers);
-    if (attemptedAnswers < 5) {
-      try {
-        await store.logActivity({
-          userId: user.id,
-          type: 'reading-result-ignored',
-          meta: { reason: 'insufficient-attempt', attemptedAnswers },
-        });
-      } catch (_) {}
-
-      sendJson(res, 200, {
-        ok: true,
-        skipped: true,
-        reason: 'insufficient-attempt',
-        message: 'Reading attempt ignored because not enough answers were completed.',
-      });
-      return;
     }
 
     const rawScore = computeRawScore(answers);
