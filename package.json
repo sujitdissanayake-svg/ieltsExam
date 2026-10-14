@@ -8,6 +8,7 @@
     "student-portal:install": "npm --prefix student-portal-next install",
     "student-portal:dev": "npm --prefix student-portal-next run dev",
     "student-portal:build": "npm --prefix student-portal-next run build",
+    "test:reading-score-load": "node scripts/verify-reading-score-load.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
