@@ -184,6 +184,7 @@
         if (!(qNum >= 1 && qNum <= 40)) continue;
         var value = normalizeSpaces(input.value || '');
         if (value) merged[qNum] = value;
+        else delete merged[qNum];
       }
     } catch (_) {}
 
@@ -246,6 +247,62 @@
         }
       } catch (_) {}
     }
+
+    restoreComplexAnswerWidgets(saved);
+  }
+
+  function restoreComplexAnswerWidgets(saved) {
+    try {
+      var checkboxes = document.querySelectorAll('input[type="checkbox"][name^="reading-q"]');
+      for (var checkboxIndex = 0; checkboxIndex < checkboxes.length; checkboxIndex++) {
+        var checkbox = checkboxes[checkboxIndex];
+        var checkboxMatch = /^reading-q(\d{1,2})(?:_(\d{1,2}))?$/.exec(String(checkbox.name || ''));
+        if (!checkboxMatch) continue;
+
+        var selectedValues = [];
+        for (var groupIndex = 1; groupIndex < checkboxMatch.length; groupIndex++) {
+          var groupQuestion = Number(checkboxMatch[groupIndex]);
+          if (!(groupQuestion >= 1 && groupQuestion <= 40)) continue;
+          var savedValue = normalizeSpaces(saved[groupQuestion] || '').toUpperCase();
+          if (savedValue) selectedValues.push(savedValue);
+        }
+
+        checkbox.checked = selectedValues.indexOf(normalizeSpaces(checkbox.value || '').toUpperCase()) !== -1;
+      }
+    } catch (_) {}
+
+    try {
+      var matchingCards = document.querySelectorAll('.reading-matchCard[data-q]');
+      for (var cardIndex = 0; cardIndex < matchingCards.length; cardIndex++) {
+        var matchingCard = matchingCards[cardIndex];
+        var matchingQuestion = Number(matchingCard.getAttribute('data-q'));
+        var matchingAnswer = normalizeSpaces(saved[matchingQuestion] || '').toUpperCase();
+        if (!(matchingQuestion >= 1 && matchingQuestion <= 40) || !/^[A-Z]$/.test(matchingAnswer)) continue;
+
+        var matchingDropSlot = document.querySelector(
+          '.reading-paragraphDropSlot[data-letter="' + matchingAnswer + '"]'
+        );
+        if (!matchingDropSlot || matchingDropSlot.querySelector('.reading-matchCard[data-q]')) continue;
+        matchingDropSlot.appendChild(matchingCard);
+      }
+    } catch (_) {}
+
+    try {
+      var dragDropRoot = document.getElementById('readingDnd31_36');
+      if (!dragDropRoot) return;
+
+      for (var question = 31; question <= 36; question++) {
+        var dragDropAnswer = normalizeSpaces(saved[question] || '').toUpperCase();
+        if (!/^[A-Z]$/.test(dragDropAnswer)) continue;
+
+        var blank = dragDropRoot.querySelector('.reading-dndBlankSlot[data-q="' + question + '"]');
+        var card = dragDropRoot.querySelector('.reading-dndCard[data-choice="' + dragDropAnswer + '"]');
+        if (!blank || !card || blank.querySelector('.reading-dndCard')) continue;
+
+        blank.appendChild(card);
+        card.setAttribute('data-assigned-q', String(question));
+      }
+    } catch (_) {}
   }
 
   function computeRawScore(answers) {
@@ -521,17 +578,21 @@
 
   function installAutosave() {
     try {
+      function queueAnswerSave() {
+        saveAnswersFromDom();
+        window.setTimeout(saveAnswersFromDom, 0);
+      }
+
       function saveAnswerChange(event) {
         var target = event && event.target;
         if (!target || !target.matches) return;
-        if (target.matches('input[type="radio"][name^="reading-q"]')) saveAnswersFromDom();
-        if (target.matches('input[id^="reading-a"][data-q]')) saveAnswersFromDom();
+        if (target.matches('input[name^="reading-q"], input[id^="reading-a"][data-q]')) queueAnswerSave();
       }
 
       function saveAnswerInput(event) {
         var target = event && event.target;
         if (!target || !target.matches) return;
-        if (target.matches('input[id^="reading-a"][data-q]')) saveAnswersFromDom();
+        if (target.matches('input[id^="reading-a"][data-q]')) queueAnswerSave();
       }
 
       // The test UI handles its own answer events. Capture them before any
@@ -539,9 +600,7 @@
       document.addEventListener('change', saveAnswerChange, true);
       document.addEventListener('input', saveAnswerInput, true);
 
-      document.addEventListener('drop', function () {
-        window.setTimeout(saveAnswersFromDom, 0);
-      });
+      document.addEventListener('drop', queueAnswerSave, true);
 
       window.addEventListener('pagehide', saveAnswersFromDom);
       window.addEventListener('beforeunload', saveAnswersFromDom);

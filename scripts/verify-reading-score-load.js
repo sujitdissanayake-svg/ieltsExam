@@ -14,4 +14,16 @@ if (missingScorer.length) {
   throw new Error(`Reading scorer missing from: ${missingScorer.join(', ')}`);
 }
 
-console.log(`Verified reading scorer on ${readingPages.length} Reading test and completion pages.`);
+const scorerSource = fs.readFileSync(path.join(root, 'reading-score.js'), 'utf8');
+const requiredStateHandlers = [
+  'function restoreComplexAnswerWidgets',
+  'delete merged[qNum]',
+  'function queueAnswerSave',
+];
+const missingStateHandlers = requiredStateHandlers.filter((handler) => !scorerSource.includes(handler));
+
+if (missingStateHandlers.length) {
+  throw new Error(`Reading state persistence handlers missing: ${missingStateHandlers.join(', ')}`);
+}
+
+console.log(`Verified reading scorer and state persistence on ${readingPages.length} Reading test and completion pages.`);
