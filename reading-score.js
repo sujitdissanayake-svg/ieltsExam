@@ -203,6 +203,28 @@
     safeSetStorage(DRAFT_SESSION_KEY, String(Date.now()));
   }
 
+  function restoreCustomAnswers(saved) {
+    function restoreCheckboxGroup(selector, questions) {
+      try {
+        var selected = {};
+        for (var questionIndex = 0; questionIndex < questions.length; questionIndex += 1) {
+          var question = questions[questionIndex];
+          var selectedAnswer = normalizeSpaces(saved[question] || '').toUpperCase();
+          if (selectedAnswer) selected[selectedAnswer] = true;
+        }
+
+        var inputs = document.querySelectorAll(selector);
+        for (var inputIndex = 0; inputIndex < inputs.length; inputIndex += 1) {
+          var input = inputs[inputIndex];
+          input.checked = !!selected[normalizeSpaces(input.value || '').toUpperCase()];
+        }
+      } catch (_) {}
+    }
+
+    restoreCheckboxGroup('input.reading-chooseTwo-input[type="checkbox"]', [20, 21]);
+    restoreCheckboxGroup('input.reading-chooseTwo22-input[type="checkbox"]', [22, 23]);
+  }
+
   function restoreAnswersToDom() {
     var saved = readSavedAnswers();
     var keys = Object.keys(saved || {});
@@ -249,6 +271,7 @@
     }
 
     restoreComplexAnswerWidgets(saved);
+    restoreCustomAnswers(saved);
   }
 
   function restoreComplexAnswerWidgets(saved) {
@@ -601,6 +624,7 @@
       document.addEventListener('input', saveAnswerInput, true);
 
       document.addEventListener('drop', queueAnswerSave, true);
+      document.addEventListener('dragend', queueAnswerSave, true);
 
       window.addEventListener('pagehide', saveAnswersFromDom);
       window.addEventListener('beforeunload', saveAnswersFromDom);
