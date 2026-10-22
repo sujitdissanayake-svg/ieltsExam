@@ -5532,6 +5532,41 @@ button.packages-back {
   background: #ff1f4f;
 }
 
+.packages-instructions-card--previews {
+  display: block;
+}
+
+.packages-test-previews {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.packages-test-preview {
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid #d9e3ef;
+  border-radius: 12px;
+  background: #f7faff;
+}
+
+.packages-test-preview img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  object-position: top;
+}
+
+.packages-test-preview figcaption {
+  padding: 9px 12px;
+  color: #102a56;
+  font-size: 14px;
+  font-weight: 850;
+  text-align: center;
+}
+
 .packages-subtitle-list,
 .packages-subtitle-sublist {
   color: #13284e;
@@ -5650,6 +5685,10 @@ button.packages-back {
 
   .packages-instructions-art {
     display: none;
+  }
+
+  .packages-test-previews {
+    grid-template-columns: 1fr;
   }
 
 }
