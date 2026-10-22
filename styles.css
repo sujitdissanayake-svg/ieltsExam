@@ -5908,6 +5908,13 @@ button.packages-back {
   cursor: pointer;
 }
 
+.package-cta--static {
+  display: grid;
+  place-items: center;
+  cursor: default;
+  pointer-events: none;
+}
+
 .package-card--custom {
   display: grid;
   grid-template-columns: minmax(230px, 0.75fr) minmax(0, 1.5fr) minmax(180px, 0.45fr);
