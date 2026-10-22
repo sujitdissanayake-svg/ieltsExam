@@ -36,18 +36,31 @@
 
   var STORAGE_CONTEXT_SUFFIX = buildStorageContextSuffix();
 
-  function scopedKey(baseKey) {
-    return baseKey + '__' + STORAGE_CONTEXT_SUFFIX;
+  function getWritingSessionId() {
+    try {
+      var sessionValue = String(window.sessionStorage.getItem('ieltsWritingSessionId') || '').trim();
+      if (sessionValue) return sessionValue;
+    } catch (_) {}
+
+    try {
+      return String(window.localStorage.getItem('ieltsWritingSessionId') || '').trim();
+    } catch (_) {
+      return '';
+    }
   }
 
-  var ANSWERS_KEY = scopedKey('ieltsWritingAnswersV1');
+  function scopedKey(baseKey) {
+    var sessionId = getWritingSessionId();
+    if (!sessionId) return '';
+    return baseKey + '__' + STORAGE_CONTEXT_SUFFIX + '__' + sessionId;
+  }
+
   var LEGACY_ANSWERS_KEY = 'ieltsWritingAnswersV1';
-  var SUBMISSION_FLAG_KEY = scopedKey('ieltsWritingResultSubmittedV1');
   var LEGACY_SUBMISSION_FLAG_KEY = 'ieltsWritingResultSubmittedV1';
-  var ATTEMPT_ID_KEY = scopedKey('ieltsWritingAttemptId');
   var LEGACY_ATTEMPT_ID_KEY = 'ieltsWritingAttemptId';
-  var UNIFIED_ATTEMPT_ID_KEY = scopedKey('ieltsMockAttemptId');
   var LEGACY_UNIFIED_ATTEMPT_ID_KEY = 'ieltsMockAttemptId';
+  var DRAFT_SESSION_KEY = 'ieltsWritingDraftSessionV1__' + STORAGE_CONTEXT_SUFFIX;
+  var SHARED_ATTEMPT_ID_KEY = 'ieltsMockAttemptId__' + STORAGE_CONTEXT_SUFFIX;
 
   function safeGetStorage(key) {
     try {
@@ -74,8 +87,21 @@
     return String(value || '').replace(/\s+/g, ' ').trim();
   }
 
+  function initializeCurrentDraftSession() {
+    var sessionId = getWritingSessionId();
+    if (!sessionId) return;
+
+    var activeSessionId = normalizeSpaces(safeGetStorage(DRAFT_SESSION_KEY));
+    if (activeSessionId === sessionId) return;
+
+    safeRemoveStorage(scopedKey('ieltsWritingAnswersV1'));
+    safeRemoveStorage(scopedKey('ieltsWritingResultSubmittedV1'));
+    safeRemoveStorage(scopedKey('ieltsWritingAttemptId'));
+    safeSetStorage(DRAFT_SESSION_KEY, sessionId);
+  }
+
   function readSavedAnswers() {
-    var raw = safeGetStorage(ANSWERS_KEY);
+    var raw = safeGetStorage(scopedKey('ieltsWritingAnswersV1'));
     if (!raw) return { part1: '', part2: '' };
 
     try {
@@ -91,11 +117,14 @@
   }
 
   function writeSavedAnswers(answers) {
+    var answersKey = scopedKey('ieltsWritingAnswersV1');
+    if (!answersKey) return;
+
     var next = {
       part1: String((answers && answers.part1) || ''),
       part2: String((answers && answers.part2) || ''),
     };
-    safeSetStorage(ANSWERS_KEY, JSON.stringify(next));
+    safeSetStorage(answersKey, JSON.stringify(next));
   }
 
   function getCurrentPartKey() {
@@ -148,16 +177,20 @@
   }
 
   function readAttemptId() {
+    var attemptIdKey = scopedKey('ieltsWritingAttemptId');
+    var unifiedAttemptIdKey = scopedKey('ieltsMockAttemptId');
+    if (!attemptIdKey || !unifiedAttemptIdKey) return '';
+
     var existing = normalizeSpaces(
-      safeGetStorage(UNIFIED_ATTEMPT_ID_KEY)
-      || safeGetStorage(ATTEMPT_ID_KEY)
-      || safeGetStorage(LEGACY_UNIFIED_ATTEMPT_ID_KEY)
-      || safeGetStorage(LEGACY_ATTEMPT_ID_KEY)
+      safeGetStorage(SHARED_ATTEMPT_ID_KEY)
+      || safeGetStorage(unifiedAttemptIdKey)
+      || safeGetStorage(attemptIdKey)
     );
     if (existing) return existing;
     var created = String(Date.now());
-    safeSetStorage(ATTEMPT_ID_KEY, created);
-    safeSetStorage(UNIFIED_ATTEMPT_ID_KEY, created);
+    safeSetStorage(attemptIdKey, created);
+    safeSetStorage(unifiedAttemptIdKey, created);
+    safeSetStorage(SHARED_ATTEMPT_ID_KEY, created);
     return created;
   }
 
@@ -168,6 +201,14 @@
     var selectedPackage = normalizeSpaces(safeGetStorage('ieltsMockPackage')).toLowerCase();
     if (!selectedPackage || selectedPackage === 'free mock') return 'free';
     return 'mock';
+  }
+
+  function readTestPaper() {
+    return normalizeSpaces(safeGetStorage('ieltsMockPaper')) || '1';
+  }
+
+  function readAttemptType() {
+    return normalizeSpaces(safeGetStorage('ieltsTestAttemptType')).toLowerCase() === 'retake' ? 'retake' : 'initial';
   }
 
   function readDeviceKey() {
@@ -244,7 +285,8 @@
 
   function submitWritingResult() {
     var snapshot = buildResultSnapshot();
-    var submissionMarker = normalizeSpaces(safeGetStorage(SUBMISSION_FLAG_KEY) || safeGetStorage(LEGACY_SUBMISSION_FLAG_KEY));
+    var submissionFlagKey = scopedKey('ieltsWritingResultSubmittedV1');
+    var submissionMarker = normalizeSpaces(safeGetStorage(submissionFlagKey));
     var alreadySubmitted = submissionMarker && submissionMarker === String(snapshot.attemptId || '');
     if (alreadySubmitted) return Promise.resolve({ ok: true, skipped: true });
 
@@ -260,6 +302,8 @@
         moduleType: snapshot.moduleType,
         attemptId: snapshot.attemptId,
         testMode: readTestMode(),
+        paper: readTestPaper(),
+        attemptType: readAttemptType(),
         deviceKey: readDeviceKey(),
         task1Answer: snapshot.answers.part1,
         task2Answer: snapshot.answers.part2,
@@ -293,7 +337,7 @@
           };
         }
 
-        safeSetStorage(SUBMISSION_FLAG_KEY, String(snapshot.attemptId || '1'));
+        safeSetStorage(submissionFlagKey, String(snapshot.attemptId || '1'));
         return {
           ok: true,
           result: payload.body,
@@ -309,17 +353,27 @@
       });
   }
 
-  bindTextareaSync();
+  function initializeTextareaSync() {
+    initializeCurrentDraftSession();
+    bindTextareaSync();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeTextareaSync, { once: true });
+  } else {
+    initializeTextareaSync();
+  }
 
   window.__ieltsWritingScore = {
     buildResultSnapshot: buildResultSnapshot,
     submitWritingResult: submitWritingResult,
     readSavedAnswers: readSavedAnswers,
     clearSavedAnswers: function () {
-      safeRemoveStorage(ANSWERS_KEY);
-      safeRemoveStorage(SUBMISSION_FLAG_KEY);
-      safeRemoveStorage(ATTEMPT_ID_KEY);
-      safeRemoveStorage(UNIFIED_ATTEMPT_ID_KEY);
+      safeRemoveStorage(scopedKey('ieltsWritingAnswersV1'));
+      safeRemoveStorage(scopedKey('ieltsWritingResultSubmittedV1'));
+      safeRemoveStorage(scopedKey('ieltsWritingAttemptId'));
+      safeRemoveStorage(scopedKey('ieltsMockAttemptId'));
+      safeRemoveStorage(DRAFT_SESSION_KEY);
       safeRemoveStorage(LEGACY_ANSWERS_KEY);
       safeRemoveStorage(LEGACY_SUBMISSION_FLAG_KEY);
       safeRemoveStorage(LEGACY_ATTEMPT_ID_KEY);

@@ -113,8 +113,42 @@
         var partsRoot = document.getElementById('submission-parts');
         if (!partsRoot) return;
 
+        function readPortalValue(key) {
+          try {
+            var localValue = String(window.localStorage.getItem(key) || '').trim();
+            if (localValue) return localValue;
+          } catch (_) {}
+          try {
+            return String(window.sessionStorage.getItem(key) || '').trim();
+          } catch (_) {
+            return '';
+          }
+        }
+
+        function getListeningAttemptContext() {
+          var params = new URLSearchParams(window.location.search || '');
+          var moduleType = String(params.get('module') || readPortalValue('ieltsExamModule') || readPortalValue('ieltsModuleType') || 'academic')
+            .trim()
+            .toLowerCase()
+            .replace(/[^a-z0-9_-]/g, '');
+          var packageName = String(params.get('package') || readPortalValue('ieltsMockPackage') || 'free')
+            .trim()
+            .toLowerCase()
+            .replace(/[^a-z0-9_-]/g, '');
+          var paperNumber = String(params.get('paper') || readPortalValue('ieltsMockPaper') || '0')
+            .trim()
+            .toLowerCase()
+            .replace(/[^a-z0-9_-]/g, '');
+          return (moduleType || 'academic') + '__' + (packageName || 'free') + '__p' + (paperNumber || '0');
+        }
+
+        function getListeningAttemptId() {
+          var key = 'ieltsListeningAttemptId__' + getListeningAttemptContext();
+          return readPortalValue(key);
+        }
+
         function safeKey(key) {
-          return 'ieltsListeningAnswer:' + key;
+          return 'ieltsListeningAnswerV2__' + getListeningAttemptContext() + '__' + getListeningAttemptId() + '__' + key;
         }
 
         function loadValue(key) {

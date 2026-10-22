@@ -6,6 +6,7 @@
     <title>Test ended</title>
     <link rel="stylesheet" href="styles.css?v=20260304" />
     <script src="ielts-flow-guard.js?v=20260310-2" defer></script>
+    <script src="listening-basic-paper1-score.js?v=20261014-2"></script>
   </head>
   <body class="listening-ended">
     <main class="listening-ended-main" aria-label="Test ended">
@@ -27,7 +28,7 @@
           <div class="listening-ended-body">
             <p>Your test has finished.</p>
             <p>All of your answers have been stored.</p>
-            <p>Please wait for further instructions.</p>
+            <p id="listeningResultStatus">Calculating your Listening band score...</p>
           </div>
         </section>
       </div>
@@ -35,12 +36,97 @@
 
     <script>
       (function () {
-        // After a short pause, move to the next module (Reading).
-        window.setTimeout(function () {
+        var statusEl = document.getElementById('listeningResultStatus');
+        var redirected = false;
+
+        function setStatus(message) {
+          if (statusEl) statusEl.textContent = message;
+        }
+
+        function readPortalValue(key) {
+          try {
+            var localValue = String(window.localStorage.getItem(key) || '').trim();
+            if (localValue) return localValue;
+          } catch (_) {}
+          try {
+            return String(window.sessionStorage.getItem(key) || '').trim();
+          } catch (_) {
+            return '';
+          }
+        }
+
+        function goToReading() {
+          if (redirected) return;
+          redirected = true;
           window.location.href = 'ielts-reading-instructions-basic-paper1.html';
-        }, 3000);
+        }
+
+        function retrySubmission(message) {
+          setStatus(message + ' Retrying in 5 seconds...');
+          window.setTimeout(submitListening, 5000);
+        }
+
+        var email = readPortalValue('ieltsPortalEmail');
+        var passwordHash = readPortalValue('ieltsPortalPasswordHash');
+        var scoreStore = window.IELTSBasicPaper1ListeningScore;
+        var answers = scoreStore ? scoreStore.getAnswers() : {};
+
+        if (!email || !passwordHash) {
+          setStatus('Listening score could not be submitted because your student session is missing. Please contact support.');
+          return;
+        }
+
+        if (!scoreStore) {
+          setStatus('Listening score could not be submitted because the answer store is unavailable. Please contact support.');
+          return;
+        }
+
+        function submitListening() {
+          fetch('/api/users/submit-listening', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: email,
+              passwordHash: passwordHash,
+              answers: answers,
+              attemptId: readPortalValue('ieltsListeningAttemptId__academic__basic__p1'),
+              testMode: 'mock',
+            }),
+          })
+            .then(function (response) {
+              return response.json().catch(function () { return {}; }).then(function (data) {
+                return { ok: response.ok, data: data };
+              });
+            })
+            .then(function (result) {
+              if (!result.ok) {
+                var message = result.data && (result.data.error || result.data.message);
+                retrySubmission(message || 'Listening score could not be submitted.');
+                return;
+              }
+
+              if (result.data && result.data.skipped) {
+                setStatus('Listening answers saved. Continuing to Reading...');
+              } else {
+                var listeningResult = result.data && result.data.result;
+                var rawScore = listeningResult ? Number(listeningResult.rawScore) : NaN;
+                var bandScore = listeningResult ? Number(listeningResult.bandScore) : NaN;
+                if (!Number.isFinite(rawScore) || !Number.isFinite(bandScore)) {
+                  retrySubmission('Listening score could not be calculated.');
+                  return;
+                }
+                setStatus('Your Listening score is ' + rawScore + '/40 (Band ' + bandScore.toFixed(1) + '). Continuing to Reading...');
+              }
+
+              window.setTimeout(goToReading, 2500);
+            })
+            .catch(function () {
+              retrySubmission('Listening score could not be submitted.');
+            });
+        }
+
+        submitListening();
       })();
     </script>
   </body>
 </html>
-

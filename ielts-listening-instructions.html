@@ -79,7 +79,7 @@
           <h1>IELTS Listening</h1>
 
           <div class="preTestInfo">
-            <p>Time: Approximately 30 minutes</p>
+            <p>Time: Approximately 24 minutes</p>
 
             <h2>INSTRUCTIONS TO CANDIDATES</h2>
             <ul>
@@ -261,12 +261,65 @@
             : (litePaperOne ? 'ielts-listening-test-lite-paper1' : 'ielts-listening-test');
         }
 
+        function getListeningAttemptContext() {
+          var params = new URLSearchParams(window.location.search || '');
+          var moduleType = String(params.get('module') || readPortalValue('ieltsExamModule') || readPortalValue('ieltsModuleType') || 'academic')
+            .trim()
+            .toLowerCase()
+            .replace(/[^a-z0-9_-]/g, '');
+          var packageName = String(params.get('package') || readPortalValue('ieltsMockPackage') || 'free')
+            .trim()
+            .toLowerCase()
+            .replace(/[^a-z0-9_-]/g, '');
+          var paperNumber = String(params.get('paper') || readPortalValue('ieltsMockPaper') || '0')
+            .trim()
+            .toLowerCase()
+            .replace(/[^a-z0-9_-]/g, '');
+          return (moduleType || 'academic') + '__' + (packageName || 'free') + '__p' + (paperNumber || '0');
+        }
+
+        function startFreshListeningAttempt() {
+          var context = getListeningAttemptContext();
+          var attemptId = String(Date.now()) + '-' + Math.random().toString(36).slice(2, 10);
+
+          var clearStoredAnswers = function (storage) {
+            if (!storage) return;
+
+            var prefix = 'ieltsListeningAnswerV2__' + context + '__';
+            var keysToRemove = [];
+            for (var index = 0; index < storage.length; index++) {
+              var key = storage.key(index);
+              if (key && key.indexOf(prefix) === 0) keysToRemove.push(key);
+            }
+            for (var keyIndex = 0; keyIndex < keysToRemove.length; keyIndex++) {
+              storage.removeItem(keysToRemove[keyIndex]);
+            }
+
+            for (var questionNumber = 1; questionNumber <= 40; questionNumber++) {
+              storage.removeItem('ieltsListeningAnswer:q' + questionNumber);
+            }
+          };
+
+          try {
+            clearStoredAnswers(window.localStorage);
+            clearStoredAnswers(window.sessionStorage);
+            window.localStorage.setItem('ieltsListeningAttemptId__' + context, attemptId);
+            window.sessionStorage.setItem('ieltsListeningAttemptId__' + context, attemptId);
+            window.localStorage.setItem('ieltsMockAttemptId__' + context, attemptId);
+            window.sessionStorage.setItem('ieltsMockAttemptId__' + context, attemptId);
+            var startedAt = String(Date.now());
+            window.localStorage.setItem('ieltsListeningStartedAt__' + context, startedAt);
+            window.sessionStorage.setItem('ieltsListeningStartedAt__' + context, startedAt);
+          } catch (_) {}
+        }
+
         function goToListeningTest() {
           if (hasStarted) return;
           hasStarted = true;
           if (autoStartTimerId) window.clearTimeout(autoStartTimerId);
           if (countdownTimerId) window.clearInterval(countdownTimerId);
 
+          startFreshListeningAttempt();
           var target = resolveStartTarget();
           try {
             window.location.replace(target);

@@ -23,10 +23,10 @@ const ANSWER_KEY = {
   18: ['B'],
   19: ['C'],
   20: ['A'],
-  21: ['G'],
-  22: ['E'],
-  23: ['C'],
-  24: ['A'],
+  21: ['G', 'university tour'],
+  22: ['E', 'library tour'],
+  23: ['C', 'computer lab visit'],
+  24: ['A', 'bbq'],
   25: ['header'],
   26: ['16'],
   27: ['12'],
@@ -76,6 +76,23 @@ function computeRawScore(answers) {
   let score = 0;
 
   for (let q = 1; q <= 40; q += 1) {
+    if (q === 9 || q === 10) continue;
+
+    // Questions 8-10 are one "choose three" task. Score each correct
+    // selected option once, regardless of the order in which it was selected.
+    if (q === 8) {
+      const expected = new Set((ANSWER_KEY[8] || []).concat(ANSWER_KEY[9] || [], ANSWER_KEY[10] || []).map(normalizeForCompare));
+      const selected = new Set();
+      for (let selectedQuestion = 8; selectedQuestion <= 10; selectedQuestion += 1) {
+        const actual = normalizeForCompare(answers && answers[selectedQuestion]);
+        if (actual) selected.add(actual);
+      }
+      selected.forEach((actual) => {
+        if (expected.has(actual)) score += 1;
+      });
+      continue;
+    }
+
     const actual = normalizeForCompare(answers && answers[q]);
     if (!actual) continue;
 
@@ -107,7 +124,7 @@ function listeningBandFromRaw(rawScore) {
   if (raw >= 16) return 5.0; // 16-17
   if (raw >= 13) return 4.5; // 13-15
   if (raw >= 10) return 4.0; // 10-12
-  if (raw >= 8) return 3.5;  // 8-10
+  if (raw >= 8) return 3.5;  // 8-9
   if (raw >= 6) return 3.0;  // 6-7
   return 2.5;
 }
@@ -215,7 +232,17 @@ module.exports = async function handler(req, res) {
       return;
     }
 
-    const rawScore = computeRawScore(answers);
+    if (testMode === 'free') {
+      const claim = await store.claimFreeMockAttempt({ userId: user.id, attemptId, deviceKey });
+      if (!claim.claimed) {
+        sendJson(res, 403, {
+          error: 'Your one Free Mock Test has already been used. Please choose a paid mock test package, which includes a Speaking test.',
+        });
+        return;
+      }
+    }
+
+    const rawScore = Math.min(computeRawScore(answers), attemptedAnswers);
     const bandScore = listeningBandFromRaw(rawScore);
     const proficiency = listeningProficiencyFromBand(bandScore);
 
@@ -237,6 +264,7 @@ module.exports = async function handler(req, res) {
         attemptId,
         testMode,
         deviceKey,
+        attemptedAnswers,
         submittedAt: new Date().toISOString(),
       },
     });

@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { DashboardCard } from "@/components/DashboardCard";
-import { RetakeComponentPopover } from "@/components/RetakeComponentPopover";
 import { formatShortDate, formatShortDateTime } from "@/lib/dateFormat";
 import ieltsExamLogo from "../../../assests/IELTS Exam logo-trim.png";
 
@@ -17,6 +16,39 @@ type PendingPurchaseSync = {
   packageName: string;
   sessionId: string;
 };
+
+type PayHerePayment = {
+  sandbox: boolean;
+  merchant_id: string;
+  return_url: string;
+  cancel_url: string;
+  notify_url: string;
+  order_id: string;
+  items: string;
+  amount: string;
+  currency: string;
+  hash: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  country: string;
+  custom_1: string;
+  custom_2: string;
+};
+
+declare global {
+  interface Window {
+    payhere?: {
+      onCompleted?: (orderId: string) => void;
+      onDismissed?: () => void;
+      onError?: (error: string) => void;
+      startPayment: (payment: PayHerePayment) => void;
+    };
+  }
+}
 
 type BridgeProfile = {
   id: string;
@@ -61,6 +93,8 @@ type LiveOverview = {
     method?: string;
     status?: string;
     package?: string;
+    paper?: number;
+    orderId?: string;
     verified?: boolean;
   }>;
   results: Array<{
@@ -71,6 +105,8 @@ type LiveOverview = {
     releaseAt?: string;
     testMode?: string;
     attemptId?: string;
+    paper?: string | number;
+    attemptType?: string;
     updatedAt?: string;
     createdAt?: string;
   }>;
@@ -108,6 +144,22 @@ const LIVE_AUTH_STORAGE_KEY = "ieltsPortalBridgeAuth";
 const LIVE_PROFILE_STORAGE_KEY = "ieltsPortalBridgeProfile";
 const PENDING_PURCHASE_STORAGE_KEY = "ieltsPortalPendingPurchaseSync";
 const ALLOWED_LAUNCHER_ORIGINS = new Set(["https://www.ieltscambridge.com"]);
+let payHereScriptPromise: Promise<void> | null = null;
+
+function loadPayHereScript() {
+  if (window.payhere) return Promise.resolve();
+  if (payHereScriptPromise) return payHereScriptPromise;
+
+  payHereScriptPromise = new Promise<void>((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = "https://www.payhere.lk/lib/payhere-2.0.js";
+    script.async = true;
+    script.onload = () => window.payhere ? resolve() : reject(new Error("PayHere did not load."));
+    script.onerror = () => reject(new Error("Unable to load PayHere."));
+    document.head.appendChild(script);
+  });
+  return payHereScriptPromise;
+}
 
 function formatModuleLabel(value: string | undefined) {
   const label = String(value || "").trim();
@@ -370,6 +422,19 @@ function getLiveOverviewBridgeUrl() {
   return "/api/live-overview";
 }
 
+function getPayHereOrderUrl() {
+  if (typeof window === "undefined") return "/api/payments/create-payhere-order";
+
+  const protocol = window.location.protocol || "https:";
+  const hostname = String(window.location.hostname || "").toLowerCase();
+  const port = String(window.location.port || "");
+  if (hostname === "localhost" || hostname === "127.0.0.1" || port === "3000") {
+    return `${protocol}//${hostname}:5500/api/payments/create-payhere-order`;
+  }
+  if (hostname === "www.ieltscambridge.com") return "/api/payments/create-payhere-order";
+  return "/api/payhere-order";
+}
+
 async function loadMainPortalLiveOverview(auth: LiveAuth) {
   const response = await fetch(getLiveOverviewBridgeUrl(), {
     method: "POST",
@@ -550,6 +615,9 @@ export default function DashboardPage() {
   const [dashboardTargetUrl, setDashboardTargetUrl] = useState("/dashboard");
   const [freeMockAuthQuery, setFreeMockAuthQuery] = useState("");
   const [clockNowMs, setClockNowMs] = useState<number>(() => Date.now());
+  const [bookingPaper, setBookingPaper] = useState<number | null>(null);
+  const [bookingMessage, setBookingMessage] = useState("");
+  const [bookingGuidancePaper, setBookingGuidancePaper] = useState<number | null>(null);
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -559,6 +627,12 @@ export default function DashboardPage() {
     return () => {
       window.clearInterval(timer);
     };
+  }, []);
+
+  useEffect(() => {
+    void loadPayHereScript().catch((error) => {
+      console.warn("PayHere preloading failed; it will be retried when a test is booked.", error);
+    });
   }, []);
 
   useEffect(() => {
@@ -891,42 +965,120 @@ export default function DashboardPage() {
     ? liveOverview.profile.lastActivityAt || liveOverview.activities[0]?.createdAt || ""
     : "";
   const summaryLastActivityLabel = summaryLastActivity ? formatShortDateTime(summaryLastActivity) : "No activity recorded yet.";
-  const { freeMockUrl, paidMockUrl, bookIeltsUrl, universityUrl } = toMainSiteActionUrls(
+  const { freeMockUrl, paidMockUrl } = toMainSiteActionUrls(
     mainSiteBaseUrl,
     encodedCandidateBridgeProfile,
     freeMockAuthQuery
   );
-  const paidTestsCount = usingLive ? liveOverview.progress.paidMockTestsPurchased ?? 0 : 0;
-  const actionCards = [
-    {
-      id: "free-mock",
-      title: "Book Free Mock Test",
-      detail: "Try an IELTS Academic or General free mock before booking a full package.",
-      href: freeMockUrl,
-      tone: "amber"
-    },
-    {
-      id: "paid-mock",
-      title: "Mock Test (Paid Version)",
-      detail: usingLive ? `Booked paid mock tests: ${paidTestsCount}` : "Open the main portal to purchase and manage full mock tests.",
-      href: paidMockUrl,
-      tone: "rose"
-    },
-    {
-      id: "book-ielts",
-      title: "Book IELTS",
-      detail: "Reserve your official IELTS exam slot from the main IELTS booking flow.",
-      href: bookIeltsUrl,
-      tone: "red"
-    },
-    {
-      id: "university",
-      title: "Apply for a University",
-      detail: "Start the visa-support university path and review study options from the main site.",
-      href: universityUrl,
-      tone: "green"
+  const selectedPackage = ["Lite", "Basic", "Standard", "Pro"].find(
+    (packageName) => packageName === summarySelectedPackage
+  );
+  const testEntryUrl = (paper: number, attemptType: "initial" | "retake") => {
+    if (paper === 1) {
+      return `${freeMockUrl}&paper=1&attempt=${attemptType}`;
     }
-  ] as const;
+
+    return toMainSiteUrlWithQuery(
+      mainSiteBaseUrl,
+      "/ielts-academic.html",
+      `?bypass=1&testMode=mock&module=academic&paper=${paper}&attempt=${attemptType}&profile=${encodedCandidateBridgeProfile}${freeMockAuthQuery}`
+    );
+  };
+  const bookedPapers = new Set<number>();
+  if (usingLive) {
+    liveOverview.payments
+      .filter((payment) => String(payment.status || "").toLowerCase() === "paid" && payment.verified !== false)
+      .forEach((payment) => {
+        const paper = Math.max(1, Math.min(10, Number(payment.paper) || 0));
+        if (paper) bookedPapers.add(paper);
+      });
+  }
+  const completedSlotAttempts = new Map<number, Set<"initial" | "retake">>();
+  if (usingLive) {
+    liveOverview.results
+      .filter((result) => String(result.module || "").toLowerCase() === "writing")
+      .forEach((result) => {
+        const paper = Math.max(1, Math.min(10, Number(result.paper) || 1));
+        const attemptType = String(result.attemptType || "").toLowerCase() === "retake" ? "retake" : "initial";
+        const attempts = completedSlotAttempts.get(paper) || new Set<"initial" | "retake">();
+        attempts.add(attemptType);
+        completedSlotAttempts.set(paper, attempts);
+      });
+  }
+  const nextBookingPaper = Array.from({ length: 10 }, (_, index) => index + 1)
+    .find((paper) => !bookedPapers.has(paper)) || null;
+
+  const startPayHerePayment = async (paper: number) => {
+    const auth = readStoredAuth();
+    if (!auth) {
+      setBookingMessage("Please sign in to book a test.");
+      return;
+    }
+
+    setBookingPaper(paper);
+    setBookingMessage("");
+    try {
+      const orderRequest = fetch(getPayHereOrderUrl(), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...auth, paper }),
+      });
+      const [response] = await Promise.all([orderRequest, loadPayHereScript()]);
+      const data = (await response.json().catch(() => ({}))) as {
+        error?: string;
+        payment?: PayHerePayment;
+      };
+      if (!response.ok || !data.payment) {
+        throw new Error(data.error || "Unable to start PayHere payment.");
+      }
+
+      if (!window.payhere) throw new Error("PayHere did not load.");
+
+      window.payhere.onCompleted = (orderId) => {
+        setBookingPaper(null);
+        setBookingMessage("Confirming your payment with PayHere...");
+        void (async () => {
+          const auth = readStoredAuth();
+          if (!auth) return;
+
+          for (const delayMs of [1000, 2000, 4000, 8000]) {
+            await new Promise<void>((resolve) => window.setTimeout(resolve, delayMs));
+            try {
+              const { response, data } = await loadMainPortalLiveOverview(auth);
+              const overview = normalizeBridgeResponse(response, data);
+              if (!overview) continue;
+
+              setLiveBridgeState(overview, setLiveOverview, setLiveMode);
+              const paymentConfirmed = overview.payments.some((payment) =>
+                String(payment.orderId || "") === orderId &&
+                String(payment.status || "").toLowerCase() === "paid" &&
+                payment.verified !== false
+              );
+              if (paymentConfirmed) {
+                setBookingMessage("Payment confirmed. Your test is now ready to take.");
+                return;
+              }
+            } catch {
+              // The visible confirmation message is retained while the next verification attempt runs.
+            }
+          }
+          setBookingMessage("Payment was submitted. Your booked test will unlock once PayHere confirms the payment.");
+        })();
+      };
+      window.payhere.onDismissed = () => {
+        setBookingPaper(null);
+        setBookingMessage("Payment was cancelled.");
+      };
+      window.payhere.onError = (error) => {
+        setBookingPaper(null);
+        setBookingMessage(`PayHere error: ${error}`);
+      };
+      window.payhere.startPayment(data.payment);
+    } catch (error) {
+      setBookingPaper(null);
+      setBookingMessage(error instanceof Error ? error.message : "Unable to start PayHere payment.");
+    }
+  };
 
   return (
     <main className="w-full px-6 py-5">
@@ -1015,7 +1167,7 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      <section className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
+      <section id="tests-taken" className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
         <DashboardCard title={<span className="text-lg font-bold text-[#DA2C43]">Tests Taken</span>}>
           {usingLive ? (
             attemptSummaries.length === 0 ? (
@@ -1251,115 +1403,219 @@ export default function DashboardPage() {
         </DashboardCard>
       </section>
 
-      <section className="mt-4 overflow-hidden rounded-[32px] border border-slate-200 bg-[radial-gradient(circle_at_top_left,_rgba(218,44,67,0.12),_transparent_30%),radial-gradient(circle_at_bottom_right,_rgba(21,93,252,0.08),_transparent_28%),linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-6 shadow-[0_28px_60px_rgba(15,23,43,0.10)] lg:p-7">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <section
+        aria-label="Action Hub"
+        className="mt-6 overflow-hidden rounded-[28px] border border-slate-200 bg-[radial-gradient(circle_at_top_left,_rgba(218,44,67,0.08),_transparent_32%),radial-gradient(circle_at_bottom_right,_rgba(21,93,252,0.08),_transparent_30%),linear-gradient(145deg,#ffffff_0%,#f6f8fc_100%)] p-4 shadow-[0_22px_55px_rgba(15,23,43,0.08)] sm:p-6"
+      >
+        <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#DA2C43]">Action Hub</p>
-            <h2 className="mt-2 text-[clamp(1.65rem,2.4vw,2.3rem)] font-bold leading-tight text-slate-900">Choose Your Next Step</h2>
+            <p className="text-[0.68rem] font-extrabold uppercase tracking-[0.22em] text-[#DA2C43]">Action Hub</p>
+            <h2 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-[1.8rem]">Your next IELTS step</h2>
+            <p className="mt-1 text-sm text-slate-600">Book a package, start a test, or pick up where you left off.</p>
           </div>
-          <p className="max-w-xl text-sm font-bold leading-6 text-slate-600">Book tests, manage retakes, and move into IELTS or university applications from one section.</p>
+          <span className="rounded-full border border-slate-200 bg-white/80 px-3 py-1.5 text-xs font-bold text-slate-600 shadow-sm">
+            {selectedPackage ? `${selectedPackage} plan` : "10 test slots"}
+          </span>
         </div>
 
-        <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-slate-600">
-          <a href={freeMockUrl} target="_blank" rel="noreferrer" className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 hover:bg-slate-50">Free Access</a>
-          <a href={paidMockUrl} target="_blank" rel="noreferrer" className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 hover:bg-slate-50">Paid Mock Booking</a>
-          <a href="#action-retake" className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 hover:bg-slate-50">Retake Support</a>
-          <a href={bookIeltsUrl} target="_blank" rel="noreferrer" className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 hover:bg-slate-50">Official Exam</a>
-          <a href={universityUrl} target="_blank" rel="noreferrer" className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 hover:bg-slate-50">University Path</a>
-        </div>
-
-        <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-5">
-          <a
-            id="action-free-mock"
-            href={freeMockUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="group flex min-h-[270px] flex-col rounded-[26px] border border-amber-200/80 bg-[linear-gradient(180deg,#fff7e8_0%,#fffdf7_100%)] p-5 shadow-[0_16px_30px_rgba(180,83,9,0.08)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_22px_40px_rgba(180,83,9,0.14)]"
-          >
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-amber-700">Practice</p>
-              <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white/85 text-lg shadow-sm">F</span>
-            </div>
-            <p className="mt-5 text-[1.35rem] font-bold leading-tight text-slate-900">Booking Free Mock Test</p>
-            <p className="mt-3 text-sm leading-6 text-slate-600">Try an IELTS Academic or General free mock before booking a full package.</p>
-            <div className="mt-auto flex justify-center pt-6">
-              <span className="inline-flex w-[220px] items-center justify-center rounded-xl bg-amber-700 px-4 py-2 text-sm font-semibold text-white transition group-hover:bg-amber-800">Take a Free Mock Test</span>
-            </div>
-          </a>
-
-          <a
-            id="action-paid-mock"
-            href={paidMockUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="group flex min-h-[270px] flex-col rounded-[26px] border border-[#f1b6c0] bg-[linear-gradient(180deg,#fff1f4_0%,#fff8fa_100%)] p-5 shadow-[0_16px_30px_rgba(218,44,67,0.08)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_22px_40px_rgba(218,44,67,0.14)]"
-          >
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#DA2C43]">Paid Mock</p>
-              <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white/85 text-lg shadow-sm">P</span>
-            </div>
-            <p className="mt-5 text-[1.35rem] font-bold leading-tight text-slate-900">Mock Test (Paid Version)</p>
-            <p className="mt-3 text-center text-sm leading-6 text-slate-600">{usingLive ? `Booked paid mock tests: ${paidTestsCount}` : "Open the main portal to purchase and manage full mock tests."}</p>
-            <div className="mt-auto flex justify-center pt-6">
-              <span className="inline-flex w-[220px] items-center justify-center rounded-xl bg-[#DA2C43] px-4 py-2 text-sm font-semibold text-white transition group-hover:bg-[#b81f36]">Open Mock Tests</span>
-            </div>
-          </a>
-
-          <div id="action-retake" className="flex min-h-[270px] flex-col rounded-[26px] border border-blue-200/80 bg-[linear-gradient(180deg,#eef5ff_0%,#f8fbff_100%)] p-5 shadow-[0_16px_30px_rgba(21,93,252,0.08)]">
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">Retake</p>
-              <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white/85 text-lg shadow-sm">R</span>
-            </div>
-            <p className="mt-5 text-[1.35rem] font-bold leading-tight text-slate-900">Retake One Component</p>
-            <p className="mt-3 text-center text-sm leading-6 text-slate-600">Use this only for components inside already booked paid mock tests.</p>
-            <div className="mt-auto flex justify-center pt-6">
-              <div className="w-[220px] rounded-2xl border border-blue-200 bg-white px-3 py-2 shadow-sm">
-                <RetakeComponentPopover title="Select Component to Retake" />
+        <div className="grid grid-cols-1 gap-4 2xl:grid-cols-[1064px_minmax(220px,1fr)]">
+          <div className="space-y-4">
+          <div className="max-w-[1064px] rounded-[22px] border border-slate-200 bg-white/90 p-3 shadow-[0_8px_24px_rgba(15,23,43,0.05)] sm:p-4">
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <div>
+                <h3 className="text-xl font-bold tracking-tight text-slate-900">Your test slots</h3>
+                <p className="mt-1 text-base font-extrabold tracking-tight text-[#DA2C43]">Please read the instructions below carefully before taking your test.</p>
+                <p className="mt-1 text-base text-slate-500">Choose an action for each test.</p>
               </div>
+              <span className="rounded-lg bg-rose-50 px-2.5 py-1 text-base font-bold text-[#DA2C43]">01—10</span>
+            </div>
+
+            <div className="space-y-1.5">
+              {bookingMessage && (
+                <p className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700" role="status">
+                  {bookingMessage}
+                </p>
+              )}
+              {Array.from({ length: 10 }, (_, index) => {
+                const paper = index + 1;
+                const testLabel = `${String(paper).padStart(2, "0")} Test`;
+                const attempts = completedSlotAttempts.get(paper);
+                const initialCompleted = attempts?.has("initial") || false;
+                const retakeCompleted = attempts?.has("retake") || false;
+                const booked = bookedPapers.has(paper);
+                const bookingAvailable = paper === 1 || bookedPapers.has(paper - 1);
+                const canBook = bookingAvailable && !booked;
+                const initialAvailable = booked && !initialCompleted;
+                const retakeAvailable = initialCompleted && !retakeCompleted;
+                const initialUrl = testEntryUrl(paper, "initial");
+                const retakeUrl = testEntryUrl(paper, "retake");
+
+                return (
+                  <div
+                    key={paper}
+                    className="grid grid-cols-[130px_220px_65px_220px_220px] justify-start gap-1.5 rounded-xl border border-slate-100 bg-slate-50/80 p-1.5 transition hover:border-slate-200 hover:bg-white sm:gap-2"
+                  >
+                    <p className="whitespace-nowrap rounded-lg bg-emerald-600 px-3 py-2 text-center text-base font-extrabold tracking-tight text-white shadow-sm shadow-emerald-900/15 sm:text-lg">{testLabel}</p>
+                    <button
+                      type="button"
+                      disabled={bookingPaper !== null || booked}
+                      onClick={() => {
+                        if (canBook) {
+                          void startPayHerePayment(paper);
+                          return;
+                        }
+                        setBookingGuidancePaper(paper);
+                      }}
+                      className={`rounded-lg border px-1 py-2 text-center text-[18px] leading-tight transition focus-visible:outline-none focus-visible:ring-2 ${booked ? "cursor-default border-blue-200 bg-blue-50 font-bold text-blue-700 disabled:cursor-default disabled:bg-blue-50 disabled:text-blue-700 disabled:opacity-100" : "border-slate-200 bg-white font-semibold text-slate-700 hover:border-indigo-300 hover:text-indigo-700 focus-visible:ring-indigo-500 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"}`}
+                      aria-label={`Book ${testLabel}`}
+                    >
+                      {booked ? "Booked Test" : bookingPaper === paper ? "Opening PayHere..." : "Book the Test"}
+                    </button>
+                    <p className="whitespace-nowrap text-center text-[18px] font-bold text-slate-900" aria-label={`${testLabel} price`}>
+                      $12.99
+                    </p>
+                    <a
+                      href={initialUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-disabled={!initialAvailable}
+                      tabIndex={!initialAvailable ? -1 : undefined}
+                      onClick={(event) => {
+                        if (!initialAvailable) event.preventDefault();
+                      }}
+                      className={`rounded-lg px-1 py-2 text-center text-[18px] font-bold leading-tight transition focus-visible:outline-none focus-visible:ring-2 ${initialAvailable ? "bg-[#DA2C43] text-white shadow-sm shadow-rose-900/10 hover:-translate-y-0.5 hover:bg-[#b81f36] focus-visible:ring-rose-500" : "cursor-not-allowed bg-slate-100 text-slate-400"}`}
+                      aria-label={`Take ${testLabel} now`}
+                    >
+                      Take the Test Now
+                    </a>
+                    <a
+                      href={retakeUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-disabled={!retakeAvailable}
+                      tabIndex={!retakeAvailable ? -1 : undefined}
+                      onClick={(event) => {
+                        if (!retakeAvailable) event.preventDefault();
+                      }}
+                      className={`rounded-lg border px-1 py-2 text-center text-[18px] font-semibold leading-tight transition focus-visible:outline-none focus-visible:ring-2 ${retakeAvailable ? "border-amber-200 bg-amber-50 text-amber-800 hover:border-amber-300 hover:bg-amber-100 focus-visible:ring-amber-500" : "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400"}`}
+                      aria-label={`Retake ${testLabel}`}
+                    >
+                      Retake the Test
+                    </a>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
-          <a
-            id="action-official"
-            href={bookIeltsUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="group flex min-h-[270px] flex-col items-center rounded-[26px] border border-rose-200 bg-[#c30010] p-5 text-center text-white shadow-[0_18px_34px_rgba(195,0,16,0.28)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_24px_42px_rgba(195,0,16,0.34)]"
-          >
-            <div className="flex w-full items-center justify-center gap-3">
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/80">Official Exam</p>
-              <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white/15 text-lg shadow-sm">I</span>
-            </div>
-            <p className="mt-5 text-[1.35rem] font-bold leading-tight">Book IELTS</p>
-            <p className="mt-3 text-sm leading-6 text-white/90">Reserve your official IELTS exam slot from the main IELTS booking flow.</p>
-            <div className="mt-auto flex justify-center pt-6">
-              <span className="inline-flex w-[220px] items-center justify-center rounded-xl bg-white px-4 py-2 text-sm font-semibold text-[#b90d2a] transition group-hover:bg-rose-50">Take the Official Test</span>
-            </div>
-          </a>
+          <aside className="max-w-[1064px] rounded-[22px] border border-slate-200 bg-white/90 p-5 shadow-[0_8px_24px_rgba(15,23,43,0.05)]">
+            <p className="text-[0.68rem] font-extrabold uppercase tracking-[0.22em] text-[#DA2C43]">Candidate guidance</p>
+            <h3 className="mt-1 text-xl font-bold tracking-tight text-slate-900">Important Instructions for Taking the IELTS Test</h3>
+            <p className="mt-3 text-sm leading-6 text-slate-600">Please read the following instructions carefully before starting your test.</p>
 
-          <a
-            id="action-university"
-            href={universityUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="group flex min-h-[270px] flex-col items-center rounded-[26px] border border-[#6bcbe8] bg-[linear-gradient(180deg,#1f4fd8_0%,#1ec9dc_100%)] p-5 text-center text-white shadow-[0_18px_34px_rgba(31,79,216,0.30)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_24px_42px_rgba(30,201,220,0.34)]"
-          >
-            <div className="flex w-full items-center justify-center gap-3">
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/80">Study Abroad</p>
-              <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white/15 text-lg shadow-sm">U</span>
+            <ol className="mt-4 list-decimal space-y-3 pl-5 text-sm leading-6 text-slate-700">
+              <li>
+                <span className="font-bold text-slate-900">Complete the Test Once You Start:</span> Once you begin the test, you must complete it. If you close the browser before completing the test, the system will mark the test as taken. You will then have only one additional attempt, called the <span className="font-bold">Retake</span>.
+              </li>
+              <li>
+                <span className="font-bold text-slate-900">Secure Power and Network Connection:</span> Before starting, ensure that you have a stable power supply and internet connection. If power or network connectivity is lost, your test may not be completed and will be marked as taken. You will then have only the Retake attempt remaining.
+              </li>
+              <li>
+                <span className="font-bold text-slate-900">Speaking Session in the Retake:</span> The Retake attempt does not include a Speaking session.
+              </li>
+              <li>
+                <span className="font-bold text-slate-900">Booking the Speaking Session:</span> After completing the test, you can book your Speaking session. The booking option will appear after the Writing section. You can take the Speaking session only after 48 hours have passed from the time you took the test.
+              </li>
+              <li>
+                <span className="font-bold text-slate-900">Book Your Speaking Session Carefully:</span> You must book your Speaking session through the available booking option. If you miss your booked session, you will lose that opportunity. Please ensure that you attend your session as scheduled.
+              </li>
+              <li>
+                <span className="font-bold text-slate-900">Viewing Your Band Scores:</span>
+                <ul className="mt-1 list-disc space-y-1 pl-5">
+                  <li><span className="font-semibold">Listening and Reading:</span> Your band scores will be available immediately after you complete the test.</li>
+                  <li><span className="font-semibold">Writing and Speaking:</span> Your band scores will be available within an additional 24–48 hours after the test is taken.</li>
+                </ul>
+              </li>
+              <li>
+                <span className="font-bold text-slate-900">Checking Your Final Results:</span> Your updated band scores will be displayed in the <span className="font-bold">Tests Taken</span> section of your account.
+              </li>
+            </ol>
+
+            <p className="mt-4 rounded-xl border border-rose-100 bg-rose-50 px-3 py-2 text-sm font-semibold leading-6 text-rose-800">
+              Please follow these instructions carefully to avoid losing your test attempts or Speaking session opportunity.
+            </p>
+          </aside>
+          </div>
+
+          <aside className="self-start rounded-[22px] border border-slate-200 bg-white/90 p-4 shadow-[0_8px_24px_rgba(15,23,43,0.05)] 2xl:sticky 2xl:top-4">
+            <p className="text-[0.68rem] font-extrabold uppercase tracking-[0.22em] text-[#DA2C43]">Test results</p>
+            <h3 className="mt-1 text-xl font-bold tracking-tight text-slate-900">Your Results</h3>
+            <p className="mt-2 text-sm leading-5 text-slate-600">Results become available here after you complete each test.</p>
+
+            <div className="mt-4 space-y-2">
+              {Array.from({ length: 10 }, (_, index) => {
+                const paper = index + 1;
+                const initialCompleted = completedSlotAttempts.get(paper)?.has("initial") || false;
+                const testLabel = `${String(paper).padStart(2, "0")} Test`;
+
+                return (
+                  <div key={paper} className="flex items-center justify-between gap-2 rounded-lg border border-slate-100 bg-slate-50/80 px-2.5 py-2">
+                    <p className="whitespace-nowrap text-sm font-bold text-slate-700">{testLabel}</p>
+                    <a
+                      href="#tests-taken"
+                      aria-disabled={!initialCompleted}
+                      tabIndex={!initialCompleted ? -1 : undefined}
+                      onClick={(event) => {
+                        if (!initialCompleted) event.preventDefault();
+                      }}
+                      className={`rounded-md px-2 py-1 text-xs font-bold transition ${initialCompleted ? "bg-blue-600 text-white hover:bg-blue-700" : "cursor-not-allowed bg-slate-200 text-slate-400"}`}
+                    >
+                      {initialCompleted ? "View Results" : "Results"}
+                    </a>
+                  </div>
+                );
+              })}
             </div>
-            <p className="mt-5 text-[1.35rem] font-bold leading-tight">Apply for a University</p>
-            <p className="mt-3 text-sm leading-6 text-white/90">Continue with the visa-support university path and review study options from the main site.</p>
-            <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-              <span className="rounded-xl bg-[#ffd447] px-3 py-1.5 text-xs font-black uppercase tracking-[0.08em] text-[#0b0b0b]">100% Free Service</span>
-              <span className="rounded-xl bg-[#c30010] px-3 py-1.5 text-xs font-extrabold uppercase tracking-[0.08em] text-white">100% Visa Success</span>
-            </div>
-            <div className="mt-auto flex justify-center pt-6">
-              <span className="inline-flex w-[220px] items-center justify-center rounded-xl bg-white px-4 py-2 text-sm font-semibold text-[#1f4fd8] transition group-hover:bg-cyan-50">Search Universities</span>
-            </div>
-          </a>
+          </aside>
         </div>
       </section>
+      {bookingGuidancePaper != null && nextBookingPaper != null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 p-4" role="presentation">
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="booking-guidance-title"
+            className="w-full max-w-md rounded-2xl bg-white p-6 text-center shadow-2xl"
+          >
+            <p className="text-sm font-extrabold uppercase tracking-[0.16em] text-[#DA2C43]">Test booking sequence</p>
+            <h2 id="booking-guidance-title" className="mt-2 text-2xl font-bold text-slate-900">
+              Continue with Test {String(nextBookingPaper).padStart(2, "0")}
+            </h2>
+            <p className="mt-3 text-base leading-6 text-slate-600">
+              Tests are released in sequence to support an organised learning journey. Please book Test {String(nextBookingPaper).padStart(2, "0")} before booking Test {String(bookingGuidancePaper).padStart(2, "0")}.
+            </p>
+            <div className="mt-6 flex flex-wrap justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setBookingGuidancePaper(null)}
+                className="rounded-lg border border-slate-200 px-4 py-2 font-semibold text-slate-700 transition hover:bg-slate-50"
+              >
+                Not now
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setBookingGuidancePaper(null);
+                  void startPayHerePayment(nextBookingPaper);
+                }}
+                className="rounded-lg bg-[#DA2C43] px-4 py-2 font-bold text-white transition hover:bg-[#b81f36]"
+              >
+                Book Test {String(nextBookingPaper).padStart(2, "0")} now
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
     </main>
   );
 }

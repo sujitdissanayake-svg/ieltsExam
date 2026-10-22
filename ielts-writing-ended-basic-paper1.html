@@ -33,25 +33,26 @@
       </div>
     </main>
 
-    <script src="writing-score.js?v=20261013-1"></script>
+    <script src="writing-score.js?v=20261015-1"></script>
     <script>
       (function () {
-        // Clear the writing timer so a new run starts fresh.
-        try {
-          window.localStorage.removeItem('ieltsWritingSessionId');
-          window.localStorage.removeItem('ieltsWritingStartAt');
-          window.localStorage.removeItem('ieltsWritingPart1EndAt');
-          window.localStorage.removeItem('ieltsWritingEndAt');
-          window.localStorage.removeItem('ieltsWritingWarn45Shown');
-          window.localStorage.removeItem('ieltsWritingWarn40Shown');
-          window.localStorage.removeItem('ieltsWritingWarn15Shown');
-          window.localStorage.removeItem('ieltsWritingWarn5Shown');
-          window.localStorage.removeItem('ieltsWritingWarn1Shown');
-        } catch (_) {}
+        function clearWritingTimer() {
+          try {
+            window.localStorage.removeItem('ieltsWritingSessionId');
+            window.localStorage.removeItem('ieltsWritingStartAt');
+            window.localStorage.removeItem('ieltsWritingPart1EndAt');
+            window.localStorage.removeItem('ieltsWritingEndAt');
+            window.localStorage.removeItem('ieltsWritingWarn45Shown');
+            window.localStorage.removeItem('ieltsWritingWarn40Shown');
+            window.localStorage.removeItem('ieltsWritingWarn15Shown');
+            window.localStorage.removeItem('ieltsWritingWarn5Shown');
+            window.localStorage.removeItem('ieltsWritingWarn1Shown');
+          } catch (_) {}
 
-        try {
-          window.sessionStorage.removeItem('ieltsWritingSessionId');
-        } catch (_) {}
+          try {
+            window.sessionStorage.removeItem('ieltsWritingSessionId');
+          } catch (_) {}
+        }
 
         function readValue(key) {
           try {
@@ -80,6 +81,7 @@
         var goToSpeaking = function () {
           if (redirected) return;
           redirected = true;
+          clearWritingTimer();
           var usesHtml = /\.html$/i.test(window.location.pathname || '');
           var target = '';
 
@@ -112,6 +114,7 @@
             var shouldRedirect = !!(result.redirectToPackages || (freeMockAttempt && freeMockAttempt.redirectToPackages));
             if (shouldRedirect) {
               var redirectPath = String(result.redirectPath || (freeMockAttempt && freeMockAttempt.redirectPath) || '/packages.html').trim();
+              clearWritingTimer();
               window.location.href = redirectPath;
               return false;
             }

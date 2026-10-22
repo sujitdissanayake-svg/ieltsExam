@@ -2,7 +2,7 @@ const crypto = require('crypto');
 
 const CANDIDATE_NUMBER_SEED = 50250;
 const CANDIDATE_NUMBER_START = CANDIDATE_NUMBER_SEED;
-const FREE_MOCK_MAX_ATTEMPTS = 1;
+const FREE_MOCK_MAX_ATTEMPTS = 2;
 
 let sql = null;
 let hasPg = false;
@@ -24,6 +24,7 @@ const mem = global.__ieltsMemStore || {
   tests: [],
   payments: [],
   results: [],
+  freeMockAttempts: [],
   activities: [],
   availability: [],
   speakingBookings: [],
@@ -34,6 +35,7 @@ if (!(mem.userIdByEmail instanceof Map)) mem.userIdByEmail = new Map();
 if (!Array.isArray(mem.tests)) mem.tests = [];
 if (!Array.isArray(mem.payments)) mem.payments = [];
 if (!Array.isArray(mem.results)) mem.results = [];
+if (!Array.isArray(mem.freeMockAttempts)) mem.freeMockAttempts = [];
 if (!Array.isArray(mem.activities)) mem.activities = [];
 if (!Array.isArray(mem.availability)) mem.availability = [];
 if (!Array.isArray(mem.speakingBookings)) mem.speakingBookings = [];
@@ -169,6 +171,15 @@ const ensureSchema = async () => {
       meta jsonb,
       created_at timestamptz not null default now(),
       updated_at timestamptz not null default now()
+    );
+  `;
+
+  await sql`
+    create table if not exists free_mock_attempts (
+      user_id text primary key references users(id) on delete cascade,
+      attempt_id text not null,
+      device_key text unique,
+      created_at timestamptz not null default now()
     );
   `;
 
@@ -841,6 +852,78 @@ const createPayment = async ({ userId, amount, currency = 'LKR', status = 'paid'
     values (${record.id}, ${record.userId}, ${record.amount}, ${record.currency}, ${record.status}, ${record.method}, ${record.meta});
   `;
   return record;
+};
+
+const findPaymentByPayHereOrderId = async (orderId) => {
+  const normalizedOrderId = String(orderId || '').trim();
+  if (!normalizedOrderId) return null;
+
+  if (!hasPg) {
+    return mem.payments.find((payment) => {
+      const meta = payment && payment.meta && typeof payment.meta === 'object' ? payment.meta : {};
+      return String(meta.payhereOrderId || '').trim() === normalizedOrderId;
+    }) || null;
+  }
+
+  await ensureSchema();
+  const result = await sql`
+    select id, user_id, amount, currency, status, method, meta, created_at
+    from payments
+    where meta ->> 'payhereOrderId' = ${normalizedOrderId}
+    limit 1;
+  `;
+  const row = result.rows && result.rows[0] ? result.rows[0] : null;
+  if (!row) return null;
+  return {
+    id: row.id,
+    userId: row.user_id || '',
+    amount: Number(row.amount) || 0,
+    currency: row.currency || 'LKR',
+    status: row.status || 'pending',
+    method: row.method || 'payhere',
+    meta: row.meta || {},
+    createdAt: row.created_at,
+  };
+};
+
+const updatePayHerePayment = async ({ orderId, status, paymentId = '', method = '', statusMessage = '' } = {}) => {
+  const existing = await findPaymentByPayHereOrderId(orderId);
+  if (!existing) return null;
+
+  const nextStatus = String(status || existing.status || 'pending').trim().toLowerCase() || 'pending';
+  const nextMeta = {
+    ...(existing.meta && typeof existing.meta === 'object' ? existing.meta : {}),
+    payherePaymentId: String(paymentId || '').trim(),
+    payhereMethod: String(method || '').trim(),
+    payhereStatusMessage: String(statusMessage || '').trim(),
+    payhereNotifiedAt: new Date().toISOString(),
+    verified: true,
+  };
+
+  if (!hasPg) {
+    const index = mem.payments.findIndex((payment) => payment.id === existing.id);
+    if (index < 0) return null;
+    mem.payments[index] = {
+      ...mem.payments[index],
+      status: nextStatus,
+      method: 'payhere',
+      meta: nextMeta,
+    };
+    return mem.payments[index];
+  }
+
+  await ensureSchema();
+  await sql`
+    update payments
+    set status = ${nextStatus}, method = 'payhere', meta = ${nextMeta}
+    where id = ${existing.id};
+  `;
+  return {
+    ...existing,
+    status: nextStatus,
+    method: 'payhere',
+    meta: nextMeta,
+  };
 };
 
 const listResults = async ({ limit = 200, module = '', userId = '' } = {}) => {
@@ -1743,6 +1826,66 @@ const getAttemptIdFromResult = (result) => {
   return '';
 };
 
+const claimFreeMockAttempt = async ({ userId, attemptId, deviceKey = '' } = {}) => {
+  const normalizedUserId = String(userId || '').trim();
+  const normalizedAttemptId = String(attemptId || '').trim();
+  const normalizedDeviceKey = normalizeDeviceKey(deviceKey);
+  if (!normalizedUserId || !normalizedAttemptId) throw new Error('Missing Free Mock attempt details.');
+
+  if (!hasPg) {
+    const existing = mem.freeMockAttempts.find((attempt) =>
+      attempt.userId === normalizedUserId || (normalizedDeviceKey && attempt.deviceKey === normalizedDeviceKey)
+    );
+    if (existing) {
+      return {
+        claimed: existing.userId === normalizedUserId,
+      };
+    }
+    mem.freeMockAttempts.push({
+      userId: normalizedUserId,
+      attemptId: normalizedAttemptId,
+      deviceKey: normalizedDeviceKey,
+    });
+    return { claimed: true };
+  }
+
+  await ensureSchema();
+  const existingResult = await sql`
+    select user_id, attempt_id
+    from free_mock_attempts
+    where user_id = ${normalizedUserId}
+       or (${normalizedDeviceKey || null}::text is not null and device_key = ${normalizedDeviceKey || null})
+    limit 1;
+  `;
+  const existing = existingResult.rows && existingResult.rows[0] ? existingResult.rows[0] : null;
+  if (existing) {
+    return {
+      claimed: String(existing.user_id) === normalizedUserId,
+    };
+  }
+
+  try {
+    await sql`
+      insert into free_mock_attempts (user_id, attempt_id, device_key)
+      values (${normalizedUserId}, ${normalizedAttemptId}, ${normalizedDeviceKey || null});
+    `;
+    return { claimed: true };
+  } catch (err) {
+    if (!err || err.code !== '23505') throw err;
+    const conflictResult = await sql`
+      select user_id, attempt_id
+      from free_mock_attempts
+      where user_id = ${normalizedUserId}
+         or (${normalizedDeviceKey || null}::text is not null and device_key = ${normalizedDeviceKey || null})
+      limit 1;
+    `;
+    const conflict = conflictResult.rows && conflictResult.rows[0] ? conflictResult.rows[0] : null;
+    return {
+      claimed: !!conflict && String(conflict.user_id) === normalizedUserId,
+    };
+  }
+};
+
 const getFreeMockAttemptSummary = async ({ userId, currentAttemptId = '', deviceKey = '' } = {}) => {
   const normalizedUserId = String(userId || '').trim();
   const normalizedCurrentAttemptId = String(currentAttemptId || '').trim();
@@ -1882,6 +2025,8 @@ module.exports = {
   deleteExaminerByEmail,
   listPayments,
   createPayment,
+  findPaymentByPayHereOrderId,
+  updatePayHerePayment,
   listResults,
   upsertResult,
   upsertAvailabilitySlots,
@@ -1894,6 +2039,7 @@ module.exports = {
   normalizeTestMode,
   normalizeDeviceKey,
   getAttemptIdFromResult,
+  claimFreeMockAttempt,
   getFreeMockAttemptSummary,
   clearStudentResultData,
   listTests,

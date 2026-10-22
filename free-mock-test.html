@@ -15,7 +15,7 @@
         var module = String(params.get('module') || '').trim().toLowerCase() === 'general' ? 'general' : 'academic';
 
         function withForwardParams(target) {
-          ['source', 'package', 'profile', 'auth', 'restart', 'module'].forEach(function (key) {
+          ['source', 'package', 'profile', 'auth', 'restart', 'module', 'paper', 'attempt'].forEach(function (key) {
             var value = String(params.get(key) || '').trim();
             if (!value) return;
             target += (target.indexOf('?') === -1 ? '?' : '&') + key + '=' + encodeURIComponent(value);
@@ -24,7 +24,14 @@
         }
 
         function openFreeMock() {
-          var nextTarget = 'ielts-academic.html?bypass=1&module=' + module;
+          var paper = String(params.get('paper') || '1').replace(/[^0-9]/g, '') || '1';
+          var attempt = String(params.get('attempt') || 'initial').toLowerCase() === 'retake' ? 'retake' : 'initial';
+          try {
+            window.localStorage.setItem('ieltsTestMode', 'free');
+            window.localStorage.setItem('ieltsMockPaper', paper);
+            window.localStorage.setItem('ieltsTestAttemptType', attempt);
+          } catch (_) {}
+          var nextTarget = 'ielts-listening.html?bypass=1&module=' + module + '&paper=' + paper + '&attempt=' + attempt;
           window.location.replace(withForwardParams('free-mock-confirm.html?bypass=1&next=' + encodeURIComponent(nextTarget)));
         }
 
@@ -61,10 +68,16 @@
           return;
         }
 
+        var statusRequestController = typeof AbortController === 'function' ? new AbortController() : null;
+        var statusRequestTimeout = window.setTimeout(function () {
+          if (statusRequestController) statusRequestController.abort();
+        }, 1200);
+
         fetch('/api/users/free-mock-status', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(auth),
+          signal: statusRequestController ? statusRequestController.signal : undefined,
         })
           .then(function (response) {
             return response.json().catch(function () { return {}; }).then(function (data) {
@@ -82,6 +95,9 @@
           .catch(function () {
             // Submission endpoints remain authoritative if this availability check cannot be reached.
             openFreeMock();
+          })
+          .finally(function () {
+            window.clearTimeout(statusRequestTimeout);
           });
       })();
     </script>

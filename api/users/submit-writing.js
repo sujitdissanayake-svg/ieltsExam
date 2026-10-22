@@ -283,6 +283,8 @@ module.exports = async function handler(req, res) {
   const moduleType = normalizeSpaces(body.moduleType || '').toLowerCase() === 'general' ? 'general' : 'academic';
   const attemptId = normalizeSpaces(body.attemptId || '').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 80);
   const testMode = store.normalizeTestMode(body.testMode || '') || 'mock';
+  const paper = Math.max(1, Math.min(10, Number.parseInt(body.paper, 10) || 1));
+  const attemptType = String(body.attemptType || '').trim().toLowerCase() === 'retake' ? 'retake' : 'initial';
   const deviceKey = store.normalizeDeviceKey(body.deviceKey || '');
 
   const task1Answer = String(body.task1Answer || '').slice(0, 12000);
@@ -365,6 +367,16 @@ module.exports = async function handler(req, res) {
       return;
     }
 
+    if (testMode === 'free') {
+      const claim = await store.claimFreeMockAttempt({ userId: user.id, attemptId, deviceKey });
+      if (!claim.claimed) {
+        sendJson(res, 403, {
+          error: 'Your one Free Mock Test has already been used. Please choose a paid mock test package, which includes a Speaking test.',
+        });
+        return;
+      }
+    }
+
     let aiPayload = null;
     let aiProvider = 'heuristic-fallback';
 
@@ -406,6 +418,8 @@ module.exports = async function handler(req, res) {
         },
         attemptId,
         testMode,
+        paper,
+        attemptType,
         deviceKey,
         submittedAt: submittedAtIso,
         releaseAt: releaseAtIso,

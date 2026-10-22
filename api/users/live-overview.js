@@ -221,6 +221,8 @@ module.exports = async function handler(req, res) {
           method: payment.method,
           status: payment.status,
           package: payment && payment.meta && typeof payment.meta === 'object' ? String(payment.meta.package || '') : '',
+          paper: payment && payment.meta && typeof payment.meta === 'object' ? Number(payment.meta.paper) || 0 : 0,
+          orderId: payment && payment.meta && typeof payment.meta === 'object' ? String(payment.meta.payhereOrderId || '') : '',
           verified: isVerifiedPaidPayment(payment),
         })),
         results: portalVisibleResults.map((result) => ({
@@ -231,6 +233,8 @@ module.exports = async function handler(req, res) {
           releaseAt: result.meta && typeof result.meta === 'object' ? (result.meta.releaseAt || '') : '',
           testMode: result.meta && typeof result.meta === 'object' ? (result.meta.testMode || '') : '',
           attemptId: result.meta && typeof result.meta === 'object' ? (result.meta.attemptId || '') : '',
+          paper: result.meta && typeof result.meta === 'object' ? (result.meta.paper || '') : '',
+          attemptType: result.meta && typeof result.meta === 'object' ? (result.meta.attemptType || '') : '',
           updatedAt: result.updatedAt,
           createdAt: result.createdAt,
         })),

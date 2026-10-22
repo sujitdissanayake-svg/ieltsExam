@@ -33,25 +33,32 @@
       </div>
     </main>
 
-    <script src="writing-score.js?v=20261013-1"></script>
+    <script src="writing-score.js?v=20261015-1"></script>
     <script>
       (function () {
-        // Clear the writing timer so a new run starts fresh.
-        try {
-          window.localStorage.removeItem('ieltsWritingSessionId');
-          window.localStorage.removeItem('ieltsWritingStartAt');
-          window.localStorage.removeItem('ieltsWritingPart1EndAt');
-          window.localStorage.removeItem('ieltsWritingEndAt');
-          window.localStorage.removeItem('ieltsWritingWarn45Shown');
-          window.localStorage.removeItem('ieltsWritingWarn40Shown');
-          window.localStorage.removeItem('ieltsWritingWarn15Shown');
-          window.localStorage.removeItem('ieltsWritingWarn5Shown');
-          window.localStorage.removeItem('ieltsWritingWarn1Shown');
-        } catch (_) {}
+        var statusEl = document.querySelector('.listening-ended-body p:last-child');
 
-        try {
-          window.sessionStorage.removeItem('ieltsWritingSessionId');
-        } catch (_) {}
+        function setStatus(message) {
+          if (statusEl) statusEl.textContent = message;
+        }
+
+        function clearWritingTimer() {
+          try {
+            window.localStorage.removeItem('ieltsWritingSessionId');
+            window.localStorage.removeItem('ieltsWritingStartAt');
+            window.localStorage.removeItem('ieltsWritingPart1EndAt');
+            window.localStorage.removeItem('ieltsWritingEndAt');
+            window.localStorage.removeItem('ieltsWritingWarn45Shown');
+            window.localStorage.removeItem('ieltsWritingWarn40Shown');
+            window.localStorage.removeItem('ieltsWritingWarn15Shown');
+            window.localStorage.removeItem('ieltsWritingWarn5Shown');
+            window.localStorage.removeItem('ieltsWritingWarn1Shown');
+          } catch (_) {}
+
+          try {
+            window.sessionStorage.removeItem('ieltsWritingSessionId');
+          } catch (_) {}
+        }
 
         function readValue(key) {
           try {
@@ -103,8 +110,6 @@
           window.location.href = target;
         };
 
-        var fallbackTimeout = window.setTimeout(goToSpeaking, 7000);
-
         var submitWritingResult = function () {
           try {
             if (window.__ieltsWritingScore && typeof window.__ieltsWritingScore.submitWritingResult === 'function') {
@@ -115,30 +120,36 @@
           return Promise.resolve({ ok: false, skipped: true });
         };
 
-        submitWritingResult()
-          .then(function (payload) {
+        function retrySubmission(message) {
+          setStatus(message + ' Retrying in 5 seconds...');
+          window.setTimeout(submitAndContinue, 5000);
+        }
+
+        function submitAndContinue() {
+          submitWritingResult()
+            .then(function (payload) {
             var result = payload && typeof payload === 'object' ? payload : {};
             var freeMockAttempt = result.freeMockAttempt && typeof result.freeMockAttempt === 'object' ? result.freeMockAttempt : null;
             var shouldRedirect = !!(result.redirectToPackages || (freeMockAttempt && freeMockAttempt.redirectToPackages));
             if (shouldRedirect) {
               var redirectPath = String(result.redirectPath || (freeMockAttempt && freeMockAttempt.redirectPath) || '/packages.html').trim();
               window.location.href = redirectPath;
-              return false;
+              return;
             }
-            return true;
+            if (!result.ok) {
+              retrySubmission(result.error || 'Writing result could not be saved.');
+              return;
+            }
+            clearWritingTimer();
+            setStatus('Writing answers saved. Continuing...');
+            window.setTimeout(goToSpeaking, 1000);
           })
           .catch(function () {
-            return true;
-          })
-          .then(function (shouldContinue) {
-            if (shouldContinue === false) return;
-            window.setTimeout(function () {
-              try {
-                window.clearTimeout(fallbackTimeout);
-              } catch (_) {}
-              goToSpeaking();
-            }, 1000);
+            retrySubmission('Writing result could not be saved.');
           });
+        }
+
+        submitAndContinue();
       })();
     </script>
   </body>

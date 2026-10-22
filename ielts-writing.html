@@ -72,13 +72,48 @@
           return /\.html$/i.test(window.location.pathname || '');
         }
 
+        function normalizeContextToken(value, fallback) {
+          var raw = String(value == null ? '' : value).trim().toLowerCase();
+          if (!raw) return String(fallback || '').trim().toLowerCase();
+          return raw.replace(/[^a-z0-9_-]/g, '');
+        }
+
+        function getWritingStorageSuffix() {
+          var params = new URLSearchParams(window.location.search || '');
+          var moduleType = normalizeContextToken(
+            params.get('module') || window.localStorage.getItem('ieltsExamModule') || window.localStorage.getItem('ieltsModuleType') || 'academic',
+            'academic'
+          );
+          var packageName = normalizeContextToken(
+            params.get('package') || window.localStorage.getItem('ieltsMockPackage') || 'free',
+            'free'
+          );
+          var paperNumber = normalizeContextToken(
+            params.get('paper') || window.localStorage.getItem('ieltsMockPaper') || '0',
+            '0'
+          );
+          return moduleType + '__' + packageName + '__p' + paperNumber;
+        }
+
         function startWritingTimer() {
           try {
             var startAt = Date.now();
             var sessionId = String(startAt) + '-' + String(Math.random()).slice(2);
+            var storageSuffix = getWritingStorageSuffix();
             window.localStorage.removeItem('ieltsWritingResultSubmittedV1');
             window.localStorage.removeItem('ieltsWritingAttemptId');
             window.localStorage.removeItem('ieltsWritingAnswersV1');
+            window.localStorage.removeItem('ieltsWritingResultSubmittedV1__' + storageSuffix);
+            window.localStorage.removeItem('ieltsWritingAttemptId__' + storageSuffix);
+            var testMode = String(
+              window.localStorage.getItem('ieltsTestMode')
+              || window.sessionStorage.getItem('ieltsTestMode')
+              || ''
+            ).trim().toLowerCase();
+            if (testMode !== 'free') {
+              window.localStorage.removeItem('ieltsMockAttemptId__' + storageSuffix);
+            }
+            window.localStorage.removeItem('ieltsWritingAnswersV1__' + storageSuffix);
             window.sessionStorage.setItem('ieltsWritingSessionId', sessionId);
             window.localStorage.setItem('ieltsWritingSessionId', sessionId);
             window.localStorage.setItem('ieltsWritingStartAt', String(startAt));

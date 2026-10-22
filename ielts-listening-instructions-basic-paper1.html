@@ -6,6 +6,7 @@
     <title>IELTS Listening</title>
     <link rel="stylesheet" href="styles.css?v=20260309-4" />
     <script src="ielts-flow-guard.js?v=20260310-2" defer></script>
+    <script src="listening-basic-paper1-score.js?v=20261014-2" defer></script>
   </head>
   <body class="listening-soundcheck listening-instructions">
     <header class="academic-topbar" aria-label="IELTS top bar">
@@ -233,6 +234,10 @@
           if (autoStartTimerId) window.clearTimeout(autoStartTimerId);
           if (countdownTimerId) window.clearInterval(countdownTimerId);
 
+          if (window.IELTSBasicPaper1ListeningScore) {
+            window.IELTSBasicPaper1ListeningScore.startNewAttempt();
+          }
+
           var target = resolveStartTarget();
           try {
             window.location.replace(target);
@@ -276,4 +281,3 @@
     </script>
   </body>
 </html>
-

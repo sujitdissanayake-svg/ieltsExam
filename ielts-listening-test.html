@@ -33,6 +33,14 @@
           </div>
         </div>
 
+        <div class="listening-topbar-timer" aria-label="Time remaining">
+          <span class="sr-only">Time remaining:</span>
+          <span class="listening-timerIcon" aria-hidden="true">
+            <img src="assets/clock%20-reading-transparent.png" alt="" />
+          </span>
+          <span id="listening-timer" class="listening-timer-value" aria-live="polite">24:00</span>
+        </div>
+
         <div class="listening-topbar-right" aria-label="Header actions">
           <div class="academic-topbar-partners" aria-label="IELTS partners">
             <img class="academic-topbar-partner" src="assets/british-council-trim-no-official.png?v=20260226" alt="British Council" loading="lazy" />
@@ -172,7 +180,7 @@
     </header>
 
     <audio id="listeningAudio" preload="auto" playsinline>
-      <source src="assets/Listening%201-%20Free%20Mock%20Test.mp3" type="audio/mpeg" />
+      <source src="assets/Free%20Mock%20Test%20Audio%20File%20Final.mp3" type="audio/mpeg" />
     </audio>
 
     <main class="listening-test-page listening-test-page--wide listening-test-page--withBottomBar" aria-label="IELTS Listening test">
@@ -1302,18 +1310,10 @@
             listeningAudio.addEventListener(
               'ended',
               function () {
-                // Mark as complete and navigate to the end screen.
+                // The test timer allows the final seven seconds after this audio ends.
                 try {
                   setStoredTime(0);
                 } catch (_) {}
-
-                try {
-                  window.location.href = 'ielts-listening-ended.html';
-                } catch (_) {
-                  try {
-                    window.location.assign('ielts-listening-ended.html');
-                  } catch (_) {}
-                }
               },
               { once: true }
             );
@@ -2045,6 +2045,51 @@
           })(paperBlanks[i]);
         }
 
+        function readPortalValue(key) {
+          try {
+            var localValue = String(window.localStorage.getItem(key) || '').trim();
+            if (localValue) return localValue;
+          } catch (_) {}
+          try {
+            return String(window.sessionStorage.getItem(key) || '').trim();
+          } catch (_) {
+            return '';
+          }
+        }
+
+        function getListeningAttemptContext() {
+          var params = new URLSearchParams(window.location.search || '');
+          var moduleType = String(params.get('module') || readPortalValue('ieltsExamModule') || readPortalValue('ieltsModuleType') || 'academic')
+            .trim()
+            .toLowerCase()
+            .replace(/[^a-z0-9_-]/g, '');
+          var packageName = String(params.get('package') || readPortalValue('ieltsMockPackage') || 'free')
+            .trim()
+            .toLowerCase()
+            .replace(/[^a-z0-9_-]/g, '');
+          var paperNumber = String(params.get('paper') || readPortalValue('ieltsMockPaper') || '0')
+            .trim()
+            .toLowerCase()
+            .replace(/[^a-z0-9_-]/g, '');
+          return (moduleType || 'academic') + '__' + (packageName || 'free') + '__p' + (paperNumber || '0');
+        }
+
+        function getListeningAttemptId() {
+          var key = 'ieltsListeningAttemptId__' + getListeningAttemptContext();
+          var existing = readPortalValue(key);
+          if (existing) return existing;
+
+          var created = String(Date.now()) + '-' + Math.random().toString(36).slice(2, 10);
+          try {
+            window.localStorage.setItem(key, created);
+          } catch (_) {}
+          return created;
+        }
+
+        function getListeningAnswerKey(questionNumber) {
+          return 'ieltsListeningAnswerV2__' + getListeningAttemptContext() + '__' + getListeningAttemptId() + '__q' + questionNumber;
+        }
+
         function persistListeningAnswer(input) {
           if (!input) return;
           var q = String(input.getAttribute('data-q') || '').trim();
@@ -2052,7 +2097,7 @@
           if (String(input.type || '').toLowerCase() === 'radio' && !input.checked) return;
 
           try {
-            window.localStorage.setItem('ieltsListeningAnswer:q' + q, String(input.value || '').trim());
+            window.localStorage.setItem(getListeningAnswerKey(q), String(input.value || '').trim());
           } catch (_) {}
         }
 
@@ -2623,9 +2668,17 @@
           }
         } catch (_) {}
 
-        var totalSeconds = 30 * 60;
-        var start = Date.now();
+        var totalSeconds = 24 * 60;
+        var timerStorageKey = 'ieltsListeningStartedAt__' + getListeningAttemptContext();
+        var storedStart = Number(readPortalValue(timerStorageKey));
+        var start = Number.isFinite(storedStart) && storedStart > 0 ? storedStart : Date.now();
         var timerEl = document.getElementById('listening-timer');
+        var hasFinished = false;
+
+        try {
+          window.localStorage.setItem(timerStorageKey, String(start));
+          window.sessionStorage.setItem(timerStorageKey, String(start));
+        } catch (_) {}
 
         function format(seconds) {
           var s = Math.max(0, Math.floor(seconds));
@@ -2640,6 +2693,9 @@
           if (timerEl) timerEl.textContent = format(remaining);
           if (remaining <= 0) {
             window.clearInterval(interval);
+            if (hasFinished) return;
+            hasFinished = true;
+            window.location.replace('ielts-listening-ended.html');
           }
         }
 

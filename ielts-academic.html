@@ -109,6 +109,9 @@
             window.sessionStorage.setItem('ieltsModuleType', moduleType);
             window.localStorage.setItem('ieltsTestMode', testMode);
             window.sessionStorage.setItem('ieltsTestMode', testMode);
+            var attemptType = String(params.get('attempt') || 'initial').trim().toLowerCase() === 'retake' ? 'retake' : 'initial';
+            window.localStorage.setItem('ieltsTestAttemptType', attemptType);
+            window.sessionStorage.setItem('ieltsTestAttemptType', attemptType);
 
             if (testMode === 'mock' && packageName) {
               window.localStorage.setItem('ieltsMockPackage', packageName);
