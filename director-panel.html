@@ -1037,6 +1037,84 @@
         font-size: 0.78rem;
       }
 
+      .panel2-sessions-card {
+        border: 1px solid #d9e2ef;
+        border-radius: 14px;
+        background: #ffffff;
+        box-shadow: 0 14px 30px rgba(24, 38, 60, 0.08);
+        padding: 16px;
+      }
+
+      .panel2-sessions-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      .panel2-sessions-kicker {
+        margin: 0;
+        color: #9d7e3f;
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .panel2-sessions-title {
+        margin: 6px 0 0;
+        color: #132238;
+        font-size: 1.4rem;
+        font-weight: 800;
+      }
+
+      .panel2-sessions-copy,
+      .panel2-sessions-note {
+        margin: 8px 0 0;
+        color: #5d6b81;
+        font-size: 0.9rem;
+      }
+
+      .panel2-sessions-note.error {
+        color: #b91c1c;
+      }
+
+      .panel2-session-examiner {
+        margin-top: 16px;
+        overflow: hidden;
+        border: 1px solid #e0e8f2;
+        border-radius: 12px;
+      }
+
+      .panel2-session-examiner-heading {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 14px;
+        background: #f7f9fd;
+      }
+
+      .panel2-session-examiner-heading strong {
+        color: #132238;
+      }
+
+      .panel2-session-examiner-heading span {
+        color: #5d6b81;
+        font-size: 0.82rem;
+      }
+
+      .panel2-session-status {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 999px;
+        background: #eef4ff;
+        color: #24518f;
+        font-size: 0.75rem;
+        font-weight: 800;
+        text-transform: capitalize;
+      }
+
       .panel2-examiner-reset-btn {
         padding: 6px 10px;
         font-size: 0.78rem;
@@ -1328,7 +1406,20 @@
                 <div id="panel2-examiner-list" class="panel2-speaking-list"></div>
               </section>
             </section>
-            <section id="sessions-panel" class="panel2-panel" aria-label="Speaking Slots panel"><div class="panel2-empty-card">Speaking Slots section is ready for content.</div></section>
+            <section id="sessions-panel" class="panel2-panel" aria-label="Speaking Slots panel">
+              <section class="panel2-sessions-card" aria-labelledby="panel2-sessions-title">
+                <div class="panel2-sessions-header">
+                  <div>
+                    <p class="panel2-sessions-kicker">Speaking Slots</p>
+                    <h2 id="panel2-sessions-title" class="panel2-sessions-title">Examiner availability</h2>
+                    <p class="panel2-sessions-copy">Slots created in each examiner portal appear here and are grouped by examiner.</p>
+                  </div>
+                  <button id="panel2-sessions-refresh-btn" class="panel2-btn" type="button">Refresh slots</button>
+                </div>
+                <p id="panel2-sessions-note" class="panel2-sessions-note" aria-live="polite"></p>
+                <div id="panel2-sessions-content"></div>
+              </section>
+            </section>
             <section id="results-panel" class="panel2-panel" aria-label="Results panel">
               <section class="panel2-results-card" aria-label="Results review panel">
                 <p class="panel2-results-kicker">Results</p>
@@ -1523,6 +1614,9 @@
         var examinerCount = document.getElementById('panel2-examiner-count');
         var examinerList = document.getElementById('panel2-examiner-list');
         var speakingNote = document.getElementById('panel2-speaking-note');
+        var sessionsContent = document.getElementById('panel2-sessions-content');
+        var sessionsNote = document.getElementById('panel2-sessions-note');
+        var sessionsRefreshBtn = document.getElementById('panel2-sessions-refresh-btn');
         var candidateSelectAllCheckbox = document.getElementById('panel2-select-all-checkbox');
         var candidateSelectAllBtn = document.getElementById('panel2-select-all-btn');
         var candidateClearSelectionBtn = document.getElementById('panel2-clear-selection-btn');
@@ -1540,6 +1634,7 @@
         var performanceTimer = null;
         var resultsTimer = null;
         var speakingTimer = null;
+        var sessionsTimer = null;
         var activePanelId = 'overview-panel';
         var candidateRowsCache = [];
         var selectedCandidateIds = {};
@@ -1816,11 +1911,13 @@
           if (performanceTimer) window.clearInterval(performanceTimer);
           if (resultsTimer) window.clearInterval(resultsTimer);
           if (speakingTimer) window.clearInterval(speakingTimer);
+          if (sessionsTimer) window.clearInterval(sessionsTimer);
           overviewTimer = null;
           candidatesTimer = null;
           performanceTimer = null;
           resultsTimer = null;
           speakingTimer = null;
+          sessionsTimer = null;
           stopInactivityWatcher();
         }
 
@@ -1840,6 +1937,7 @@
           if (performanceBand) performanceBand.innerHTML = '';
           if (resultReviewContent) resultReviewContent.innerHTML = '';
           if (examinerList) examinerList.innerHTML = '';
+          if (sessionsContent) sessionsContent.innerHTML = '';
         }
 
         function ensureDashboardStarted() {
@@ -1855,6 +1953,7 @@
           startPerformanceAutoRefresh();
           startResultsAutoRefresh();
           startSpeakingAutoRefresh();
+          startSessionsAutoRefresh();
           dashboardStarted = true;
           startInactivityWatcher();
         }
@@ -1930,6 +2029,81 @@
             });
           }).catch(function (error) {
             throw mapApiError(error);
+          });
+        }
+
+        function setSessionsNote(message, mode) {
+          if (!sessionsNote) return;
+          sessionsNote.textContent = String(message || '');
+          sessionsNote.className = mode === 'error' ? 'panel2-sessions-note error' : 'panel2-sessions-note';
+        }
+
+        function renderSpeakingSessions(slots) {
+          if (!sessionsContent) return;
+          if (!slots.length) {
+          sessionsContent.innerHTML = '<div class="panel2-empty-card">No speaking slots have been created by examiners yet.</div>';
+          return;
+          }
+
+          var groups = {};
+          slots.forEach(function (slot) {
+          var examinerId = String(slot && slot.examinerId || '').trim();
+          var examinerEmail = String(slot && slot.examinerEmail || '').trim();
+          var key = examinerId || examinerEmail || 'unassigned';
+          if (!groups[key]) {
+            groups[key] = {
+              name: String(slot && slot.examinerName || '').trim() || 'Unnamed examiner',
+              email: examinerEmail,
+              slots: [],
+            };
+          }
+          groups[key].slots.push(slot);
+          });
+
+          sessionsContent.innerHTML = Object.keys(groups)
+          .map(function (key) { return groups[key]; })
+          .sort(function (left, right) { return left.name.localeCompare(right.name); })
+          .map(function (group) {
+            var rows = group.slots
+              .slice()
+              .sort(function (left, right) { return String(left.startTs || '').localeCompare(String(right.startTs || '')); })
+              .map(function (slot) {
+                return '<tr>' +
+                  '<td>' + escapeHtml(formatDate(slot.startTs)) + '</td>' +
+                  '<td>' + escapeHtml(formatDate(slot.endTs)) + '</td>' +
+                  '<td>' + escapeHtml(String(slot.durationMinutes || '—')) + ' min</td>' +
+                  '<td><span class="panel2-session-status">' + escapeHtml(slot.status || 'pending') + '</span></td>' +
+                  '<td>' + escapeHtml(slot.sessionNote || '—') + '</td>' +
+                '</tr>';
+              }).join('');
+
+            return '<section class="panel2-session-examiner">' +
+              '<div class="panel2-session-examiner-heading"><div><strong>' + escapeHtml(group.name) + '</strong><span> ' + escapeHtml(group.email || 'No email recorded') + '</span></div><span>' + String(group.slots.length) + ' slot' + (group.slots.length === 1 ? '' : 's') + '</span></div>' +
+              '<div class="panel2-candidates-table-wrap"><table class="panel2-table" aria-label="Speaking slots for ' + escapeHtml(group.name) + '"><thead><tr><th>Start</th><th>End</th><th>Duration</th><th>Status</th><th>Examiner note</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+            '</section>';
+          }).join('');
+        }
+
+        function loadSpeakingSessions() {
+          var token = getToken();
+          if (!token) {
+          setSessionsNote('Admin login required to load speaking slots.', 'error');
+          return Promise.resolve();
+          }
+
+          setSessionsNote('Loading examiner speaking slots...', 'info');
+          return getJson('/api/admin/speaking-sessions?limit=500', token)
+          .then(function (result) {
+            if (!result.ok) {
+              throw new Error((result.data && (result.data.error || result.data.message)) || 'Unable to load speaking slots.');
+            }
+            var slots = Array.isArray(result.data && result.data.slots) ? result.data.slots : [];
+            renderSpeakingSessions(slots);
+            setSessionsNote(String(slots.length) + ' speaking slot' + (slots.length === 1 ? '' : 's') + ' refreshed.', 'info');
+          })
+          .catch(function (error) {
+            renderSpeakingSessions([]);
+            setSessionsNote(error && error.message ? error.message : 'Unable to load speaking slots.', 'error');
           });
         }
 
@@ -3035,6 +3209,16 @@
           }, 30000);
         }
 
+        function startSessionsAutoRefresh() {
+          if (sessionsTimer) {
+            window.clearInterval(sessionsTimer);
+          }
+          sessionsTimer = window.setInterval(function () {
+            if (document.hidden || activePanelId !== 'sessions-panel') return;
+            loadSpeakingSessions();
+          }, 30000);
+        }
+
         function setActivePanel(panelId) {
           activePanelId = panelId || 'overview-panel';
           for (var i = 0; i < navItems.length; i++) {
@@ -3065,6 +3249,9 @@
           }
           if (panelId === 'speaking-panel') {
             loadSpeaking();
+          }
+          if (panelId === 'sessions-panel') {
+            loadSpeakingSessions();
           }
         }
 
@@ -3126,6 +3313,15 @@
             var panelId = this.getAttribute('data-panel') || '';
             if (!panelId) return;
             setActivePanel(panelId);
+          });
+        }
+
+        if (sessionsRefreshBtn) {
+          sessionsRefreshBtn.addEventListener('click', function () {
+            sessionsRefreshBtn.disabled = true;
+            loadSpeakingSessions().finally(function () {
+              sessionsRefreshBtn.disabled = false;
+            });
           });
         }
 
