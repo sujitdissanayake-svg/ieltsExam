@@ -57,6 +57,51 @@ module.exports = async function handler(req, res) {
     return;
   }
 
+  if (String(body.action || '').trim() === 'approve-writing') {
+    const resultId = String(body.id || '').trim();
+    const approvedBandScore = Number(body.bandScore);
+    if (!resultId || !Number.isFinite(approvedBandScore) || approvedBandScore < 0 || approvedBandScore > 9 || Math.round(approvedBandScore * 2) !== approvedBandScore * 2) {
+      sendJson(res, 400, { error: 'A Writing band from 0.0 to 9.0 in 0.5 increments is required.' });
+      return;
+    }
+
+    try {
+      const writingResults = await store.listResults({ userId, module: 'writing', limit: 200 });
+      const existing = writingResults.find((result) => String(result.id || '') === resultId);
+      if (!existing) {
+        sendJson(res, 404, { error: 'Writing result not found.' });
+        return;
+      }
+
+      const now = new Date().toISOString();
+      const result = await store.upsertResult({
+        id: existing.id,
+        userId: existing.userId,
+        testName: existing.testName,
+        module: existing.module,
+        source: 'admin-moderated',
+        bandScore: approvedBandScore,
+        rawScore: existing.rawScore,
+        maxScore: existing.maxScore,
+        status: 'published',
+        notes: existing.notes,
+        artifactUrl: existing.artifactUrl,
+        meta: {
+          ...(existing.meta && typeof existing.meta === 'object' ? existing.meta : {}),
+          aiBandScore: existing.bandScore,
+          approvedBandScore,
+          moderationStatus: 'approved',
+          moderatedAt: now,
+          releasedAt: now,
+        },
+      });
+      sendJson(res, 200, { ok: true, result });
+    } catch (err) {
+      sendJson(res, 500, { error: err && err.message ? err.message : 'Unable to approve Writing result.' });
+    }
+    return;
+  }
+
   if (!moduleName) {
     sendJson(res, 400, { error: 'Module is required.' });
     return;

@@ -412,6 +412,14 @@
     return 'mock';
   }
 
+  function readTestPaper() {
+    return normalizeSpaces(safeGetStorage('ieltsMockPaper')) || '1';
+  }
+
+  function readAttemptType() {
+    return normalizeSpaces(safeGetStorage('ieltsTestAttemptType')).toLowerCase() === 'retake' ? 'retake' : 'initial';
+  }
+
   function readDeviceKey() {
     var storageKey = 'ieltsDeviceKeyV1';
     var existing = normalizeSpaces(safeGetStorage(storageKey));
@@ -483,6 +491,8 @@
         moduleType: snapshot.moduleType,
         attemptId: snapshot.attemptId,
         testMode: readTestMode(),
+        paper: readTestPaper(),
+        attemptType: readAttemptType(),
         deviceKey: readDeviceKey()
       })
     })

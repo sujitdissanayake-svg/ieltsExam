@@ -60,6 +60,9 @@ function isScoreReleasedForPortal(result, nowMs) {
   const moduleName = String((result && result.module) || '').trim().toLowerCase();
   if (moduleName !== 'writing') return true;
 
+  const meta = result && result.meta && typeof result.meta === 'object' ? result.meta : {};
+  if (String(meta.moderationStatus || '').trim().toLowerCase() === 'approved') return true;
+
   const releaseAtMs = resolveWritingReleaseAt(result);
   if (!Number.isFinite(releaseAtMs)) return false;
   return nowMs >= releaseAtMs;
@@ -126,16 +129,38 @@ module.exports = async function handler(req, res) {
       return;
     }
 
-    const [payments, results, activities, speakingBookings] = await Promise.all([
-      store.listPayments({ limit: 500 }),
+    const [payments, results, activities, loadedSpeakingBookings] = await Promise.all([
+      store.listPayments({ userId: user.id, limit: 100 }),
       store.listResults({ userId: user.id, limit: 200 }),
       store.listActivities({ userId: user.id, limit: 50 }),
       store.listSpeakingBookingsByUser({ userId: user.id, limit: 200 }),
     ]);
 
-    const studentPayments = payments.filter((payment) => String(payment.userId || '') === String(user.id));
-    const studentResults = results.filter((result) => String(result.userId || '') === String(user.id));
     const nowMs = Date.now();
+    const overdueBookingIds = new Set(
+      loadedSpeakingBookings
+        .filter((booking) => {
+          const endMs = Date.parse(String(booking && booking.endTs || ''));
+          return String(booking && booking.slotStatus || '').toLowerCase() === 'booked' &&
+            Number.isFinite(endMs) &&
+            endMs < nowMs;
+        })
+        .map((booking) => String(booking.slotId || '').trim())
+        .filter(Boolean)
+    );
+    if (overdueBookingIds.size > 0) {
+      await Promise.all(
+        Array.from(overdueBookingIds).map((slotId) => store.updateSpeakingSlot({ slotId, status: 'incomplete' }))
+      );
+    }
+    const speakingBookings = loadedSpeakingBookings.map((booking) => (
+      overdueBookingIds.has(String(booking && booking.slotId || '').trim())
+        ? { ...booking, slotStatus: 'incomplete' }
+        : booking
+    ));
+
+    const studentPayments = payments;
+    const studentResults = results.filter((result) => String(result.userId || '') === String(user.id));
     const writingPendingReleaseCount = studentResults.filter((result) => !isScoreReleasedForPortal(result, nowMs)).length;
     const portalVisibleResults = studentResults.map((result) => {
       const released = isScoreReleasedForPortal(result, nowMs);
@@ -174,12 +199,19 @@ module.exports = async function handler(req, res) {
 
     const verifiedPaidPayments = studentPayments.filter(isVerifiedPaidPayment);
     const latestPaidPackage = resolveLatestPaidPackage(verifiedPaidPayments);
-    const speakingSlotsAllocated = latestPaidPackage ? Number(SPEAKING_SLOTS_BY_PACKAGE[latestPaidPackage] || 0) : 0;
+    const has01TestWriting = studentResults.some((result) =>
+      String(result && result.module || '').trim().toLowerCase() === 'writing' &&
+      String(result && result.meta && result.meta.testMode || '').trim().toLowerCase() === 'free'
+    );
+    const speakingPackage = latestPaidPackage || (has01TestWriting ? '01 Test' : '');
+    const speakingSlotsAllocated = latestPaidPackage
+      ? Number(SPEAKING_SLOTS_BY_PACKAGE[latestPaidPackage] || 0)
+      : (has01TestWriting ? 1 : 0);
     const speakingSlotsBooked = speakingBookings.length;
     const speakingSlotsCompleted = speakingBookings.filter((booking) => String((booking && booking.slotStatus) || '').toLowerCase() === 'completed').length;
     const speakingSlotsRemaining = Math.max(0, speakingSlotsAllocated - speakingSlotsCompleted);
     const paidMockTestsPurchased = verifiedPaidPayments.length;
-    const completedMockTests = portalVisibleResults.filter((result) => result.bandScore != null).length;
+    const completedMockTests = studentResults.length;
     const notices = [];
 
     if (!paidMockTestsPurchased) notices.push('No paid mock tests recorded yet.');
@@ -205,7 +237,7 @@ module.exports = async function handler(req, res) {
           paidMockTestsPurchased,
           completedMockTests,
           remainingMockTests: Math.max(0, paidMockTestsPurchased - completedMockTests),
-          speakingPackage: latestPaidPackage || '',
+          speakingPackage,
           speakingSlotsAllocated,
           speakingSlotsBooked,
           speakingSlotsCompleted,
@@ -222,6 +254,7 @@ module.exports = async function handler(req, res) {
           status: payment.status,
           package: payment && payment.meta && typeof payment.meta === 'object' ? String(payment.meta.package || '') : '',
           paper: payment && payment.meta && typeof payment.meta === 'object' ? Number(payment.meta.paper) || 0 : 0,
+          purchaseType: payment && payment.meta && typeof payment.meta === 'object' ? String(payment.meta.purchaseType || 'test') : 'test',
           orderId: payment && payment.meta && typeof payment.meta === 'object' ? String(payment.meta.payhereOrderId || '') : '',
           verified: isVerifiedPaidPayment(payment),
         })),

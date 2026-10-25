@@ -28,6 +28,7 @@ const mem = global.__ieltsMemStore || {
   activities: [],
   availability: [],
   speakingBookings: [],
+  testTokens: [],
   nextCandidateNumber: CANDIDATE_NUMBER_START,
 };
 if (!(mem.usersById instanceof Map)) mem.usersById = new Map();
@@ -39,6 +40,7 @@ if (!Array.isArray(mem.freeMockAttempts)) mem.freeMockAttempts = [];
 if (!Array.isArray(mem.activities)) mem.activities = [];
 if (!Array.isArray(mem.availability)) mem.availability = [];
 if (!Array.isArray(mem.speakingBookings)) mem.speakingBookings = [];
+if (!Array.isArray(mem.testTokens)) mem.testTokens = [];
 if (!Number.isFinite(Number(mem.nextCandidateNumber))) mem.nextCandidateNumber = CANDIDATE_NUMBER_START;
 if (Number(mem.nextCandidateNumber) < CANDIDATE_NUMBER_START) mem.nextCandidateNumber = CANDIDATE_NUMBER_START;
 mem.availability = mem.availability.map((slot) => ({
@@ -202,6 +204,7 @@ const ensureSchema = async () => {
       duration_minutes integer not null default 10,
       status text not null default 'pending',
       zoom_link text,
+      recording_link text,
       session_note text,
       admin_note text,
       approved_at timestamptz,
@@ -225,9 +228,25 @@ const ensureSchema = async () => {
     );
   `;
 
+  await sql`
+    create table if not exists test_tokens (
+      id text primary key,
+      code_hash text unique not null,
+      code_hint text not null,
+      batch_id text not null,
+      token_type text not null default 'test',
+      status text not null default 'active',
+      used_by_user_id text references users(id) on delete set null,
+      used_for_paper integer,
+      used_at timestamptz,
+      created_at timestamptz not null default now()
+    );
+  `;
+
   await sql`alter table examiner_availability add column if not exists duration_minutes integer not null default 10;`;
   await sql`alter table examiner_availability add column if not exists status text not null default 'pending';`;
   await sql`alter table examiner_availability add column if not exists zoom_link text;`;
+  await sql`alter table examiner_availability add column if not exists recording_link text;`;
   await sql`alter table examiner_availability add column if not exists session_note text;`;
   await sql`alter table examiner_availability add column if not exists admin_note text;`;
   await sql`alter table examiner_availability add column if not exists approved_at timestamptz;`;
@@ -236,6 +255,7 @@ const ensureSchema = async () => {
   await sql`alter table speaking_bookings add column if not exists booked_at timestamptz not null default now();`;
   await sql`alter table speaking_bookings add column if not exists meta jsonb;`;
   await sql`alter table speaking_bookings add column if not exists created_at timestamptz not null default now();`;
+  await sql`alter table test_tokens add column if not exists token_type text not null default 'test';`;
 
   schemaReady = true;
 };
@@ -773,19 +793,42 @@ const getMetrics = async () => {
   };
 };
 
-const listPayments = async ({ status = '', limit = 200 } = {}) => {
+const listPayments = async ({ status = '', userId = '', limit = 200 } = {}) => {
   const lim = Math.min(500, Math.max(1, Number(limit) || 200));
   const wantedStatus = String(status || '').trim().toLowerCase();
+  const wantedUserId = String(userId || '').trim();
 
   if (!hasPg) {
     return mem.payments
-      .filter((payment) => !wantedStatus || String(payment.status || '').toLowerCase() === wantedStatus)
+      .filter((payment) => (!wantedStatus || String(payment.status || '').toLowerCase() === wantedStatus) &&
+        (!wantedUserId || String(payment.userId || '') === wantedUserId))
       .sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)))
       .slice(0, lim);
   }
 
   await ensureSchema();
-  const result = wantedStatus
+  const result = wantedUserId && wantedStatus
+    ? await sql`
+        select p.id, p.user_id, p.amount, p.currency, p.status, p.method, p.meta, p.created_at,
+               u.name, u.email, u.whatsapp, u.candidate_number
+        from payments p
+        left join users u on u.id = p.user_id
+        where p.user_id = ${wantedUserId}
+          and lower(p.status) = ${wantedStatus}
+        order by p.created_at desc
+        limit ${lim};
+      `
+    : wantedUserId
+      ? await sql`
+          select p.id, p.user_id, p.amount, p.currency, p.status, p.method, p.meta, p.created_at,
+                 u.name, u.email, u.whatsapp, u.candidate_number
+          from payments p
+          left join users u on u.id = p.user_id
+          where p.user_id = ${wantedUserId}
+          order by p.created_at desc
+          limit ${lim};
+        `
+    : wantedStatus
     ? await sql`
         select p.id, p.user_id, p.amount, p.currency, p.status, p.method, p.meta, p.created_at,
                u.name, u.email, u.whatsapp, u.candidate_number
@@ -852,6 +895,340 @@ const createPayment = async ({ userId, amount, currency = 'LKR', status = 'paid'
     values (${record.id}, ${record.userId}, ${record.amount}, ${record.currency}, ${record.status}, ${record.method}, ${record.meta});
   `;
   return record;
+};
+
+const normalizeTestTokenCode = (value) => String(value || '').trim().toUpperCase().replace(/\s+/g, '');
+const hashTestTokenCode = (value) => crypto.createHash('sha256').update(normalizeTestTokenCode(value), 'utf8').digest('hex');
+
+const createTestTokens = async ({ quantity, tokenType = 'test' } = {}) => {
+  const count = Math.min(100, Math.max(1, Number.parseInt(String(quantity || ''), 10) || 0));
+  if (!count) throw new Error('Enter a quantity between 1 and 100.');
+  const normalizedTokenType = String(tokenType).trim().toLowerCase() === 'retake' ? 'retake' : 'test';
+
+  const batchId = makeId();
+  const createdAt = new Date().toISOString();
+  const tokens = [];
+
+  for (let index = 0; index < count; index += 1) {
+    const code = `IELTS-${normalizedTokenType === 'retake' ? 'RETAKE' : 'TEST'}-${crypto.randomBytes(8).toString('hex').toUpperCase()}`;
+    const record = {
+      id: makeId(),
+      codeHash: hashTestTokenCode(code),
+      codeHint: code.slice(-4),
+      batchId,
+      tokenType: normalizedTokenType,
+      status: 'active',
+      usedByUserId: '',
+      usedForPaper: 0,
+      usedAt: '',
+      createdAt,
+    };
+
+    if (!hasPg) {
+      mem.testTokens.push(record);
+    } else {
+      await ensureSchema();
+      await sql`
+        insert into test_tokens (id, code_hash, code_hint, batch_id, token_type, status)
+        values (${record.id}, ${record.codeHash}, ${record.codeHint}, ${record.batchId}, ${record.tokenType}, ${record.status});
+      `;
+    }
+
+    tokens.push({ code, ...record });
+  }
+
+  return { batchId, tokens };
+};
+
+const listTestTokens = async ({ limit = 100, tokenType = 'test' } = {}) => {
+  const lim = Math.min(500, Math.max(1, Number(limit) || 100));
+  const normalizedTokenType = String(tokenType).trim().toLowerCase() === 'retake' ? 'retake' : 'test';
+
+  if (!hasPg) {
+    return mem.testTokens
+      .filter((token) => String(token.tokenType || 'test').toLowerCase() === normalizedTokenType)
+      .slice()
+      .sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')))
+      .slice(0, lim)
+      .map((token) => ({
+        id: token.id,
+        codeHint: token.codeHint,
+        batchId: token.batchId,
+        status: token.status,
+        candidateNumber: Number((mem.usersById.get(String(token.usedByUserId || '')) || {}).candidateNumber) || 0,
+        usedForPaper: Number(token.usedForPaper) || 0,
+        usedAt: token.usedAt || '',
+        createdAt: token.createdAt,
+      }));
+  }
+
+  await ensureSchema();
+  const result = await sql`
+    select t.id, t.code_hint, t.batch_id, t.status, t.used_for_paper, t.used_at, t.created_at,
+           u.candidate_number
+    from test_tokens t
+    left join users u on u.id = t.used_by_user_id
+    where t.token_type = ${normalizedTokenType}
+    order by t.created_at desc
+    limit ${lim};
+  `;
+  return (result.rows || []).map((token) => ({
+    id: token.id,
+    codeHint: token.code_hint,
+    batchId: token.batch_id,
+    status: token.status,
+    candidateNumber: Number(token.candidate_number) || 0,
+    usedForPaper: Number(token.used_for_paper) || 0,
+    usedAt: token.used_at || '',
+    createdAt: token.created_at,
+  }));
+};
+
+const redeemTestToken = async ({ code, userId, paper } = {}) => {
+  const normalizedCode = normalizeTestTokenCode(code);
+  const normalizedUserId = String(userId || '').trim();
+  const normalizedPaper = Math.max(1, Math.min(10, Number(paper) || 0));
+  if (!normalizedCode || !normalizedUserId || !normalizedPaper) throw new Error('A valid token, learner, and test are required.');
+
+  const now = new Date().toISOString();
+  if (!hasPg) {
+    const token = mem.testTokens.find((item) => item.codeHash === hashTestTokenCode(normalizedCode) && String(item.tokenType || 'test').toLowerCase() === 'test' && item.status === 'active');
+    if (!token) return null;
+    token.status = 'used';
+    token.usedByUserId = normalizedUserId;
+    token.usedForPaper = normalizedPaper;
+    token.usedAt = now;
+    return { id: token.id, usedForPaper: normalizedPaper, usedAt: now };
+  }
+
+  await ensureSchema();
+  const result = await sql`
+    update test_tokens
+    set status = 'used',
+        used_by_user_id = ${normalizedUserId},
+        used_for_paper = ${normalizedPaper},
+        used_at = ${now}
+    where code_hash = ${hashTestTokenCode(normalizedCode)}
+      and token_type = 'test'
+      and status = 'active'
+    returning id, used_for_paper, used_at;
+  `;
+  const token = result.rows && result.rows[0] ? result.rows[0] : null;
+  if (!token) return null;
+  return {
+    id: token.id,
+    usedForPaper: Number(token.used_for_paper) || normalizedPaper,
+    usedAt: token.used_at || now,
+  };
+};
+
+const disableTestToken = async ({ id, tokenType = 'test' } = {}) => {
+  const tokenId = String(id || '').trim();
+  if (!tokenId) throw new Error('Token id is required.');
+  const normalizedTokenType = String(tokenType).trim().toLowerCase() === 'retake' ? 'retake' : 'test';
+
+  if (!hasPg) {
+    const token = mem.testTokens.find((item) => String(item.id || '') === tokenId && String(item.tokenType || 'test').toLowerCase() === normalizedTokenType && item.status === 'active');
+    if (!token) return null;
+    token.status = 'disabled';
+    return { id: token.id, status: token.status };
+  }
+
+  await ensureSchema();
+  const result = await sql`
+    update test_tokens
+    set status = 'disabled'
+    where id = ${tokenId}
+      and token_type = ${normalizedTokenType}
+      and status = 'active'
+    returning id, status;
+  `;
+  const token = result.rows && result.rows[0] ? result.rows[0] : null;
+  return token ? { id: token.id, status: token.status } : null;
+};
+
+const deleteTestTokens = async ({ tokenType = 'test' } = {}) => {
+  const normalizedTokenType = String(tokenType).trim().toLowerCase() === 'retake' ? 'retake' : 'test';
+  if (!hasPg) {
+    const before = mem.testTokens.length;
+    mem.testTokens = mem.testTokens.filter((token) => String(token.tokenType || 'test').toLowerCase() !== normalizedTokenType);
+    return before - mem.testTokens.length;
+  }
+
+  await ensureSchema();
+  const result = await sql`
+    delete from test_tokens
+    where token_type = ${normalizedTokenType}
+    returning id;
+  `;
+  return (result.rows || []).length;
+};
+
+const redeemTestTokenForBooking = async ({ code, userId, paper } = {}) => {
+  const normalizedCode = normalizeTestTokenCode(code);
+  const normalizedUserId = String(userId || '').trim();
+  const normalizedPaper = Math.max(1, Math.min(10, Number(paper) || 0));
+  if (!normalizedCode || !normalizedUserId || !normalizedPaper) throw new Error('A valid token, learner, and test are required.');
+
+  const now = new Date().toISOString();
+  const payment = {
+    id: makeId(),
+    userId: normalizedUserId,
+    amount: 1499,
+    currency: 'USD',
+    status: 'paid',
+    method: 'token',
+    meta: {
+      paper: normalizedPaper,
+      item: `IELTS Mock Test ${String(normalizedPaper).padStart(2, '0')}`,
+      amountFormat: 'usd_cents',
+      verified: true,
+    },
+    createdAt: now,
+  };
+
+  if (!hasPg) {
+    const alreadyBooked = mem.payments.some((item) => {
+      const meta = item && item.meta && typeof item.meta === 'object' ? item.meta : {};
+      return String(item.userId || '') === normalizedUserId && String(item.status || '').toLowerCase() === 'paid' && Number(meta.paper) === normalizedPaper;
+    });
+    const token = mem.testTokens.find((item) => item.codeHash === hashTestTokenCode(normalizedCode) && String(item.tokenType || 'test').toLowerCase() === 'test' && item.status === 'active');
+    if (alreadyBooked || !token) return null;
+    token.status = 'used';
+    token.usedByUserId = normalizedUserId;
+    token.usedForPaper = normalizedPaper;
+    token.usedAt = now;
+    payment.meta.tokenId = token.id;
+    const user = mem.usersById.get(normalizedUserId);
+    mem.payments.push({
+      ...payment,
+      name: user && user.name ? user.name : '',
+      email: user && user.email ? user.email : '',
+      whatsapp: user && user.whatsapp ? user.whatsapp : '',
+      candidateNumber: user && user.candidateNumber ? user.candidateNumber : 0,
+    });
+    return { token: { id: token.id, usedForPaper: normalizedPaper, usedAt: now }, payment };
+  }
+
+  await ensureSchema();
+  const result = await sql`
+    with redeemed_token as (
+      update test_tokens
+      set status = 'used',
+          used_by_user_id = ${normalizedUserId},
+          used_for_paper = ${normalizedPaper},
+          used_at = ${now}
+      where code_hash = ${hashTestTokenCode(normalizedCode)}
+        and token_type = 'test'
+        and status = 'active'
+        and not exists (
+          select 1
+          from payments
+          where user_id = ${normalizedUserId}
+            and lower(status) = 'paid'
+            and (meta ->> 'paper') = ${String(normalizedPaper)}
+        )
+      returning id, used_for_paper, used_at
+    ),
+    created_payment as (
+      insert into payments (id, user_id, amount, currency, status, method, meta)
+      select ${payment.id}, ${payment.userId}, ${payment.amount}, ${payment.currency}, ${payment.status}, ${payment.method},
+             ${payment.meta}::jsonb
+      from redeemed_token
+      returning id
+    )
+    select redeemed_token.id as token_id, redeemed_token.used_for_paper, redeemed_token.used_at, created_payment.id as payment_id
+    from redeemed_token
+    join created_payment on true;
+  `;
+  const row = result.rows && result.rows[0] ? result.rows[0] : null;
+  if (!row) return null;
+  payment.meta.tokenId = row.token_id;
+  return {
+    token: {
+      id: row.token_id,
+      usedForPaper: Number(row.used_for_paper) || normalizedPaper,
+      usedAt: row.used_at || now,
+    },
+    payment,
+  };
+};
+
+const redeemRetakeTokenForEntitlement = async ({ code, userId, paper } = {}) => {
+  const normalizedCode = normalizeTestTokenCode(code);
+  const normalizedUserId = String(userId || '').trim();
+  const normalizedPaper = Math.max(1, Math.min(10, Number(paper) || 0));
+  if (!normalizedCode || !normalizedUserId || !normalizedPaper) throw new Error('A valid retake token, learner, and test are required.');
+
+  const now = new Date().toISOString();
+  const payment = {
+    id: makeId(),
+    userId: normalizedUserId,
+    amount: 200,
+    currency: 'USD',
+    status: 'paid',
+    method: 'retake_token',
+    meta: {
+      paper: normalizedPaper,
+      item: `IELTS Mock Test ${String(normalizedPaper).padStart(2, '0')} Retake`,
+      purchaseType: 'retake',
+      includesSpeaking: false,
+      amountFormat: 'usd_cents',
+      verified: true,
+    },
+    createdAt: now,
+  };
+
+  if (!hasPg) {
+    const paidRetakes = mem.payments.filter((item) => {
+      const meta = item && item.meta && typeof item.meta === 'object' ? item.meta : {};
+      return String(item.userId || '') === normalizedUserId && String(item.status || '').toLowerCase() === 'paid' &&
+        Number(meta.paper) === normalizedPaper && String(meta.purchaseType || '').toLowerCase() === 'retake';
+    }).length;
+    const token = mem.testTokens.find((item) => item.codeHash === hashTestTokenCode(normalizedCode) &&
+      String(item.tokenType || 'test').toLowerCase() === 'retake' && item.status === 'active');
+    if (paidRetakes >= 5 || !token) return null;
+    token.status = 'used';
+    token.usedByUserId = normalizedUserId;
+    token.usedForPaper = normalizedPaper;
+    token.usedAt = now;
+    payment.meta.tokenId = token.id;
+    const user = mem.usersById.get(normalizedUserId);
+    mem.payments.push({ ...payment, name: user && user.name ? user.name : '', email: user && user.email ? user.email : '', whatsapp: user && user.whatsapp ? user.whatsapp : '', candidateNumber: user && user.candidateNumber ? user.candidateNumber : 0 });
+    return { token: { id: token.id, usedForPaper: normalizedPaper, usedAt: now }, payment };
+  }
+
+  await ensureSchema();
+  const result = await sql`
+    with redeemed_token as (
+      update test_tokens
+      set status = 'used', used_by_user_id = ${normalizedUserId}, used_for_paper = ${normalizedPaper}, used_at = ${now}
+      where code_hash = ${hashTestTokenCode(normalizedCode)}
+        and token_type = 'retake'
+        and status = 'active'
+        and (
+          select count(*)
+          from payments
+          where user_id = ${normalizedUserId}
+            and lower(status) = 'paid'
+            and (meta ->> 'paper') = ${String(normalizedPaper)}
+            and lower(coalesce(meta ->> 'purchaseType', '')) = 'retake'
+        ) < 5
+      returning id, used_for_paper, used_at
+    ),
+    created_payment as (
+      insert into payments (id, user_id, amount, currency, status, method, meta)
+      select ${payment.id}, ${payment.userId}, ${payment.amount}, ${payment.currency}, ${payment.status}, ${payment.method}, ${payment.meta}::jsonb
+      from redeemed_token
+      returning id
+    )
+    select redeemed_token.id as token_id, redeemed_token.used_for_paper, redeemed_token.used_at
+    from redeemed_token join created_payment on true;
+  `;
+  const row = result.rows && result.rows[0] ? result.rows[0] : null;
+  if (!row) return null;
+  payment.meta.tokenId = row.token_id;
+  return { token: { id: row.token_id, usedForPaper: Number(row.used_for_paper) || normalizedPaper, usedAt: row.used_at || now }, payment };
 };
 
 const findPaymentByPayHereOrderId = async (orderId) => {
@@ -1098,27 +1475,30 @@ const upsertResult = async ({ id = '', userId, testName = '', module, source = '
 
 const getAdminOverview = async () => {
   if (!hasPg) normalizeMemCandidateNumbers();
-  const users = await listUsers({ limit: 500, offset: 0 });
-  const students = users.filter((user) => String(user.role || '') === 'student');
-  const examiners = users.filter((user) => String(user.role || '') === 'examiner');
-  const payments = await listPayments({ limit: 500 });
-  const results = await listResults({ limit: 500 });
-  const speakingSlots = await listSpeakingSlots({ limit: 1000 });
-  const activities = hasPg
-    ? await ensureSchema().then(function () {
+  const activitiesPromise = hasPg
+    ? ensureSchema().then(function () {
         return normalizePgCandidateNumbers();
       }).then(function () {
         return sql`
-        select user_id, max(created_at) as created_at
-        from activity
-        group by user_id;
-      `;
+          select user_id, max(created_at) as created_at
+          from activity
+          group by user_id;
+        `;
       }).then(function (result) {
         return (result.rows || []).map(function (row) {
           return { userId: row.user_id, createdAt: row.created_at };
         });
       })
-    : mem.activities.slice();
+    : Promise.resolve(mem.activities.slice());
+  const [users, payments, results, speakingSlots, activities] = await Promise.all([
+    listUsers({ limit: 500, offset: 0 }),
+    listPayments({ limit: 500 }),
+    listResults({ limit: 500 }),
+    listSpeakingSlots({ limit: 1000 }),
+    activitiesPromise,
+  ]);
+  const students = users.filter((user) => String(user.role || '') === 'student');
+  const examiners = users.filter((user) => String(user.role || '') === 'examiner');
 
   const candidateRows = getCandidateProgressRows({ students, payments, results, activities });
 
@@ -1196,6 +1576,16 @@ const deleteExaminerByEmail = async (email) => {
   }
 
   await ensureSchema();
+  const examinerResult = await sql`
+    select id
+    from users
+    where email = ${e} and role = 'examiner'
+    limit 1;
+  `;
+  const examiner = examinerResult.rows && examinerResult.rows[0] ? examinerResult.rows[0] : null;
+  if (!examiner) return { deleted: 0 };
+
+  await sql`delete from examiner_availability where examiner_id = ${examiner.id};`;
   const result = await sql`
     delete from users
     where email = ${e} and role = 'examiner';
@@ -1205,7 +1595,7 @@ const deleteExaminerByEmail = async (email) => {
 
 const normalizeSpeakingStatus = (value) => {
   const status = String(value || '').trim().toLowerCase();
-  if (status === 'approved' || status === 'booked' || status === 'blocked' || status === 'pending' || status === 'completed') return status;
+  if (status === 'approved' || status === 'booked' || status === 'blocked' || status === 'pending' || status === 'completed' || status === 'incomplete') return status;
   return 'pending';
 };
 
@@ -1311,6 +1701,7 @@ const listAvailabilityByDate = async ({ date, status = 'approved', examinerId = 
         durationMinutes: Number(a.durationMinutes) || 0,
         status: a.status || 'pending',
         zoomLink: a.zoomLink || '',
+        recordingLink: a.recordingLink || '',
         sessionNote: a.sessionNote || '',
         adminNote: a.adminNote || '',
         approvedAt: a.approvedAt || '',
@@ -1322,7 +1713,7 @@ const listAvailabilityByDate = async ({ date, status = 'approved', examinerId = 
   let result;
   if (wantedStatus && wantedExaminerId) {
     result = await sql`
-      select a.id, a.examiner_id, a.start_ts, a.end_ts, a.duration_minutes, a.status, a.zoom_link, a.session_note, a.admin_note, a.approved_at, a.approved_by
+      select a.id, a.examiner_id, a.start_ts, a.end_ts, a.duration_minutes, a.status, a.zoom_link, a.recording_link, a.session_note, a.admin_note, a.approved_at, a.approved_by
       from examiner_availability a
       where a.start_ts >= ${start.toISOString()} and a.start_ts <= ${end.toISOString()}
         and lower(a.status) = ${wantedStatus}
@@ -1331,7 +1722,7 @@ const listAvailabilityByDate = async ({ date, status = 'approved', examinerId = 
     `;
   } else if (wantedStatus) {
     result = await sql`
-      select a.id, a.examiner_id, a.start_ts, a.end_ts, a.duration_minutes, a.status, a.zoom_link, a.session_note, a.admin_note, a.approved_at, a.approved_by
+      select a.id, a.examiner_id, a.start_ts, a.end_ts, a.duration_minutes, a.status, a.zoom_link, a.recording_link, a.session_note, a.admin_note, a.approved_at, a.approved_by
       from examiner_availability a
       where a.start_ts >= ${start.toISOString()} and a.start_ts <= ${end.toISOString()}
         and lower(a.status) = ${wantedStatus}
@@ -1339,7 +1730,7 @@ const listAvailabilityByDate = async ({ date, status = 'approved', examinerId = 
     `;
   } else if (wantedExaminerId) {
     result = await sql`
-      select a.id, a.examiner_id, a.start_ts, a.end_ts, a.duration_minutes, a.status, a.zoom_link, a.session_note, a.admin_note, a.approved_at, a.approved_by
+      select a.id, a.examiner_id, a.start_ts, a.end_ts, a.duration_minutes, a.status, a.zoom_link, a.recording_link, a.session_note, a.admin_note, a.approved_at, a.approved_by
       from examiner_availability a
       where a.start_ts >= ${start.toISOString()} and a.start_ts <= ${end.toISOString()}
         and a.examiner_id = ${wantedExaminerId}
@@ -1347,7 +1738,7 @@ const listAvailabilityByDate = async ({ date, status = 'approved', examinerId = 
     `;
   } else {
     result = await sql`
-      select a.id, a.examiner_id, a.start_ts, a.end_ts, a.duration_minutes, a.status, a.zoom_link, a.session_note, a.admin_note, a.approved_at, a.approved_by
+      select a.id, a.examiner_id, a.start_ts, a.end_ts, a.duration_minutes, a.status, a.zoom_link, a.recording_link, a.session_note, a.admin_note, a.approved_at, a.approved_by
       from examiner_availability a
       where a.start_ts >= ${start.toISOString()} and a.start_ts <= ${end.toISOString()}
       order by a.start_ts asc;
@@ -1362,6 +1753,7 @@ const listAvailabilityByDate = async ({ date, status = 'approved', examinerId = 
     durationMinutes: Number(r.duration_minutes) || 0,
     status: r.status || 'pending',
     zoomLink: r.zoom_link || '',
+    recordingLink: r.recording_link || '',
     sessionNote: r.session_note || '',
     adminNote: r.admin_note || '',
     approvedAt: r.approved_at || '',
@@ -1381,16 +1773,24 @@ const listSpeakingSlots = async ({ status = '', examinerId = '', limit = 500 } =
       .slice(0, lim)
       .map((slot) => {
         const examiner = mem.usersById.get(slot.examinerId);
+        const booking = mem.speakingBookings.find((item) => String(item.slotId || '') === String(slot.id || ''));
+        const candidate = booking ? mem.usersById.get(String(booking.userId || '')) : null;
         return {
           id: slot.id,
           examinerId: slot.examinerId,
           examinerName: examiner && examiner.name ? examiner.name : '',
           examinerEmail: examiner && examiner.email ? examiner.email : '',
+          candidateId: booking ? String(booking.userId || '') : '',
+          candidateNumber: candidate && candidate.candidateNumber ? Number(candidate.candidateNumber) : 0,
+          candidateName: candidate && candidate.name ? candidate.name : '',
+          candidateEmail: candidate && candidate.email ? candidate.email : '',
+          bookingPackage: booking ? String(booking.packageName || '') : '',
           startTs: slot.startTs,
           endTs: slot.endTs,
           durationMinutes: Number(slot.durationMinutes) || 0,
           status: slot.status || 'pending',
           zoomLink: slot.zoomLink || '',
+          recordingLink: slot.recordingLink || '',
           sessionNote: slot.sessionNote || '',
           adminNote: slot.adminNote || '',
           approvedAt: slot.approvedAt || '',
@@ -1404,40 +1804,48 @@ const listSpeakingSlots = async ({ status = '', examinerId = '', limit = 500 } =
   let result;
   if (wantedStatus && wantedExaminerId) {
     result = await sql`
-      select a.id, a.examiner_id, a.start_ts, a.end_ts, a.duration_minutes, a.status, a.zoom_link, a.session_note, a.admin_note, a.approved_at, a.approved_by, a.created_at,
-             u.name, u.email
+      select a.id, a.examiner_id, a.start_ts, a.end_ts, a.duration_minutes, a.status, a.zoom_link, a.recording_link, a.session_note, a.admin_note, a.approved_at, a.approved_by, a.created_at,
+             u.name, u.email, b.user_id as candidate_id, b.package_name as booking_package, candidate.candidate_number, candidate.name as candidate_name, candidate.email as candidate_email
       from examiner_availability a
       left join users u on u.id = a.examiner_id
+      left join speaking_bookings b on b.slot_id = a.id
+      left join users candidate on candidate.id = b.user_id
       where lower(a.status) = ${wantedStatus} and a.examiner_id = ${wantedExaminerId}
       order by a.start_ts asc
       limit ${lim};
     `;
   } else if (wantedStatus) {
     result = await sql`
-      select a.id, a.examiner_id, a.start_ts, a.end_ts, a.duration_minutes, a.status, a.zoom_link, a.session_note, a.admin_note, a.approved_at, a.approved_by, a.created_at,
-             u.name, u.email
+      select a.id, a.examiner_id, a.start_ts, a.end_ts, a.duration_minutes, a.status, a.zoom_link, a.recording_link, a.session_note, a.admin_note, a.approved_at, a.approved_by, a.created_at,
+             u.name, u.email, b.user_id as candidate_id, b.package_name as booking_package, candidate.candidate_number, candidate.name as candidate_name, candidate.email as candidate_email
       from examiner_availability a
       left join users u on u.id = a.examiner_id
+      left join speaking_bookings b on b.slot_id = a.id
+      left join users candidate on candidate.id = b.user_id
       where lower(a.status) = ${wantedStatus}
       order by a.start_ts asc
       limit ${lim};
     `;
   } else if (wantedExaminerId) {
     result = await sql`
-      select a.id, a.examiner_id, a.start_ts, a.end_ts, a.duration_minutes, a.status, a.zoom_link, a.session_note, a.admin_note, a.approved_at, a.approved_by, a.created_at,
-             u.name, u.email
+      select a.id, a.examiner_id, a.start_ts, a.end_ts, a.duration_minutes, a.status, a.zoom_link, a.recording_link, a.session_note, a.admin_note, a.approved_at, a.approved_by, a.created_at,
+             u.name, u.email, b.user_id as candidate_id, b.package_name as booking_package, candidate.candidate_number, candidate.name as candidate_name, candidate.email as candidate_email
       from examiner_availability a
       left join users u on u.id = a.examiner_id
+      left join speaking_bookings b on b.slot_id = a.id
+      left join users candidate on candidate.id = b.user_id
       where a.examiner_id = ${wantedExaminerId}
       order by a.start_ts asc
       limit ${lim};
     `;
   } else {
     result = await sql`
-      select a.id, a.examiner_id, a.start_ts, a.end_ts, a.duration_minutes, a.status, a.zoom_link, a.session_note, a.admin_note, a.approved_at, a.approved_by, a.created_at,
-             u.name, u.email
+      select a.id, a.examiner_id, a.start_ts, a.end_ts, a.duration_minutes, a.status, a.zoom_link, a.recording_link, a.session_note, a.admin_note, a.approved_at, a.approved_by, a.created_at,
+             u.name, u.email, b.user_id as candidate_id, b.package_name as booking_package, candidate.candidate_number, candidate.name as candidate_name, candidate.email as candidate_email
       from examiner_availability a
       left join users u on u.id = a.examiner_id
+      left join speaking_bookings b on b.slot_id = a.id
+      left join users candidate on candidate.id = b.user_id
       order by a.start_ts asc
       limit ${lim};
     `;
@@ -1448,11 +1856,17 @@ const listSpeakingSlots = async ({ status = '', examinerId = '', limit = 500 } =
     examinerId: row.examiner_id,
     examinerName: row.name || '',
     examinerEmail: row.email || '',
+    candidateId: row.candidate_id || '',
+    candidateNumber: Number(row.candidate_number) || 0,
+    candidateName: row.candidate_name || '',
+    candidateEmail: row.candidate_email || '',
+    bookingPackage: row.booking_package || '',
     startTs: row.start_ts,
     endTs: row.end_ts,
     durationMinutes: Number(row.duration_minutes) || 0,
     status: row.status || 'pending',
     zoomLink: row.zoom_link || '',
+    recordingLink: row.recording_link || '',
     sessionNote: row.session_note || '',
     adminNote: row.admin_note || '',
     approvedAt: row.approved_at || '',
@@ -1540,11 +1954,12 @@ const listSpeakingBookingsByUser = async ({ userId = '', limit = 200 } = {}) => 
   }));
 };
 
-const updateSpeakingSlot = async ({ slotId, status, zoomLink, adminNote, approvedBy = '' } = {}) => {
+const updateSpeakingSlot = async ({ slotId, status, zoomLink, recordingLink, adminNote, approvedBy = '' } = {}) => {
   const id = String(slotId || '').trim();
   if (!id) throw new Error('Missing slotId.');
   const nextStatus = normalizeSpeakingStatus(status);
   const nextZoomLink = String(zoomLink || '').trim();
+  const nextRecordingLink = recordingLink === undefined ? null : String(recordingLink || '').trim();
   const nextAdminNote = String(adminNote || '').trim();
   const nextApprovedBy = String(approvedBy || '').trim();
 
@@ -1559,6 +1974,7 @@ const updateSpeakingSlot = async ({ slotId, status, zoomLink, adminNote, approve
       ...existing,
       status: nextStatus,
       zoomLink: nextZoomLink || existing.zoomLink || '',
+      recordingLink: nextRecordingLink === null ? (existing.recordingLink || '') : nextRecordingLink,
       adminNote: nextAdminNote || existing.adminNote || '',
       approvedAt,
       approvedBy: nextApprovedBy || existing.approvedBy || '',
@@ -1569,7 +1985,7 @@ const updateSpeakingSlot = async ({ slotId, status, zoomLink, adminNote, approve
 
   await ensureSchema();
   const current = await sql`
-    select id, examiner_id, start_ts, end_ts, duration_minutes, status, zoom_link, session_note, admin_note, approved_at, approved_by, created_at
+    select id, examiner_id, start_ts, end_ts, duration_minutes, status, zoom_link, recording_link, session_note, admin_note, approved_at, approved_by, created_at
     from examiner_availability
     where id = ${id}
     limit 1;
@@ -1584,11 +2000,12 @@ const updateSpeakingSlot = async ({ slotId, status, zoomLink, adminNote, approve
     update examiner_availability
     set status = ${nextStatus},
         zoom_link = ${nextZoomLink || existing.zoom_link || ''},
+        recording_link = ${nextRecordingLink === null ? (existing.recording_link || '') : nextRecordingLink},
         admin_note = ${nextAdminNote || existing.admin_note || ''},
         approved_at = ${approvedAt || null},
         approved_by = ${nextApprovedBy || existing.approved_by || null}
     where id = ${id}
-    returning id, examiner_id, start_ts, end_ts, duration_minutes, status, zoom_link, session_note, admin_note, approved_at, approved_by, created_at;
+    returning id, examiner_id, start_ts, end_ts, duration_minutes, status, zoom_link, recording_link, session_note, admin_note, approved_at, approved_by, created_at;
   `;
   const row = result.rows && result.rows[0] ? result.rows[0] : null;
   if (!row) throw new Error('Slot not found.');
@@ -1600,6 +2017,7 @@ const updateSpeakingSlot = async ({ slotId, status, zoomLink, adminNote, approve
     durationMinutes: Number(row.duration_minutes) || 0,
     status: row.status || 'pending',
     zoomLink: row.zoom_link || '',
+    recordingLink: row.recording_link || '',
     sessionNote: row.session_note || '',
     adminNote: row.admin_note || '',
     approvedAt: row.approved_at || '',
@@ -1830,7 +2248,7 @@ const claimFreeMockAttempt = async ({ userId, attemptId, deviceKey = '' } = {}) 
   const normalizedUserId = String(userId || '').trim();
   const normalizedAttemptId = String(attemptId || '').trim();
   const normalizedDeviceKey = normalizeDeviceKey(deviceKey);
-  if (!normalizedUserId || !normalizedAttemptId) throw new Error('Missing Free Mock attempt details.');
+  if (!normalizedUserId || !normalizedAttemptId) throw new Error('Missing 01 Test attempt details.');
 
   if (!hasPg) {
     const existing = mem.freeMockAttempts.find((attempt) =>
@@ -2025,6 +2443,13 @@ module.exports = {
   deleteExaminerByEmail,
   listPayments,
   createPayment,
+  createTestTokens,
+  listTestTokens,
+  redeemTestToken,
+  disableTestToken,
+  deleteTestTokens,
+  redeemTestTokenForBooking,
+  redeemRetakeTokenForEntitlement,
   findPaymentByPayHereOrderId,
   updatePayHerePayment,
   listResults,

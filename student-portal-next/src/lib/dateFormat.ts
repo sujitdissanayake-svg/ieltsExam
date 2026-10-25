@@ -30,6 +30,20 @@ export function formatShortDateTime(iso: string): string {
   }).format(d);
 }
 
+export function formatSriLankaDateTime(iso: string): string {
+  const d = parseStableIsoDate(iso);
+  if (!d) return iso;
+
+  return new Intl.DateTimeFormat("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: "Asia/Colombo"
+  }).format(d);
+}
+
 export function formatShortDate(iso: string): string {
   const d = parseStableIsoDate(iso);
   if (!d) return iso;

@@ -86,10 +86,9 @@
           var target = '';
 
           if (getCurrentTestMode() === 'free') {
-            // Free mock flow must always land on the speaking-unavailable page.
-            target = usesHtml ? 'ielts-speaking-basic-paper1.html?testMode=free' : 'ielts-speaking-basic-paper1?testMode=free';
+            target = usesHtml ? 'payment-success.html?package=01%20Test' : 'payment-success?package=01%20Test';
           } else {
-            target = usesHtml ? 'ielts-speaking-basic-paper1.html' : 'ielts-speaking-basic-paper1';
+            target = usesHtml ? 'payment-success.html' : 'payment-success';
           }
 
           window.location.href = target;

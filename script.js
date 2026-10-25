@@ -66,16 +66,8 @@
     document.documentElement.style.setProperty('--headerHeight', `${header.offsetHeight}px`);
   };
 
-  const applyFooterSizing = () => {
-    const lecturerBox = document.querySelector('.footer-lecturer-box');
-    if (!(lecturerBox instanceof HTMLElement)) return;
-    document.documentElement.style.setProperty('--lecturerBoxHeight', `${lecturerBox.offsetHeight}px`);
-  };
-
   applyHeaderOffset();
-  applyFooterSizing();
   window.addEventListener('resize', applyHeaderOffset);
-  window.addEventListener('resize', applyFooterSizing);
 
   const yearEl = document.getElementById('year');
   if (yearEl) yearEl.textContent = String(new Date().getFullYear());
@@ -238,86 +230,6 @@
     });
   }
 
-  const lecturerForm = document.querySelector('[data-lecturer-form]');
-  if (lecturerForm instanceof HTMLFormElement) {
-    const status = document.createElement('p');
-    status.setAttribute('aria-live', 'polite');
-    status.style.margin = '8px 0 0';
-    status.style.fontSize = '0.92rem';
-    status.style.color = 'var(--muted)';
-    status.style.display = 'none';
-    lecturerForm.appendChild(status);
-
-    let statusHideTimer = 0;
-
-    const showStatus = (message, color) => {
-      if (statusHideTimer) {
-        window.clearTimeout(statusHideTimer);
-        statusHideTimer = 0;
-      }
-      status.textContent = message;
-      status.style.color = color;
-      status.style.display = 'block';
-    };
-
-    const hideStatusLater = () => {
-      if (statusHideTimer) window.clearTimeout(statusHideTimer);
-      statusHideTimer = window.setTimeout(() => {
-        status.textContent = '';
-        status.style.display = 'none';
-      }, 5000);
-    };
-
-    lecturerForm.addEventListener('submit', async (event) => {
-      event.preventDefault();
-
-      const data = new FormData(lecturerForm);
-      const name = String(data.get('name') ?? '').trim();
-      const email = String(data.get('email') ?? '').trim();
-      const institute = String(data.get('institute') ?? '').trim();
-      const message = String(data.get('message') ?? '').trim();
-
-      const submitButton = lecturerForm.querySelector('.footer-submit');
-      const originalButtonText = submitButton instanceof HTMLButtonElement ? submitButton.textContent : null;
-
-      if (submitButton instanceof HTMLButtonElement) {
-        submitButton.disabled = true;
-        submitButton.textContent = 'Sending...';
-      }
-      showStatus('Sending registration...', 'var(--muted)');
-
-      try {
-        const response = await fetch('/api/lecturer-registration', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            name,
-            email,
-            institute,
-            message,
-          }),
-        });
-
-        const payload = await response.json().catch(() => ({}));
-        if (!response.ok) {
-          throw new Error((payload && payload.error) || 'Unable to send registration.');
-        }
-
-        lecturerForm.reset();
-        showStatus('Registration sent successfully. We will contact you soon.', 'var(--accentGreen)');
-        hideStatusLater();
-      } catch (err) {
-        showStatus(err && err.message ? err.message : 'Unable to send registration.', 'var(--red)');
-      } finally {
-        if (submitButton instanceof HTMLButtonElement) {
-          submitButton.disabled = false;
-          submitButton.textContent = originalButtonText || 'Send registration';
-        }
-      }
-    });
-  }
   // Gate test access behind a one-time registration on the portal page.
   const registrationFlagKey = 'ieltsPortalRegistered';
   let isRegistered = false;
@@ -361,7 +273,7 @@
   // If we handle it, stop processing to avoid binding handlers unnecessarily.
   if (routeTestHash(getNormalizedHash())) return;
 
-  // Free Mock Test: always open the free mock test page.
+  // 01 Test: always open the 01 Test page.
   const freeMockLinks = document.querySelectorAll(
     'a.dropdown-item[href="#free-mock"], .promo-grid .cta-button[data-test="free-mock"], .hero-actions a[href="#free-mock"]'
   );

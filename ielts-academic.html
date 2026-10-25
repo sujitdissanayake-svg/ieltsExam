@@ -236,7 +236,7 @@
         if (paidPackageEl) {
           var modeForDisplay = resolveCurrentTestMode();
           if (modeForDisplay !== 'mock') {
-            paidPackageEl.textContent = 'Free Mock Test';
+            paidPackageEl.textContent = '01 Test';
           } else {
             var paidPackage = normalizePaidPackageName(params.get('package') || readPortalValue('ieltsMockPackage') || readPortalValue('ieltsLastPaymentPackage'));
             paidPackageEl.textContent = paidPackage || '-';

@@ -98,6 +98,18 @@
             : 'free';
         }
 
+        function getTestPaper() {
+          var params = new URLSearchParams(window.location.search || '');
+          return String(params.get('paper') || readPortalValue('ieltsMockPaper') || '1').replace(/[^0-9]/g, '') || '1';
+        }
+
+        function getAttemptType() {
+          var params = new URLSearchParams(window.location.search || '');
+          return String(params.get('attempt') || readPortalValue('ieltsTestAttemptType') || '').trim().toLowerCase() === 'retake'
+            ? 'retake'
+            : 'initial';
+        }
+
         function getAnswers() {
           var answers = {};
           for (var q = 1; q <= 40; q++) {
@@ -139,6 +151,8 @@
               answers: answers,
               attemptId: getAttemptId(),
               testMode: getTestMode(),
+              paper: getTestPaper(),
+              attemptType: getAttemptType(),
             }),
           })
             .then(function (response) {

@@ -488,6 +488,14 @@
         text-align: center;
       }
 
+      .examiner-slot-candidate {
+        color: #1a4e8d;
+        font-size: 0.74rem;
+        font-weight: 800;
+        margin-top: 3px;
+        text-align: center;
+      }
+
       .examiner-slot-status {
         display: inline-flex;
         align-items: center;
@@ -1398,9 +1406,16 @@
 
                 var status = String(slot.status || 'pending').toLowerCase();
                 var statusLabel = getStatusBadgeLabel(status);
+                var candidateLabel = Number(slot.candidateNumber) > 0
+                  ? '<div class="examiner-slot-candidate">Candidate # ' + escapeHtml(String(slot.candidateNumber)) + '</div>'
+                  : '';
                 var actionHtml = '';
                 if (status === 'completed') {
-                  actionHtml = '<button class="examiner-cell-btn is-done" type="button" disabled>Completed</button>';
+                  var hasRecordingLink = !!String(slot.recordingLink || '').trim();
+                  actionHtml = [
+                    '<button class="examiner-cell-btn is-done" type="button" disabled>Completed</button>',
+                    '<button class="examiner-cell-btn is-add-link" type="button" data-add-recording-slot="' + escapeHtml(slot.id) + '">' + (hasRecordingLink ? 'REC Saved' : 'Save REC') + '</button>'
+                  ].join('');
                 } else if (startedSessions[slot.id]) {
                   actionHtml = '<button class="examiner-cell-btn is-complete" type="button" data-complete-slot="' + escapeHtml(slot.id) + '">Complete</button>';
                 } else {
@@ -1420,6 +1435,7 @@
                   '<div class="examiner-slot-card">',
                   '<div class="examiner-slot-time">' + escapeHtml(formatTimeRange(slot.start, slot.end)) + '</div>',
                   '<div class="examiner-slot-duration">' + escapeHtml((slot.durationMinutes || '—') + ' min') + '</div>',
+                  candidateLabel,
                   actionHtml,
                   '</div>',
                   '</td>'
@@ -1570,14 +1586,32 @@
             setNote(slotNote, 'Add a meeting link before starting this session.', 'error');
             return;
           }
-          startedSessions[String(slot.id)] = true;
-          setStartedSessions(startedSessions);
-          try {
-            window.open(String(slot.zoomLink), '_blank', 'noopener');
-          } catch (_) {
-            window.location.href = String(slot.zoomLink);
-          }
-          renderDashboard();
+
+          var meetingWindow = window.open('', '_blank');
+          if (meetingWindow) meetingWindow.opener = null;
+
+          setNote(slotNote, 'Starting Zoom meeting and marking the session completed...', 'info');
+          postJson('/api/examiner/availability', { slotId: slotId, status: 'completed' }, getToken())
+            .then(function (result) {
+              if (!result.ok) {
+                throw new Error((result.data && result.data.error) || 'Unable to mark session completed.');
+              }
+
+              applyUpdatedSlot(result.data && result.data.slot ? result.data.slot : null);
+              delete startedSessions[String(slot.id)];
+              setStartedSessions(startedSessions);
+              if (meetingWindow) {
+                meetingWindow.location.href = String(slot.zoomLink);
+              } else {
+                window.open(String(slot.zoomLink), '_blank', 'noopener');
+              }
+              setNote(slotNote, 'Zoom meeting started and session marked completed.', 'success');
+              renderDashboard();
+            })
+            .catch(function (error) {
+              if (meetingWindow) meetingWindow.close();
+              setNote(slotNote, error && error.message ? error.message : 'Unable to start session.', 'error');
+            });
         }
 
         function applyUpdatedSlot(updatedSlot) {
@@ -1592,6 +1626,10 @@
                 durationMinutes: updatedSlot.durationMinutes,
                 status: updatedSlot.status,
                 zoomLink: updatedSlot.zoomLink,
+                recordingLink: updatedSlot.recordingLink,
+                candidateNumber: updatedSlot.candidateNumber || allSessions[i].candidateNumber || 0,
+                candidateName: updatedSlot.candidateName || allSessions[i].candidateName || '',
+                candidateEmail: updatedSlot.candidateEmail || allSessions[i].candidateEmail || '',
                 sessionNote: updatedSlot.sessionNote,
                 adminNote: updatedSlot.adminNote,
                 approvedAt: updatedSlot.approvedAt,
@@ -1672,6 +1710,47 @@
             })
             .catch(function (err) {
               setNote(slotNote, err && err.message ? err.message : 'Unable to complete session.', 'error');
+            });
+        }
+
+        function addRecordingLink(slotId) {
+          var slot = allSessions.find(function (item) { return String(item.id || '') === String(slotId || ''); });
+          if (!slot) {
+            setNote(slotNote, 'Unable to find this session.', 'error');
+            return;
+          }
+
+          var recordingLink = window.prompt('Enter the recording link for this completed session:', String(slot.recordingLink || '').trim());
+          if (recordingLink === null) return;
+          recordingLink = String(recordingLink).trim();
+          if (!recordingLink) {
+            setNote(slotNote, 'Recording link is required.', 'error');
+            return;
+          }
+          if (!/^https?:\/\//i.test(recordingLink)) {
+            setNote(slotNote, 'Recording link must start with http:// or https://', 'error');
+            return;
+          }
+
+          setNote(slotNote, 'Saving recording link...', 'info');
+          postJson('/api/examiner/availability', {
+            slotId: slotId,
+            status: 'completed',
+            recordingLink: recordingLink
+          }, getToken())
+            .then(function (result) {
+              if (!result.ok || !result.data || !result.data.slot) {
+                throw new Error((result.data && result.data.error) || 'Unable to save recording link.');
+              }
+              applyUpdatedSlot(result.data.slot);
+              try {
+                window.localStorage.setItem('ieltsSpeakingRecordingsUpdatedAt', String(Date.now()));
+              } catch (_) {}
+              setNote(slotNote, 'Recording link saved.', 'success');
+              renderDashboard();
+            })
+            .catch(function (error) {
+              setNote(slotNote, error && error.message ? error.message : 'Unable to save recording link.', 'error');
             });
         }
 
@@ -1783,6 +1862,7 @@
             var startButton = event.target.closest('[data-start-slot]');
             var completeButton = event.target.closest('[data-complete-slot]');
             var addLinkButton = event.target.closest('[data-add-link-slot]');
+            var addRecordingButton = event.target.closest('[data-add-recording-slot]');
             if (startButton) {
               startSession(String(startButton.getAttribute('data-start-slot') || ''));
             }
@@ -1791,6 +1871,9 @@
             }
             if (addLinkButton) {
               addSessionLink(String(addLinkButton.getAttribute('data-add-link-slot') || ''));
+            }
+            if (addRecordingButton) {
+              addRecordingLink(String(addRecordingButton.getAttribute('data-add-recording-slot') || ''));
             }
           });
 

@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { DashboardCard } from "@/components/DashboardCard";
-import { formatShortDate, formatShortDateTime } from "@/lib/dateFormat";
+import { formatShortDate, formatShortDateTime, formatSriLankaDateTime } from "@/lib/dateFormat";
 import ieltsExamLogo from "../../../assests/IELTS Exam logo-trim.png";
 
 type LiveAuth = {
@@ -94,6 +94,7 @@ type LiveOverview = {
     status?: string;
     package?: string;
     paper?: number;
+    purchaseType?: string;
     orderId?: string;
     verified?: boolean;
   }>;
@@ -144,6 +145,7 @@ const LIVE_AUTH_STORAGE_KEY = "ieltsPortalBridgeAuth";
 const LIVE_PROFILE_STORAGE_KEY = "ieltsPortalBridgeProfile";
 const PENDING_PURCHASE_STORAGE_KEY = "ieltsPortalPendingPurchaseSync";
 const ALLOWED_LAUNCHER_ORIGINS = new Set(["https://www.ieltscambridge.com"]);
+const MAX_PAID_RETAKES_PER_TEST = 5;
 let payHereScriptPromise: Promise<void> | null = null;
 
 function loadPayHereScript() {
@@ -435,6 +437,45 @@ function getPayHereOrderUrl() {
   return "/api/payhere-order";
 }
 
+function getCompleteSpeakingSessionUrl() {
+  if (typeof window === "undefined") return "/api/speaking/complete";
+
+  const protocol = window.location.protocol || "https:";
+  const hostname = String(window.location.hostname || "").toLowerCase();
+  const port = String(window.location.port || "");
+  if (hostname === "localhost" || hostname === "127.0.0.1" || port === "3000") {
+    return `${protocol}//${hostname}:5500/api/speaking/complete`;
+  }
+  if (hostname === "www.ieltscambridge.com") return "/api/speaking/complete";
+  return "/api/complete-speaking-session";
+}
+
+function getTokenRedeemUrl() {
+  if (typeof window === "undefined") return "/api/tokens/redeem";
+
+  const protocol = window.location.protocol || "https:";
+  const hostname = String(window.location.hostname || "").toLowerCase();
+  const port = String(window.location.port || "");
+  if (hostname === "localhost" || hostname === "127.0.0.1" || port === "3000") {
+    return `${protocol}//${hostname}:5500/api/tokens/redeem`;
+  }
+  if (hostname === "www.ieltscambridge.com") return "/api/tokens/redeem";
+  return "/api/redeem-token";
+}
+
+function getRetakeTokenRedeemUrl() {
+  if (typeof window === "undefined") return "/api/retake-tokens/redeem";
+
+  const protocol = window.location.protocol || "https:";
+  const hostname = String(window.location.hostname || "").toLowerCase();
+  const port = String(window.location.port || "");
+  if (hostname === "localhost" || hostname === "127.0.0.1" || port === "3000") {
+    return `${protocol}//${hostname}:5500/api/retake-tokens/redeem`;
+  }
+  if (hostname === "www.ieltscambridge.com") return "/api/retake-tokens/redeem";
+  return "/api/redeem-retake-token";
+}
+
 async function loadMainPortalLiveOverview(auth: LiveAuth) {
   const response = await fetch(getLiveOverviewBridgeUrl(), {
     method: "POST",
@@ -556,7 +597,8 @@ function getSpeakingJoinState(
     durationMinutes?: number;
     zoomLink?: string;
   },
-  nowMs: number
+  nowMs: number,
+  testLabel: string
 ) {
   const status = String(slot.status || "").trim().toLowerCase();
   const startMs = toTimestamp(slot.startTs);
@@ -565,28 +607,41 @@ function getSpeakingJoinState(
 
   if (status === "completed") {
     return {
-      label: "Completed",
+      label: `Completed ${testLabel} Speaking`,
       disabled: true,
       href: "",
-      className: "inline-flex items-center justify-center rounded-md px-3 py-1.5 text-xs font-semibold bg-emerald-600 text-white cursor-default",
+      statusLabel: "Completed",
+      className: "inline-flex w-full items-center justify-center rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white cursor-default",
+    };
+  }
+
+  if (status === "incomplete") {
+    return {
+      label: "Incomplete",
+      disabled: true,
+      href: "",
+      statusLabel: "Incomplete",
+      className: "inline-flex w-full items-center justify-center rounded-lg bg-red-100 px-4 py-2.5 text-sm font-bold text-red-700 cursor-not-allowed",
     };
   }
 
   if (startMs != null && nowMs < startMs) {
     return {
-      label: `Join at ${formatShortDateTime(slot.startTs || "")}`,
+      label: `Join at ${formatSriLankaDateTime(slot.startTs || "")}`,
       disabled: true,
       href: "",
-      className: "inline-flex items-center justify-center rounded-md px-3 py-1.5 text-xs font-semibold bg-slate-200 text-slate-500 cursor-not-allowed",
+      statusLabel: "Booked",
+      className: "inline-flex w-full items-center justify-center rounded-lg bg-slate-200 px-4 py-2.5 text-sm font-bold text-slate-500 cursor-not-allowed",
     };
   }
 
   if (endMs != null && nowMs > endMs) {
     return {
-      label: "Session ended",
+      label: "Incomplete",
       disabled: true,
       href: "",
-      className: "inline-flex items-center justify-center rounded-md px-3 py-1.5 text-xs font-semibold bg-slate-200 text-slate-500 cursor-not-allowed",
+      statusLabel: "Incomplete",
+      className: "inline-flex w-full items-center justify-center rounded-lg bg-red-100 px-4 py-2.5 text-sm font-bold text-red-700 cursor-not-allowed",
     };
   }
 
@@ -595,15 +650,17 @@ function getSpeakingJoinState(
       label: "Join link pending",
       disabled: true,
       href: "",
-      className: "inline-flex items-center justify-center rounded-md px-3 py-1.5 text-xs font-semibold bg-slate-200 text-slate-500 cursor-not-allowed",
+      statusLabel: "Booked",
+      className: "inline-flex w-full items-center justify-center rounded-lg bg-slate-200 px-4 py-2.5 text-sm font-bold text-slate-500 cursor-not-allowed",
     };
   }
 
   return {
-    label: "Join Test",
+    label: "Join Now",
     disabled: false,
     href: zoomLink,
-    className: "inline-flex items-center justify-center rounded-md px-3 py-1.5 text-xs font-semibold bg-[#DA2C43] text-white hover:bg-[#b81f36]",
+    statusLabel: "Booked",
+    className: "inline-flex w-full items-center justify-center rounded-lg bg-[#DA2C43] px-4 py-2.5 text-sm font-bold text-white shadow-[0_8px_18px_rgba(218,44,67,0.28)] transition hover:bg-[#b81f36] focus:outline-none focus:ring-2 focus:ring-[#DA2C43] focus:ring-offset-2",
   };
 }
 
@@ -618,6 +675,137 @@ export default function DashboardPage() {
   const [bookingPaper, setBookingPaper] = useState<number | null>(null);
   const [bookingMessage, setBookingMessage] = useState("");
   const [bookingGuidancePaper, setBookingGuidancePaper] = useState<number | null>(null);
+  const [retakePurchasePaper, setRetakePurchasePaper] = useState<number | null>(null);
+  const [retakeTokenPaper, setRetakeTokenPaper] = useState<number | null>(null);
+  const [tokenPaper, setTokenPaper] = useState<number | null>(null);
+  const [tokenCode, setTokenCode] = useState("");
+  const [tokenMessage, setTokenMessage] = useState("");
+  const [redeemingToken, setRedeemingToken] = useState(false);
+  const [retakeTokenCode, setRetakeTokenCode] = useState("");
+  const [retakeTokenMessage, setRetakeTokenMessage] = useState("");
+  const [redeemingRetakeToken, setRedeemingRetakeToken] = useState(false);
+  const [completingSpeakingSlotId, setCompletingSpeakingSlotId] = useState("");
+  const [speakingActionMessage, setSpeakingActionMessage] = useState("");
+
+  const logOut = () => {
+    clearLiveBridgeState(setLiveOverview, setLiveMode, { clearAuth: true });
+    setBridgeProfile(null);
+    window.localStorage.removeItem(LIVE_PROFILE_STORAGE_KEY);
+    window.localStorage.removeItem(PENDING_PURCHASE_STORAGE_KEY);
+    window.location.assign(mainSiteBaseUrl);
+  };
+
+  const completeSpeakingSession = async (slotId: string) => {
+    const auth = readStoredAuth();
+    if (!auth) {
+      setSpeakingActionMessage("Please sign in again before joining your speaking session.");
+      return;
+    }
+
+    setCompletingSpeakingSlotId(slotId);
+    setSpeakingActionMessage("");
+    try {
+      const response = await fetch(getCompleteSpeakingSessionUrl(), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...auth, slotId }),
+      });
+      const data = (await response.json().catch(() => ({}))) as { error?: string };
+      if (!response.ok) {
+        throw new Error(data.error || "Unable to update your speaking session.");
+      }
+
+      const { response: overviewResponse, data: overviewData } = await loadMainPortalLiveOverview(auth);
+      const overview = normalizeBridgeResponse(overviewResponse, overviewData);
+      if (!overview) {
+        throw new Error("Speaking session joined, but the portal could not refresh. Please refresh this page.");
+      }
+      setLiveBridgeState(overview, setLiveOverview, setLiveMode);
+    } catch (error) {
+      setSpeakingActionMessage(error instanceof Error ? error.message : "Unable to update your speaking session.");
+    } finally {
+      setCompletingSpeakingSlotId("");
+    }
+  };
+
+  const redeemToken = async () => {
+    const auth = readStoredAuth();
+    if (!auth || tokenPaper == null) {
+      setTokenMessage("Please sign in again before redeeming a token.");
+      return;
+    }
+
+    const code = tokenCode.trim();
+    if (!code) {
+      setTokenMessage("Enter the token code provided by your institution.");
+      return;
+    }
+
+    setRedeemingToken(true);
+    setTokenMessage("");
+    try {
+      const response = await fetch(getTokenRedeemUrl(), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...auth, code, paper: tokenPaper }),
+      });
+      const data = (await response.json().catch(() => ({}))) as { error?: string };
+      if (!response.ok) {
+        throw new Error(data.error || "Unable to redeem this token.");
+      }
+
+      const { response: overviewResponse, data: overviewData } = await loadMainPortalLiveOverview(auth);
+      const overview = normalizeBridgeResponse(overviewResponse, overviewData);
+      if (!overview) {
+        throw new Error("Token redeemed, but the test booking could not be refreshed. Please refresh the page.");
+      }
+      setLiveBridgeState(overview, setLiveOverview, setLiveMode);
+      setTokenPaper(null);
+      setTokenCode("");
+      setBookingMessage(`Test ${String(tokenPaper).padStart(2, "0")} has been booked using your token.`);
+    } catch (error) {
+      setTokenMessage(error instanceof Error ? error.message : "Unable to redeem this token.");
+    } finally {
+      setRedeemingToken(false);
+    }
+  };
+
+  const redeemRetakeToken = async () => {
+    const auth = readStoredAuth();
+    if (!auth || retakeTokenPaper == null) {
+      setRetakeTokenMessage("Please sign in again before redeeming a retake token.");
+      return;
+    }
+    const code = retakeTokenCode.trim();
+    if (!code) {
+      setRetakeTokenMessage("Enter the retake token code provided by your institution.");
+      return;
+    }
+    setRedeemingRetakeToken(true);
+    setRetakeTokenMessage("");
+    try {
+      const response = await fetch(getRetakeTokenRedeemUrl(), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...auth, code, paper: retakeTokenPaper }),
+      });
+      const data = (await response.json().catch(() => ({}))) as { error?: string };
+      if (!response.ok) throw new Error(data.error || "Unable to redeem this retake token.");
+
+      const { response: overviewResponse, data: overviewData } = await loadMainPortalLiveOverview(auth);
+      const overview = normalizeBridgeResponse(overviewResponse, overviewData);
+      if (!overview) throw new Error("Retake token redeemed, but the portal could not be refreshed. Please refresh the page.");
+      const redeemedPaper = retakeTokenPaper;
+      setLiveBridgeState(overview, setLiveOverview, setLiveMode);
+      setRetakeTokenPaper(null);
+      setRetakeTokenCode("");
+      setBookingMessage(`Your retake token has activated Test ${String(redeemedPaper).padStart(2, "0")} retake.`);
+    } catch (error) {
+      setRetakeTokenMessage(error instanceof Error ? error.message : "Unable to redeem this retake token.");
+    } finally {
+      setRedeemingRetakeToken(false);
+    }
+  };
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -637,6 +825,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     let fallbackTimer: number | undefined;
+    let liveRefreshTimer: number | undefined;
 
     setMainSiteBaseUrl(getMainSiteBaseUrl());
 
@@ -727,9 +916,18 @@ export default function DashboardPage() {
       }
     }
 
+    liveRefreshTimer = window.setInterval(() => {
+      if (document.hidden) return;
+      const auth = readStoredAuth();
+      if (auth) void loadLiveOverview(auth);
+    }, 30000);
+
     return () => {
       if (fallbackTimer) {
         window.clearTimeout(fallbackTimer);
+      }
+      if (liveRefreshTimer) {
+        window.clearInterval(liveRefreshTimer);
       }
       window.removeEventListener("message", handleMessage);
     };
@@ -750,10 +948,19 @@ export default function DashboardPage() {
   const resultRowsAscending = usingLive
     ? scoredResultRowsDescending.slice().reverse()
     : [];
+  const speakingBookingStatusByPaper = new Map<number, string>();
+  if (usingLive) {
+    (liveOverview.speakingBookings || []).forEach((booking) => {
+      const match = String(booking.packageName || "").match(/\d+/);
+      const paper = Math.max(1, Math.min(10, Number(match && match[0]) || 0));
+      if (paper) speakingBookingStatusByPaper.set(paper, String(booking.status || "").trim().toLowerCase());
+    });
+  }
   const attemptSummaries = (() => {
     if (!usingLive) return [] as Array<{
       key: string;
       testMode: "free" | "mock";
+      paper: number;
       attemptId: string;
       attemptNumber: number;
       updatedAt: string;
@@ -765,6 +972,7 @@ export default function DashboardPage() {
       };
       overallBand: number | null;
       pendingRelease: boolean;
+      speakingBookingStatus: string;
     }>;
 
     const ordered = liveOverview.results
@@ -774,6 +982,7 @@ export default function DashboardPage() {
     const buckets = new Map<string, {
       key: string;
       testMode: "free" | "mock";
+      paper: number;
       attemptId: string;
       firstSeenAt: string;
       updatedAt: string;
@@ -784,12 +993,14 @@ export default function DashboardPage() {
         speaking: number | null;
       };
       pendingRelease: boolean;
+      speakingBookingStatus: string;
     }>();
 
     ordered.forEach((result) => {
       const testMode = normalizeResultTestMode(result.testMode);
+      const paper = Math.max(1, Math.min(10, Number(result.paper) || 1));
       const attemptId = String(result.attemptId || "").trim() || String(result.id || "").trim() || `unknown-${String(result.updatedAt || result.createdAt || "")}`;
-      const key = `${testMode}:${attemptId}`;
+      const key = `${paper}:${testMode}:${attemptId}`;
       const timestamp = String(result.updatedAt || result.createdAt || "");
       const moduleName = String(result.module || "").trim().toLowerCase();
 
@@ -797,6 +1008,7 @@ export default function DashboardPage() {
         buckets.set(key, {
           key,
           testMode,
+          paper,
           attemptId,
           firstSeenAt: timestamp,
           updatedAt: timestamp,
@@ -807,6 +1019,7 @@ export default function DashboardPage() {
             speaking: null,
           },
           pendingRelease: false,
+          speakingBookingStatus: speakingBookingStatusByPaper.get(paper) || "",
         });
       }
 
@@ -826,9 +1039,10 @@ export default function DashboardPage() {
       }
     });
 
-    const byMode = new Map<"free" | "mock", Array<{
+    const byPaper = new Map<number, Array<{
       key: string;
       testMode: "free" | "mock";
+      paper: number;
       attemptId: string;
       firstSeenAt: string;
       updatedAt: string;
@@ -839,17 +1053,19 @@ export default function DashboardPage() {
         speaking: number | null;
       };
       pendingRelease: boolean;
+      speakingBookingStatus: string;
     }>>();
 
     Array.from(buckets.values()).forEach((bucket) => {
-      const list = byMode.get(bucket.testMode) || [];
+      const list = byPaper.get(bucket.paper) || [];
       list.push(bucket);
-      byMode.set(bucket.testMode, list);
+      byPaper.set(bucket.paper, list);
     });
 
     const summaries: Array<{
       key: string;
       testMode: "free" | "mock";
+      paper: number;
       attemptId: string;
       attemptNumber: number;
       updatedAt: string;
@@ -861,35 +1077,52 @@ export default function DashboardPage() {
       };
       overallBand: number | null;
       pendingRelease: boolean;
+      speakingBookingStatus: string;
     }> = [];
 
-    (["free", "mock"] as const).forEach((mode) => {
-      const groups = (byMode.get(mode) || []).sort((a, b) => String(a.firstSeenAt || "").localeCompare(String(b.firstSeenAt || "")));
+    Array.from(byPaper.entries()).forEach(([paper, paperAttempts]) => {
+      const groups = paperAttempts.sort((a, b) => String(a.firstSeenAt || "").localeCompare(String(b.firstSeenAt || "")));
       groups.forEach((group, index) => {
         summaries.push({
           key: group.key,
-          testMode: mode,
+          testMode: group.testMode,
+          paper,
           attemptId: group.attemptId,
           attemptNumber: index + 1,
           updatedAt: group.updatedAt,
           moduleBands: group.moduleBands,
-          overallBand: mode === "free"
+          overallBand: group.testMode === "free"
             ? null
+            : group.speakingBookingStatus && group.moduleBands.speaking == null
+              ? null
             : toAttemptBand(
                 [group.moduleBands.listening, group.moduleBands.reading, group.moduleBands.writing, group.moduleBands.speaking]
                   .filter((score): score is number => typeof score === "number")
               ),
           pendingRelease: group.pendingRelease,
+          speakingBookingStatus: group.speakingBookingStatus,
         });
       });
     });
 
     return summaries.sort((a, b) => String(b.updatedAt || "").localeCompare(String(a.updatedAt || "")));
   })();
-  const freeAttemptSummaries = attemptSummaries
-    .filter((item) => item.testMode === "free")
-    .slice(0, 3);
-  const paidAttemptSummaries = attemptSummaries.filter((item) => item.testMode === "mock");
+  const latestPaperAttemptSummaries = (() => {
+    const byPaper = new Map<number, typeof attemptSummaries>();
+    attemptSummaries.forEach((attempt) => {
+      const attempts = byPaper.get(attempt.paper) || [];
+      attempts.push(attempt);
+      byPaper.set(attempt.paper, attempts);
+    });
+
+    return Array.from(byPaper.entries())
+      .map(([paper, attempts]) => ({
+        paper,
+        attempts: attempts.sort((a, b) => a.attemptNumber - b.attemptNumber).slice(0, 4),
+        updatedAt: attempts.reduce((latest, attempt) => String(latest).localeCompare(String(attempt.updatedAt || "")) < 0 ? attempt.updatedAt : latest, ""),
+      }))
+      .sort((a, b) => String(b.updatedAt || "").localeCompare(String(a.updatedAt || "")))[0] || null;
+  })();
   const targetBand = (() => {
     if (usingLive && Number(liveOverview.profile.targetBandScore) > 0) {
       return Number(liveOverview.profile.targetBandScore);
@@ -965,17 +1198,32 @@ export default function DashboardPage() {
     ? liveOverview.profile.lastActivityAt || liveOverview.activities[0]?.createdAt || ""
     : "";
   const summaryLastActivityLabel = summaryLastActivity ? formatShortDateTime(summaryLastActivity) : "No activity recorded yet.";
-  const { freeMockUrl, paidMockUrl } = toMainSiteActionUrls(
-    mainSiteBaseUrl,
-    encodedCandidateBridgeProfile,
-    freeMockAuthQuery
-  );
   const selectedPackage = ["Lite", "Basic", "Standard", "Pro"].find(
     (packageName) => packageName === summarySelectedPackage
   );
   const testEntryUrl = (paper: number, attemptType: "initial" | "retake") => {
     if (paper === 1) {
-      return `${freeMockUrl}&paper=1&attempt=${attemptType}`;
+      return toMainSiteUrlWithQuery(
+        mainSiteBaseUrl,
+        "/ielts-academic.html",
+        `?bypass=1&testMode=mock&module=academic&package=Lite&paper=1&attempt=${attemptType}&profile=${encodedCandidateBridgeProfile}${freeMockAuthQuery}`
+      );
+    }
+
+    if (paper === 2) {
+      return toMainSiteUrlWithQuery(
+        mainSiteBaseUrl,
+        "/ielts-academic.html",
+        `?bypass=1&testMode=mock&module=academic&package=Lite&paper=1&attempt=${attemptType}&profile=${encodedCandidateBridgeProfile}${freeMockAuthQuery}`
+      );
+    }
+
+    if (paper === 3) {
+      return toMainSiteUrlWithQuery(
+        mainSiteBaseUrl,
+        "/ielts-academic-basic-paper1.html",
+        `?bypass=1&testMode=mock&module=academic&package=Basic&paper=1&attempt=${attemptType}&profile=${encodedCandidateBridgeProfile}${freeMockAuthQuery}`
+      );
     }
 
     return toMainSiteUrlWithQuery(
@@ -994,21 +1242,39 @@ export default function DashboardPage() {
       });
   }
   const completedSlotAttempts = new Map<number, Set<"initial" | "retake">>();
+  const retakeAttemptIdsByPaper = new Map<number, Set<string>>();
   if (usingLive) {
     liveOverview.results
-      .filter((result) => String(result.module || "").toLowerCase() === "writing")
       .forEach((result) => {
         const paper = Math.max(1, Math.min(10, Number(result.paper) || 1));
         const attemptType = String(result.attemptType || "").toLowerCase() === "retake" ? "retake" : "initial";
         const attempts = completedSlotAttempts.get(paper) || new Set<"initial" | "retake">();
         attempts.add(attemptType);
         completedSlotAttempts.set(paper, attempts);
+
+        if (attemptType === "retake") {
+          const attemptIds = retakeAttemptIdsByPaper.get(paper) || new Set<string>();
+          const attemptId = String(result.attemptId || result.id || `${result.module || "module"}-${result.createdAt || ""}`);
+          attemptIds.add(attemptId);
+          retakeAttemptIdsByPaper.set(paper, attemptIds);
+        }
+      });
+  }
+  const paidRetakeEntitlementsByPaper = new Map<number, number>();
+  if (usingLive) {
+    liveOverview.payments
+      .filter((payment) => String(payment.status || "").toLowerCase() === "paid" && payment.verified !== false && String(payment.purchaseType || "").toLowerCase() === "retake")
+      .forEach((payment) => {
+        const paper = Math.max(1, Math.min(10, Number(payment.paper) || 0));
+        if (paper) {
+          paidRetakeEntitlementsByPaper.set(paper, (paidRetakeEntitlementsByPaper.get(paper) || 0) + 1);
+        }
       });
   }
   const nextBookingPaper = Array.from({ length: 10 }, (_, index) => index + 1)
     .find((paper) => !bookedPapers.has(paper)) || null;
 
-  const startPayHerePayment = async (paper: number) => {
+  const startPayHerePayment = async (paper: number, purchaseType: "test" | "retake" = "test") => {
     const auth = readStoredAuth();
     if (!auth) {
       setBookingMessage("Please sign in to book a test.");
@@ -1021,7 +1287,7 @@ export default function DashboardPage() {
       const orderRequest = fetch(getPayHereOrderUrl(), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...auth, paper }),
+        body: JSON.stringify({ ...auth, paper, purchaseType }),
       });
       const [response] = await Promise.all([orderRequest, loadPayHereScript()]);
       const data = (await response.json().catch(() => ({}))) as {
@@ -1055,7 +1321,7 @@ export default function DashboardPage() {
                 payment.verified !== false
               );
               if (paymentConfirmed) {
-                setBookingMessage("Payment confirmed. Your test is now ready to take.");
+                setBookingMessage(purchaseType === "retake" ? "Payment confirmed. Your retake is now ready." : "Payment confirmed. Your test is now ready to take.");
                 return;
               }
             } catch {
@@ -1141,7 +1407,7 @@ export default function DashboardPage() {
             </div>
             <div className="rounded-[12px] border border-white/12 bg-white/10 px-3 py-2 backdrop-blur-sm xl:min-h-[92px]">
               <p className="text-[2rem] font-bold leading-none text-white">{summaryCompletedTests}</p>
-              <p className="mt-1 max-w-[9ch] text-[0.88rem] leading-5 text-slate-100">Completed tests</p>
+              <p className="mt-1 max-w-[9ch] text-[0.88rem] leading-5 text-slate-100">Completed sections</p>
             </div>
             <div className="rounded-[12px] border border-white/12 bg-white/10 px-3 py-2 backdrop-blur-sm xl:min-h-[92px]">
               <p className="text-[2rem] font-bold leading-none text-white">{summaryRemainingTests}</p>
@@ -1151,14 +1417,13 @@ export default function DashboardPage() {
               <p className="text-[2rem] font-bold leading-none text-white">{summaryOverallBand}</p>
               <p className="mt-1 max-w-[8ch] text-[0.88rem] leading-5 text-slate-100">Current overall band</p>
             </div>
-            <a
-              href={paidMockUrl}
-              target="_blank"
-              rel="noreferrer"
+            <button
+              type="button"
+              onClick={logOut}
               className="flex items-center justify-center rounded-[12px] border-2 border-white bg-white px-3 py-2 text-lg font-black uppercase tracking-[0.08em] !text-[#DA2C43] shadow-[0_18px_32px_rgba(15,23,43,0.18)] hover:bg-[#fff5f7] sm:col-span-2 xl:col-span-2 xl:min-h-[54px]"
             >
-              Take Test
-            </a>
+              Log Out
+            </button>
             <div className="rounded-[12px] border border-white/12 bg-white/10 px-3 py-2 backdrop-blur-sm sm:col-span-2 xl:col-span-2 xl:min-h-[54px]">
               <p className="text-[0.78rem] font-bold uppercase tracking-[0.14em] text-slate-200">Last Activity</p>
               <p className="mt-1 text-[1.06rem] font-bold leading-tight text-white">{summaryLastActivityLabel}</p>
@@ -1170,77 +1435,60 @@ export default function DashboardPage() {
       <section id="tests-taken" className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
         <DashboardCard title={<span className="text-lg font-bold text-[#DA2C43]">Tests Taken</span>}>
           {usingLive ? (
-            attemptSummaries.length === 0 ? (
+            !latestPaperAttemptSummaries ? (
               <p className="text-xs text-slate-600">No published live results yet.</p>
             ) : (
               <div className="max-h-80 overflow-y-auto pr-2">
-                <div className="space-y-4">
-                  <div>
-                    <div className="mb-2 flex items-center justify-between">
-                      <p className="text-xs font-bold uppercase tracking-[0.14em] text-amber-700">Free Mock Test</p>
-                      <p className="text-[11px] font-semibold text-slate-500">Max 1 attempt</p>
-                    </div>
-                    {freeAttemptSummaries.length === 0 ? (
-                      <p className="rounded-md border border-slate-200 p-3 text-xs text-slate-600">No free mock attempts recorded yet.</p>
-                    ) : (
-                      <ul className="space-y-3">
-                        {freeAttemptSummaries.map((attempt) => (
-                          <li key={attempt.key} className="rounded-md border border-slate-200 p-3">
-                            <div className="flex items-start justify-between gap-3">
-                              <div>
-                                <p className="text-[17px] font-medium text-slate-900">Attempt {attempt.attemptNumber}</p>
-                                <p className="mt-1 text-[14px] text-slate-600">{renderComponentLabel("Listening")}: {renderBandValue(attempt.moduleBands.listening)}</p>
-                                <p className="text-[14px] text-slate-600">{renderComponentLabel("Reading")}: {renderBandValue(attempt.moduleBands.reading)}</p>
-                                <p className="text-[14px] text-slate-600">{renderComponentLabel("Writing")}: {attempt.pendingRelease && attempt.moduleBands.writing == null ? <span className="text-red-600 font-bold">wait (12h)</span> : renderBandValue(attempt.moduleBands.writing)}</p>
-                                <p className="text-[14px] text-slate-600">{renderComponentLabel("Speaking")}: {renderNotAvailableValue()}</p>
-                                <p className="mt-1 text-[14px] text-slate-600">Updated: {formatShortDateTime(attempt.updatedAt || "")}</p>
-                              </div>
-                              <div className="text-right">
-                                <p className="text-[15px] font-bold text-blue-600">Overall</p>
-                                <p className="text-[17px] font-bold text-blue-600">
-                                  {renderNotAvailableValue()}
-                                </p>
-                              </div>
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-
-                  <div>
-                    <div className="mb-2 flex items-center justify-between">
-                      <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#DA2C43]">Mock Test</p>
-                      <p className="text-[11px] font-semibold text-slate-500">Paid attempts</p>
-                    </div>
-                    {paidAttemptSummaries.length === 0 ? (
-                      <p className="rounded-md border border-slate-200 p-3 text-xs text-slate-600">No paid mock attempts recorded yet.</p>
-                    ) : (
-                      <ul className="space-y-3">
-                        {paidAttemptSummaries.map((attempt) => (
-                          <li key={attempt.key} className="rounded-md border border-slate-200 p-3">
-                            <div className="flex items-start justify-between gap-3">
-                              <div>
-                                <p className="text-[17px] font-medium text-slate-900">Attempt {attempt.attemptNumber}</p>
-                                <p className="mt-1 text-[14px] text-slate-600">{renderComponentLabel("Listening")}: {renderBandValue(attempt.moduleBands.listening)}</p>
-                                <p className="text-[14px] text-slate-600">{renderComponentLabel("Reading")}: {renderBandValue(attempt.moduleBands.reading)}</p>
-                                <p className="text-[14px] text-slate-600">{renderComponentLabel("Writing")}: {attempt.pendingRelease && attempt.moduleBands.writing == null ? <span className="text-red-600 font-bold">wait (12h)</span> : renderBandValue(attempt.moduleBands.writing)}</p>
-                                <p className="text-[14px] text-slate-600">{renderComponentLabel("Speaking")}: {attempt.moduleBands.speaking == null ? renderNotAvailableValue() : renderBandValue(attempt.moduleBands.speaking)}</p>
-                                <p className="mt-1 text-[14px] text-slate-600">Updated: {formatShortDateTime(attempt.updatedAt || "")}</p>
-                              </div>
-                              <div className="text-right">
-                                <p className="text-[15px] font-bold text-blue-600">Overall</p>
-                                <p className="text-[17px] font-bold text-blue-600">
-                                  {attempt.overallBand == null ? (attempt.pendingRelease ? <span className="text-red-600">wait</span> : "—") : `Band ${Number(attempt.overallBand).toFixed(1)}`}
-                                </p>
-                              </div>
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
+                <div className="mb-2 flex items-center justify-between">
+                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#DA2C43]">
+                    {String(latestPaperAttemptSummaries.paper).padStart(2, "0")} Test
+                  </p>
+                  <p className="text-[11px] font-semibold text-slate-500">Latest test taken</p>
                 </div>
+                <ul className="space-y-3">
+                  {latestPaperAttemptSummaries.attempts.map((attempt) => {
+                    const labels = ["First", "Second", "Third", "Fourth"];
+                    const attemptLabel = labels[attempt.attemptNumber - 1] || `${attempt.attemptNumber}th`;
+                    return (
+                      <li key={attempt.key} className="rounded-md border border-slate-200 p-3">
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <p className="text-[17px] font-bold text-slate-900">
+                              {String(latestPaperAttemptSummaries.paper).padStart(2, "0")} Test {attemptLabel} Attempt
+                            </p>
+                            <p className="mt-1 text-[14px] text-slate-600">{renderComponentLabel("Listening")}: {renderBandValue(attempt.moduleBands.listening)}</p>
+                            <p className="text-[14px] text-slate-600">{renderComponentLabel("Reading")}: {renderBandValue(attempt.moduleBands.reading)}</p>
+                            <p className="text-[14px] text-slate-600">{renderComponentLabel("Writing")}: {attempt.pendingRelease && attempt.moduleBands.writing == null ? <span className="text-red-600 font-bold">wait (12h)</span> : renderBandValue(attempt.moduleBands.writing)}</p>
+                            <p className="text-[14px] text-slate-600">{renderComponentLabel("Speaking")}: {
+                              attempt.moduleBands.speaking != null
+                                ? renderBandValue(attempt.moduleBands.speaking)
+                                : attempt.speakingBookingStatus === "booked"
+                                  ? <span className="font-bold text-blue-600">Booked</span>
+                                  : attempt.speakingBookingStatus === "completed"
+                                    ? <span className="text-red-600 font-bold">wait (48h)</span>
+                                    : renderNotAvailableValue()
+                            }</p>
+                            <p className="mt-1 text-[14px] text-slate-600">Updated: {formatShortDateTime(attempt.updatedAt || "")}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-[15px] font-bold text-blue-600">Overall</p>
+                            <p className="text-[17px] font-bold text-blue-600">
+                              {attempt.overallBand == null
+                                ? attempt.pendingRelease
+                                  ? <span className="text-red-600">wait</span>
+                                  : attempt.speakingBookingStatus === "booked"
+                                    ? <span className="text-blue-600">Booked</span>
+                                    : attempt.speakingBookingStatus === "completed"
+                                      ? <span className="text-red-600">wait (48h)</span>
+                                      : "—"
+                                : `Band ${Number(attempt.overallBand).toFixed(1)}`}
+                            </p>
+                          </div>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
               </div>
             )
           ) : (
@@ -1325,7 +1573,12 @@ export default function DashboardPage() {
         <DashboardCard title={<span className="text-lg font-bold text-[#DA2C43]">Speaking Test</span>}>
           {usingLive ? (
             (() => {
-              const speakingPackage = String(liveOverview.progress.speakingPackage || "").trim() || "-";
+              const latestCompletedWriting = [...liveOverview.results]
+                .filter((result) => String(result.module || "").trim().toLowerCase() === "writing")
+                .sort((left, right) => String(right.updatedAt || right.createdAt || "").localeCompare(String(left.updatedAt || left.createdAt || "")))[0];
+              const completedPaperNumber = Number(latestCompletedWriting?.paper) || 0;
+              const completedPaper = completedPaperNumber >= 1 && completedPaperNumber <= 10 ? completedPaperNumber : 0;
+              const speakingTest = completedPaper ? `${String(completedPaper).padStart(2, "0")} Test` : "-";
               const speakingAllocated = Number(liveOverview.progress.speakingSlotsAllocated || 0) || 0;
               const speakingBooked = Number(liveOverview.progress.speakingSlotsBooked || 0) || 0;
               const speakingCompleted = Number(liveOverview.progress.speakingSlotsCompleted || 0) || 0;
@@ -1334,6 +1587,8 @@ export default function DashboardPage() {
                 ? liveOverview.speakingBookings
                 : liveOverview.speakingAvailability.map((slot) => ({
                     id: slot.id,
+                    slotId: slot.id,
+                    packageName: "",
                     examinerName: slot.examinerName,
                     startTs: slot.startTs,
                     endTs: slot.endTs,
@@ -1351,7 +1606,7 @@ export default function DashboardPage() {
               return (
                 <div className="space-y-3">
                   <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="rounded-md border border-slate-200 bg-slate-50 p-2"><span className="font-semibold text-slate-700">Package:</span> {speakingPackage}</div>
+                    <div className="rounded-md border border-slate-200 bg-slate-50 p-2"><span className="font-semibold text-slate-700">Test:</span> {speakingTest}</div>
                     <div className="rounded-md border border-slate-200 bg-slate-50 p-2"><span className="font-semibold text-slate-700">Allocated:</span> {speakingAllocated}</div>
                     <div className="rounded-md border border-slate-200 bg-slate-50 p-2"><span className="font-semibold text-slate-700">Booked:</span> {speakingBooked}</div>
                     <div className="rounded-md border border-slate-200 bg-slate-50 p-2"><span className="font-semibold text-slate-700">Completed:</span> {speakingCompleted}</div>
@@ -1364,28 +1619,48 @@ export default function DashboardPage() {
                     <ul className="space-y-2 max-h-72 overflow-y-auto pr-1">
                       {speakingRows.map((slot) => {
                         const status = String(slot.status || "").trim().toLowerCase() || "unknown";
-                        const statusLabel = status.charAt(0).toUpperCase() + status.slice(1);
-                        const statusTone = status === "completed"
+                        const packageTestLabel = String(slot.packageName || "").trim();
+                        const slotTestLabel = /^\d{1,2} Test$/i.test(packageTestLabel) ? packageTestLabel : speakingTest;
+                        const joinState = getSpeakingJoinState(slot, clockNowMs, slotTestLabel);
+                        const statusLabel = joinState.statusLabel;
+                        const statusTone = statusLabel === "Completed"
                           ? "text-emerald-700"
-                          : status === "booked"
+                          : statusLabel === "Incomplete"
+                            ? "text-red-700"
+                            : status === "booked"
                             ? "text-red-600"
                             : "text-blue-600";
-                        const joinState = getSpeakingJoinState(slot, clockNowMs);
+                        const isCompleting = completingSpeakingSlotId === String(slot.slotId || slot.id || "");
 
                         return (
-                          <li key={slot.id || `${slot.examinerName}-${slot.startTs}`} className="rounded-md border border-slate-200 p-3">
-                            <p className="text-[15px] font-semibold text-slate-900">Speaking Session</p>
-                            <p className="mt-1 text-xs text-slate-600">{formatShortDateTime(slot.startTs || "")}</p>
-                            <p className="mt-1 text-xs text-slate-600">{slot.examinerName || "Examiner"} · {slot.durationMinutes || 0} min</p>
-                            <p className={`mt-1 text-xs font-semibold ${statusTone}`}>Status: {statusLabel}</p>
-                            <div className="mt-2">
+                          <li key={slot.id || `${slot.examinerName}-${slot.startTs}`} className="rounded-xl border border-slate-200 bg-gradient-to-br from-white to-slate-50 p-3 shadow-sm">
+                            <div className="flex items-start justify-between gap-3">
+                              <div>
+                                <p className="text-[15px] font-bold text-slate-900">Speaking Session · {slotTestLabel}</p>
+                                <p className="mt-0.5 text-xs text-slate-600">{slot.examinerName || "Examiner"} · {slot.durationMinutes || 0} min</p>
+                              </div>
+                              <span className={`rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-bold ${statusTone}`}>{statusLabel}</span>
+                            </div>
+                            <div className="mt-3 rounded-lg border border-[#DA2C43]/20 bg-[#FFF5F6] px-3 py-2.5">
+                              <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#B81F36]">Speaking date and time</p>
+                              <p className="mt-1 text-sm font-bold text-slate-900">{formatSriLankaDateTime(slot.startTs || "")}</p>
+                            </div>
+                            <div className="mt-3">
                               {joinState.disabled ? (
                                 <button type="button" disabled className={joinState.className}>
                                   {joinState.label}
                                 </button>
                               ) : (
-                                <a href={joinState.href} target="_blank" rel="noreferrer" className={joinState.className}>
-                                  {joinState.label}
+                                <a
+                                  href={joinState.href}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className={joinState.className}
+                                  onClick={() => {
+                                    void completeSpeakingSession(String(slot.slotId || slot.id || ""));
+                                  }}
+                                >
+                                  {isCompleting ? "Joining..." : joinState.label}
                                 </a>
                               )}
                             </div>
@@ -1394,6 +1669,7 @@ export default function DashboardPage() {
                       })}
                     </ul>
                   )}
+                  {speakingActionMessage ? <p className="text-xs font-semibold text-red-700">{speakingActionMessage}</p> : null}
                 </div>
               );
             })()
@@ -1410,7 +1686,7 @@ export default function DashboardPage() {
         <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
           <div>
             <p className="text-[0.68rem] font-extrabold uppercase tracking-[0.22em] text-[#DA2C43]">Action Hub</p>
-            <h2 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-[1.8rem]">Your next IELTS step</h2>
+            <h2 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-[1.8rem]">IELTS Academic</h2>
             <p className="mt-1 text-sm text-slate-600">Book a package, start a test, or pick up where you left off.</p>
           </div>
           <span className="rounded-full border border-slate-200 bg-white/80 px-3 py-1.5 text-xs font-bold text-slate-600 shadow-sm">
@@ -1418,9 +1694,9 @@ export default function DashboardPage() {
           </span>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 2xl:grid-cols-[1064px_minmax(220px,1fr)]">
+        <div className="grid grid-cols-1 gap-4">
           <div className="space-y-4">
-          <div className="max-w-[1064px] rounded-[22px] border border-slate-200 bg-white/90 p-3 shadow-[0_8px_24px_rgba(15,23,43,0.05)] sm:p-4">
+          <div className="w-full max-w-none rounded-[22px] border border-slate-200 bg-white/90 p-3 shadow-[0_8px_24px_rgba(15,23,43,0.05)] sm:p-4">
             <div className="mb-3 flex items-center justify-between gap-2">
               <div>
                 <h3 className="text-xl font-bold tracking-tight text-slate-900">Your test slots</h3>
@@ -1441,19 +1717,22 @@ export default function DashboardPage() {
                 const testLabel = `${String(paper).padStart(2, "0")} Test`;
                 const attempts = completedSlotAttempts.get(paper);
                 const initialCompleted = attempts?.has("initial") || false;
-                const retakeCompleted = attempts?.has("retake") || false;
                 const booked = bookedPapers.has(paper);
-                const bookingAvailable = paper === 1 || bookedPapers.has(paper - 1);
+                const bookingAvailable = paper === 1 || completedSlotAttempts.get(paper - 1)?.has("initial");
                 const canBook = bookingAvailable && !booked;
                 const initialAvailable = booked && !initialCompleted;
-                const retakeAvailable = initialCompleted && !retakeCompleted;
+                const retakeAttemptsTaken = retakeAttemptIdsByPaper.get(paper)?.size || 0;
+                const paidRetakeEntitlements = paidRetakeEntitlementsByPaper.get(paper) || 0;
+                const retakeAvailable = initialCompleted && retakeAttemptsTaken < 1 + paidRetakeEntitlements;
+                const canPurchaseRetake = initialCompleted && paidRetakeEntitlements < MAX_PAID_RETAKES_PER_TEST && retakeAttemptsTaken >= 1 + paidRetakeEntitlements;
+                const paidRetakeLimitReached = paidRetakeEntitlements >= MAX_PAID_RETAKES_PER_TEST && !retakeAvailable;
                 const initialUrl = testEntryUrl(paper, "initial");
                 const retakeUrl = testEntryUrl(paper, "retake");
 
                 return (
                   <div
                     key={paper}
-                    className="grid grid-cols-[130px_220px_65px_220px_220px] justify-start gap-1.5 rounded-xl border border-slate-100 bg-slate-50/80 p-1.5 transition hover:border-slate-200 hover:bg-white sm:gap-2"
+                    className="grid grid-cols-[minmax(100px,1fr)_minmax(160px,1.5fr)_minmax(60px,0.65fr)_repeat(2,minmax(150px,1.45fr))_minmax(140px,1.35fr)_minmax(160px,1.5fr)] gap-1.5 rounded-xl border border-slate-100 bg-slate-50/80 p-1.5 transition hover:border-slate-200 hover:bg-white sm:gap-2"
                   >
                     <p className="whitespace-nowrap rounded-lg bg-emerald-600 px-3 py-2 text-center text-base font-extrabold tracking-tight text-white shadow-sm shadow-emerald-900/15 sm:text-lg">{testLabel}</p>
                     <button
@@ -1466,13 +1745,13 @@ export default function DashboardPage() {
                         }
                         setBookingGuidancePaper(paper);
                       }}
-                      className={`rounded-lg border px-1 py-2 text-center text-[18px] leading-tight transition focus-visible:outline-none focus-visible:ring-2 ${booked ? "cursor-default border-blue-200 bg-blue-50 font-bold text-blue-700 disabled:cursor-default disabled:bg-blue-50 disabled:text-blue-700 disabled:opacity-100" : "border-slate-200 bg-white font-semibold text-slate-700 hover:border-indigo-300 hover:text-indigo-700 focus-visible:ring-indigo-500 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"}`}
+                      className={`rounded-lg border px-1 py-2 text-center text-[18px] leading-tight transition focus-visible:outline-none focus-visible:ring-2 ${booked ? "cursor-default border-slate-300 bg-slate-200 font-bold text-slate-900 shadow-sm shadow-slate-300/40 disabled:cursor-default disabled:bg-slate-200 disabled:text-slate-900 disabled:opacity-100" : "border-slate-200 bg-white font-semibold text-slate-700 hover:border-indigo-300 hover:text-indigo-700 focus-visible:ring-indigo-500 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"}`}
                       aria-label={`Book ${testLabel}`}
                     >
-                      {booked ? "Booked Test" : bookingPaper === paper ? "Opening PayHere..." : "Book the Test"}
+                      {booked ? "Test Booked" : bookingPaper === paper ? "Opening PayHere..." : "Book the Test"}
                     </button>
                     <p className="whitespace-nowrap text-center text-[18px] font-bold text-slate-900" aria-label={`${testLabel} price`}>
-                      $12.99
+                      $14.99
                     </p>
                     <a
                       href={initialUrl}
@@ -1486,7 +1765,7 @@ export default function DashboardPage() {
                       className={`rounded-lg px-1 py-2 text-center text-[18px] font-bold leading-tight transition focus-visible:outline-none focus-visible:ring-2 ${initialAvailable ? "bg-[#DA2C43] text-white shadow-sm shadow-rose-900/10 hover:-translate-y-0.5 hover:bg-[#b81f36] focus-visible:ring-rose-500" : "cursor-not-allowed bg-slate-100 text-slate-400"}`}
                       aria-label={`Take ${testLabel} now`}
                     >
-                      Take the Test Now
+                      {initialCompleted ? "Test Completed" : "Take the Test Now"}
                     </a>
                     <a
                       href={retakeUrl}
@@ -1497,11 +1776,40 @@ export default function DashboardPage() {
                       onClick={(event) => {
                         if (!retakeAvailable) event.preventDefault();
                       }}
-                      className={`rounded-lg border px-1 py-2 text-center text-[18px] font-semibold leading-tight transition focus-visible:outline-none focus-visible:ring-2 ${retakeAvailable ? "border-amber-200 bg-amber-50 text-amber-800 hover:border-amber-300 hover:bg-amber-100 focus-visible:ring-amber-500" : "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400"}`}
+                      className={`rounded-lg border px-1 py-2 text-center text-[18px] leading-tight transition focus-visible:outline-none focus-visible:ring-2 ${retakeAvailable ? "border-[#DA2C43] bg-[#DA2C43] font-bold text-white shadow-sm shadow-rose-900/20 hover:-translate-y-0.5 hover:bg-[#b81f36] focus-visible:ring-rose-500" : "cursor-not-allowed border-slate-200 bg-slate-100 font-semibold text-slate-400"}`}
                       aria-label={`Retake ${testLabel}`}
                     >
-                      Retake the Test
+                      {retakeAvailable ? "Retake Available" : retakeAttemptsTaken > 0 ? "Retake Completed" : "Retake the Test"}
                     </a>
+                    <button
+                      type="button"
+                      disabled={booked}
+                      onClick={() => {
+                        setTokenPaper(paper);
+                        setTokenCode("");
+                        setTokenMessage("");
+                      }}
+                      className={`rounded-lg border px-1 py-2 text-center text-[18px] leading-tight transition focus-visible:outline-none focus-visible:ring-2 ${booked ? "cursor-default border-slate-300 bg-slate-200 font-bold text-slate-900 shadow-sm shadow-slate-300/40 disabled:cursor-default disabled:bg-slate-200 disabled:text-slate-900 disabled:opacity-100" : "border-indigo-200 bg-indigo-50 font-semibold text-indigo-800 hover:border-indigo-300 hover:bg-indigo-100 focus-visible:ring-indigo-500"}`}
+                      aria-label={`Use a token for ${testLabel}`}
+                    >
+                      {booked ? "Test Booked" : "Use a Token"}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={!canPurchaseRetake || bookingPaper !== null}
+                      onClick={() => setRetakePurchasePaper(paper)}
+                      className={`rounded-lg border px-1 py-1.5 text-center text-base leading-tight transition focus-visible:outline-none focus-visible:ring-2 ${canPurchaseRetake && bookingPaper === null ? "border-[#DA2C43] bg-[#DA2C43] font-bold text-white shadow-sm shadow-rose-900/20 hover:-translate-y-0.5 hover:bg-[#b81f36] focus-visible:ring-rose-500" : "cursor-not-allowed border-slate-200 bg-slate-100 font-semibold text-slate-400"}`}
+                      aria-label={`Take ${testLabel} again for $2.00`}
+                    >
+                      {paidRetakeLimitReached ? (
+                        <span className="block">Retake Limit Reached</span>
+                      ) : (
+                        <>
+                          <span className="block">Take Test Again</span>
+                          <span className="block text-sm font-bold">$2.00</span>
+                        </>
+                      )}
+                    </button>
                   </div>
                 );
               })}
@@ -1547,36 +1855,6 @@ export default function DashboardPage() {
           </aside>
           </div>
 
-          <aside className="self-start rounded-[22px] border border-slate-200 bg-white/90 p-4 shadow-[0_8px_24px_rgba(15,23,43,0.05)] 2xl:sticky 2xl:top-4">
-            <p className="text-[0.68rem] font-extrabold uppercase tracking-[0.22em] text-[#DA2C43]">Test results</p>
-            <h3 className="mt-1 text-xl font-bold tracking-tight text-slate-900">Your Results</h3>
-            <p className="mt-2 text-sm leading-5 text-slate-600">Results become available here after you complete each test.</p>
-
-            <div className="mt-4 space-y-2">
-              {Array.from({ length: 10 }, (_, index) => {
-                const paper = index + 1;
-                const initialCompleted = completedSlotAttempts.get(paper)?.has("initial") || false;
-                const testLabel = `${String(paper).padStart(2, "0")} Test`;
-
-                return (
-                  <div key={paper} className="flex items-center justify-between gap-2 rounded-lg border border-slate-100 bg-slate-50/80 px-2.5 py-2">
-                    <p className="whitespace-nowrap text-sm font-bold text-slate-700">{testLabel}</p>
-                    <a
-                      href="#tests-taken"
-                      aria-disabled={!initialCompleted}
-                      tabIndex={!initialCompleted ? -1 : undefined}
-                      onClick={(event) => {
-                        if (!initialCompleted) event.preventDefault();
-                      }}
-                      className={`rounded-md px-2 py-1 text-xs font-bold transition ${initialCompleted ? "bg-blue-600 text-white hover:bg-blue-700" : "cursor-not-allowed bg-slate-200 text-slate-400"}`}
-                    >
-                      {initialCompleted ? "View Results" : "Results"}
-                    </a>
-                  </div>
-                );
-              })}
-            </div>
-          </aside>
         </div>
       </section>
       {bookingGuidancePaper != null && nextBookingPaper != null && (
@@ -1611,6 +1889,135 @@ export default function DashboardPage() {
                 className="rounded-lg bg-[#DA2C43] px-4 py-2 font-bold text-white transition hover:bg-[#b81f36]"
               >
                 Book Test {String(nextBookingPaper).padStart(2, "0")} now
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
+      {retakePurchasePaper != null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 p-4" role="presentation">
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="retake-purchase-title"
+            className="w-full max-w-md rounded-2xl bg-white p-6 text-center shadow-2xl"
+          >
+            <p className="text-sm font-extrabold uppercase tracking-[0.16em] text-violet-700">Retake entitlement</p>
+            <h2 id="retake-purchase-title" className="mt-2 text-2xl font-bold text-slate-900">
+              Take {String(retakePurchasePaper).padStart(2, "0")} Test Again
+            </h2>
+            <p className="mt-3 text-base leading-6 text-slate-600">
+              Purchase one retake for $2.00 USD. Retakes include Listening, Reading, and Writing only; they do not include a Speaking test.
+            </p>
+            <div className="mt-6 grid gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  const paper = retakePurchasePaper;
+                  setRetakePurchasePaper(null);
+                  void startPayHerePayment(paper, "retake");
+                }}
+                className="rounded-lg bg-violet-700 px-4 py-3 font-bold text-white transition hover:bg-violet-800"
+              >
+                Pay with Payment Gateway — $2.00
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setRetakeTokenPaper(retakePurchasePaper);
+                  setRetakePurchasePaper(null);
+                  setRetakeTokenCode("");
+                  setRetakeTokenMessage("");
+                }}
+                className="rounded-lg border border-violet-200 bg-violet-50 px-4 py-3 font-bold text-violet-800 transition hover:bg-violet-100"
+              >
+                Use Your Retake Token
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={() => setRetakePurchasePaper(null)}
+              className="mt-5 font-semibold text-slate-600 underline decoration-slate-300 underline-offset-4 transition hover:text-slate-900"
+            >
+              Not now
+            </button>
+          </section>
+        </div>
+      )}
+      {retakeTokenPaper != null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 p-4" role="presentation">
+          <section role="dialog" aria-modal="true" aria-labelledby="retake-token-redemption-title" className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+            <p className="text-sm font-extrabold uppercase tracking-[0.16em] text-violet-700">Retake token</p>
+            <h2 id="retake-token-redemption-title" className="mt-2 text-2xl font-bold text-slate-900">
+              Activate {String(retakeTokenPaper).padStart(2, "0")} Test Retake
+            </h2>
+            <p className="mt-3 text-base leading-6 text-slate-600">
+              Enter your $2.00 USD retake token. It can be used once and activates Listening, Reading, and Writing only.
+            </p>
+            <label className="mt-5 block text-sm font-bold text-slate-800" htmlFor="retake-token-code">Retake token code</label>
+            <input
+              id="retake-token-code"
+              value={retakeTokenCode}
+              onChange={(event) => setRetakeTokenCode(event.target.value)}
+              autoComplete="off"
+              disabled={redeemingRetakeToken}
+              className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 font-mono text-sm uppercase text-slate-900 outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-200 disabled:bg-slate-100"
+              placeholder="IELTS-RETAKE-..."
+            />
+            {retakeTokenMessage && <p className="mt-3 text-sm font-semibold text-rose-700" role="alert">{retakeTokenMessage}</p>}
+            <div className="mt-6 flex flex-wrap justify-end gap-3">
+              <button type="button" disabled={redeemingRetakeToken} onClick={() => setRetakeTokenPaper(null)} className="rounded-lg border border-slate-200 px-4 py-2 font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60">Cancel</button>
+              <button type="button" disabled={redeemingRetakeToken} onClick={() => void redeemRetakeToken()} className="rounded-lg bg-violet-700 px-4 py-2 font-bold text-white transition hover:bg-violet-800 disabled:cursor-not-allowed disabled:opacity-60">
+                {redeemingRetakeToken ? "Redeeming..." : "Use Retake Token"}
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
+      {tokenPaper != null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 p-4" role="presentation">
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="token-redemption-title"
+            className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl"
+          >
+            <p className="text-sm font-extrabold uppercase tracking-[0.16em] text-indigo-700">Test booking token</p>
+            <h2 id="token-redemption-title" className="mt-2 text-2xl font-bold text-slate-900">
+              Book {String(tokenPaper).padStart(2, "0")} Test with a token
+            </h2>
+            <p className="mt-3 text-base leading-6 text-slate-600">
+              Enter the $14.99 USD token provided by your institution. It can be used only once and will be deactivated immediately after booking this test.
+            </p>
+            <label className="mt-5 block text-sm font-bold text-slate-800" htmlFor="test-token-code">
+              Token code
+            </label>
+            <input
+              id="test-token-code"
+              value={tokenCode}
+              onChange={(event) => setTokenCode(event.target.value)}
+              autoComplete="off"
+              disabled={redeemingToken}
+              className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 font-mono text-sm uppercase text-slate-900 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 disabled:bg-slate-100"
+              placeholder="IELTS-RTK-..."
+            />
+            {tokenMessage && <p className="mt-3 text-sm font-semibold text-rose-700" role="alert">{tokenMessage}</p>}
+            <div className="mt-6 flex flex-wrap justify-end gap-3">
+              <button
+                type="button"
+                disabled={redeemingToken}
+                onClick={() => setTokenPaper(null)}
+                className="rounded-lg border border-slate-200 px-4 py-2 font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={redeemingToken}
+                onClick={() => void redeemToken()}
+                className="rounded-lg bg-indigo-700 px-4 py-2 font-bold text-white transition hover:bg-indigo-800 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {redeemingToken ? "Redeeming..." : "Use Token"}
               </button>
             </div>
           </section>

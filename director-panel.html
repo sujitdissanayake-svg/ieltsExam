@@ -195,6 +195,7 @@
       .panel2-nav-symbol.sessions { background-color: #f7f6ee; }
       .panel2-nav-symbol.results { background-color: #eff2fb; }
       .panel2-nav-symbol.future-ready { background-color: #eef8f6; }
+      .panel2-nav-symbol.retake-tokens { background-color: #f7f0fb; }
       .panel2-nav-symbol.mock-packages { background-color: #fbf2ee; }
 
       .panel2-resizer {
@@ -315,6 +316,88 @@
         padding: 22px;
       }
 
+      .panel2-tokens-card {
+        border: 1px solid #d9e2ef;
+        border-radius: 14px;
+        background: #ffffff;
+        box-shadow: 0 14px 30px rgba(24, 38, 60, 0.08);
+        padding: 20px;
+      }
+
+      .panel2-tokens-grid {
+        display: grid;
+        grid-template-columns: minmax(180px, 260px) auto;
+        align-items: end;
+        gap: 12px;
+        margin-top: 18px;
+      }
+
+      .panel2-token-codes {
+        margin: 12px 0 0;
+        max-height: 220px;
+        overflow: auto;
+        white-space: pre-wrap;
+        border: 1px solid #dbe5f2;
+        border-radius: 10px;
+        background: #f8fbff;
+        color: #1f2a3a;
+        font: 700 0.9rem/1.7 ui-monospace, SFMono-Regular, Menlo, monospace;
+        padding: 12px;
+      }
+
+      .panel2-token-selection-all {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+        font-family: inherit;
+        font-size: 0.85rem;
+      }
+
+      .panel2-token-code-option {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .panel2-token-table-wrap {
+        margin-top: 20px;
+        overflow-x: auto;
+      }
+
+      .panel2-token-table-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .panel2-token-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.84rem;
+      }
+
+      .panel2-token-table th,
+      .panel2-token-table td {
+        border-bottom: 1px solid #e4eaf2;
+        padding: 10px;
+        text-align: left;
+      }
+
+      .panel2-token-status {
+        border-radius: 999px;
+        display: inline-block;
+        font-size: 0.72rem;
+        font-weight: 800;
+        padding: 4px 8px;
+        text-transform: uppercase;
+      }
+
+      .panel2-token-status.active { background: #dcfce7; color: #166534; }
+      .panel2-token-status.used { background: #fee2e2; color: #b91c1c; }
+      .panel2-token-status.disabled { background: #e5e7eb; color: #475569; }
+
       .panel2-mock-labels {
         display: flex;
         flex-wrap: wrap;
@@ -341,46 +424,13 @@
         border-color: #bdd1ef;
       }
 
-      .panel2-mock-menu {
-        position: relative;
-      }
-
-      .panel2-mock-menu[open] ~ .panel2-free-mock-label {
-        display: none;
-      }
-
-      .panel2-mock-menu summary {
-        list-style: none;
-        cursor: pointer;
-      }
-
-      .panel2-mock-menu summary::-webkit-details-marker {
-        display: none;
-      }
-
-      .panel2-mock-sub-labels {
-        margin-top: 8px;
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 10px;
-        padding: 10px;
-        border: 1px solid #d7e2f2;
-        border-radius: 12px;
-        background: #ffffff;
-      }
-
       .panel2-mock-type-menu {
         min-width: 180px;
       }
 
-      .panel2-mock-sub-labels[data-active-type="academic"] .panel2-mock-type-menu[data-type="general"],
-      .panel2-mock-sub-labels[data-active-type="general"] .panel2-mock-type-menu[data-type="academic"] {
-        display: none;
-      }
-
       .panel2-mock-type-menu summary {
         list-style: none;
+        cursor: pointer;
       }
 
       .panel2-mock-type-menu summary::-webkit-details-marker {
@@ -550,6 +600,15 @@
         border-color: #efc5ca;
         color: #8e1d2a;
         background: #fff6f7;
+      }
+
+      .panel2-btn.success,
+      .panel2-btn.success:disabled {
+        border-color: #b7dfc6;
+        color: #176b3a;
+        background: #edf9f1;
+        cursor: default;
+        opacity: 1;
       }
 
       .panel2-candidate-email-box {
@@ -1108,11 +1167,41 @@
         display: inline-block;
         padding: 3px 8px;
         border-radius: 999px;
-        background: #eef4ff;
-        color: #24518f;
         font-size: 0.75rem;
         font-weight: 800;
-        text-transform: capitalize;
+      }
+
+      .panel2-session-status.is-complete {
+        background: #dcfce7;
+        color: #166534;
+      }
+
+      .panel2-session-status.is-incomplete {
+        background: #fee2e2;
+        color: #b91c1c;
+      }
+
+      .panel2-session-recording-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .panel2-session-recording-btn {
+        border: 1px solid #cddaf0;
+        border-radius: 7px;
+        background: #f8fbff;
+        color: #24518f;
+        cursor: pointer;
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 5px 7px;
+      }
+
+      .panel2-session-recording-btn.is-delete {
+        border-color: #fecaca;
+        background: #fff7f7;
+        color: #b91c1c;
       }
 
       .panel2-examiner-reset-btn {
@@ -1227,7 +1316,11 @@
               </button>
               <button class="panel2-nav-item" type="button" data-panel="future-ready-panel">
                 <span class="panel2-nav-symbol future-ready" aria-hidden="true"></span>
-                <span>Future Ready</span>
+                <span>Tokens</span>
+              </button>
+              <button class="panel2-nav-item" type="button" data-panel="retake-tokens-panel">
+                <span class="panel2-nav-symbol retake-tokens" aria-hidden="true"></span>
+                <span>Retake Tokens</span>
               </button>
               <button class="panel2-nav-item" type="button" data-panel="mock-packages-panel">
                 <span class="panel2-nav-symbol mock-packages" aria-hidden="true"></span>
@@ -1253,7 +1346,7 @@
             <section id="candidates-panel" class="panel2-panel" aria-label="Candidates panel">
               <section class="panel2-candidates-card" aria-label="Live candidates from admin panel">
                 <p class="panel2-candidates-kicker">Candidates</p>
-                <h2 class="panel2-candidates-title">Registered candidates and free-mock leads</h2>
+                <h2 class="panel2-candidates-title">Registered candidates and 01 Test leads</h2>
                 <p class="panel2-candidates-copy">Filter candidates by name, email, WhatsApp, candidate number, or payment status. Data updates automatically from the admin source.</p>
 
                 <div class="panel2-candidates-filters">
@@ -1357,7 +1450,7 @@
                   <div class="panel2-field">
                     <label for="panel2-performance-type">Test type</label>
                     <select id="panel2-performance-type">
-                      <option value="free">Free Mock Test</option>
+                      <option value="free">01 Test</option>
                       <option value="mock">Mock Test</option>
                     </select>
                   </div>
@@ -1434,7 +1527,7 @@
                   <div class="panel2-field">
                     <label for="panel2-result-review-mode">Test mode</label>
                     <select id="panel2-result-review-mode">
-                      <option value="free">Free Mock</option>
+                      <option value="free">01 Test</option>
                       <option value="mock">Mock Test (Paid)</option>
                     </select>
                   </div>
@@ -1458,106 +1551,70 @@
                 <p id="panel2-results-note" class="panel2-results-note"></p>
               </section>
             </section>
-            <section id="future-ready-panel" class="panel2-panel" aria-label="Future ready panel"><div class="panel2-empty-card">Future Ready section is ready for content.</div></section>
+            <section id="future-ready-panel" class="panel2-panel" aria-label="Tokens panel">
+              <section class="panel2-tokens-card" aria-labelledby="panel2-tokens-title">
+                <p class="panel2-results-kicker">Tokens</p>
+                <h2 id="panel2-tokens-title" class="panel2-results-title">Generate Tokens</h2>
+                <p class="panel2-results-copy">Each token is worth $14.99 USD and books one test selected by the learner. A token is permanently deactivated immediately after it is used.</p>
+                <form id="panel2-token-form" class="panel2-tokens-grid">
+                  <div class="panel2-field">
+                    <label for="panel2-token-quantity">How many tokens?</label>
+                    <input id="panel2-token-quantity" type="number" min="1" max="100" value="1" required />
+                  </div>
+                  <div class="panel2-results-actions">
+                    <button id="panel2-token-generate-btn" class="panel2-btn" type="submit">Generate Tokens</button>
+                    <button id="panel2-token-copy-btn" class="panel2-btn" type="button" disabled>Copy selected tokens</button>
+                  </div>
+                </form>
+                <p id="panel2-tokens-note" class="panel2-results-note" aria-live="polite"></p>
+                <div id="panel2-token-codes" class="panel2-token-codes" hidden></div>
+                <div class="panel2-token-table-wrap">
+                  <div class="panel2-token-table-heading"><h3 class="panel2-results-title">Token activity</h3><button id="panel2-clear-tokens-btn" class="panel2-btn danger" type="button">Delete all tokens</button></div>
+                  <table class="panel2-token-table">
+                    <thead><tr><th>No.</th><th>Token</th><th>Status</th><th>Candidate number</th><th>Test</th><th>Used at</th><th>Created</th><th>Action</th></tr></thead>
+                    <tbody id="panel2-token-table-body"><tr><td colspan="8">Sign in to load tokens.</td></tr></tbody>
+                  </table>
+                </div>
+              </section>
+            </section>
+            <section id="retake-tokens-panel" class="panel2-panel" aria-label="Retake Tokens panel">
+              <section class="panel2-tokens-card" aria-labelledby="panel2-retake-tokens-title">
+                <p class="panel2-results-kicker">Retake Tokens</p>
+                <h2 id="panel2-retake-tokens-title" class="panel2-results-title">Generate Retake Tokens</h2>
+                <p class="panel2-results-copy">Each token is worth $2.00 USD and activates one Listening, Reading, and Writing retake. It is permanently deactivated after use.</p>
+                <form id="panel2-retake-token-form" class="panel2-tokens-grid">
+                  <div class="panel2-field">
+                    <label for="panel2-retake-token-quantity">How many retake tokens?</label>
+                    <input id="panel2-retake-token-quantity" type="number" min="1" max="100" value="1" required />
+                  </div>
+                  <div class="panel2-results-actions">
+                    <button id="panel2-retake-token-generate-btn" class="panel2-btn" type="submit">Generate Retake Tokens</button>
+                    <button id="panel2-retake-token-copy-btn" class="panel2-btn" type="button" disabled>Copy selected tokens</button>
+                  </div>
+                </form>
+                <p id="panel2-retake-tokens-note" class="panel2-results-note" aria-live="polite"></p>
+                <div id="panel2-retake-token-codes" class="panel2-token-codes" hidden></div>
+                <div class="panel2-token-table-wrap">
+                  <div class="panel2-token-table-heading"><h3 class="panel2-results-title">Retake token activity</h3><button id="panel2-clear-retake-tokens-btn" class="panel2-btn danger" type="button">Delete all retake tokens</button></div>
+                  <table class="panel2-token-table">
+                    <thead><tr><th>No.</th><th>Token</th><th>Status</th><th>Candidate number</th><th>Test</th><th>Used at</th><th>Created</th><th>Action</th></tr></thead>
+                    <tbody id="panel2-retake-token-table-body"><tr><td colspan="8">Sign in to load retake tokens.</td></tr></tbody>
+                  </table>
+                </div>
+              </section>
+            </section>
             <section id="mock-packages-panel" class="panel2-panel" aria-label="Develop IELTS Papers panel">
               <div class="panel2-empty-card">
                 <div class="panel2-mock-labels" aria-label="Mock test labels">
-                  <details class="panel2-mock-menu" aria-label="Mock Tests with types">
-                    <summary class="panel2-mock-label">Mock Tests</summary>
-                    <div class="panel2-mock-sub-labels" aria-label="Mock Tests type labels">
-                      <details class="panel2-mock-type-menu" data-type="academic" aria-label="Academic mock package labels">
-                        <summary class="panel2-mock-label">Academic</summary>
-                        <div class="panel2-mock-package-labels" aria-label="Academic package labels">
-                          <details class="panel2-mock-package-menu" aria-label="Academic lite papers">
-                            <summary class="panel2-mock-label">Lite</summary>
-                            <div class="panel2-mock-paper-labels" aria-label="Academic lite paper labels">
-                              <a class="panel2-mock-label panel2-mock-label-link" href="ielts-academic.html?bypass=1&testMode=mock&module=academic&package=Lite&paper=1" target="_blank" rel="noreferrer">Paper 1</a>
-                            </div>
-                          </details>
-                          <details class="panel2-mock-package-menu" aria-label="Academic basic papers">
-                            <summary class="panel2-mock-label">Basic</summary>
-                            <div class="panel2-mock-paper-labels" aria-label="Academic basic paper labels">
-                              <a class="panel2-mock-label panel2-mock-label-link" href="ielts-academic-basic-paper1.html?bypass=1&testMode=mock&module=academic&package=Basic&paper=1" target="_blank" rel="noreferrer">Paper 1</a>
-                              <a class="panel2-mock-label panel2-mock-label-link" href="ielts-academic.html?bypass=1&testMode=mock&module=academic&package=Basic&paper=2" target="_blank" rel="noreferrer">Paper 2</a>
-                              <a class="panel2-mock-label panel2-mock-label-link" href="ielts-academic.html?bypass=1&testMode=mock&module=academic&package=Basic&paper=3" target="_blank" rel="noreferrer">Paper 3</a>
-                            </div>
-                          </details>
-                          <details class="panel2-mock-package-menu" aria-label="Academic standard papers">
-                            <summary class="panel2-mock-label">Standard</summary>
-                            <div class="panel2-mock-paper-labels" aria-label="Academic standard paper labels">
-                              <a class="panel2-mock-label panel2-mock-label-link" href="ielts-academic.html?bypass=1&testMode=mock&module=academic&package=Standard&paper=1" target="_blank" rel="noreferrer">Paper 1</a>
-                              <a class="panel2-mock-label panel2-mock-label-link" href="ielts-academic.html?bypass=1&testMode=mock&module=academic&package=Standard&paper=2" target="_blank" rel="noreferrer">Paper 2</a>
-                              <a class="panel2-mock-label panel2-mock-label-link" href="ielts-academic.html?bypass=1&testMode=mock&module=academic&package=Standard&paper=3" target="_blank" rel="noreferrer">Paper 3</a>
-                              <a class="panel2-mock-label panel2-mock-label-link" href="ielts-academic.html?bypass=1&testMode=mock&module=academic&package=Standard&paper=4" target="_blank" rel="noreferrer">Paper 4</a>
-                              <a class="panel2-mock-label panel2-mock-label-link" href="ielts-academic.html?bypass=1&testMode=mock&module=academic&package=Standard&paper=5" target="_blank" rel="noreferrer">Paper 5</a>
-                              <a class="panel2-mock-label panel2-mock-label-link" href="ielts-academic.html?bypass=1&testMode=mock&module=academic&package=Standard&paper=6" target="_blank" rel="noreferrer">Paper 6</a>
-                            </div>
-                          </details>
-                          <details class="panel2-mock-package-menu" aria-label="Academic pro papers">
-                            <summary class="panel2-mock-label">Pro</summary>
-                            <div class="panel2-mock-paper-labels" aria-label="Academic pro paper labels">
-                              <a class="panel2-mock-label panel2-mock-label-link" href="ielts-academic.html?bypass=1&testMode=mock&module=academic&package=Pro&paper=1" target="_blank" rel="noreferrer">Paper 1</a>
-                              <a class="panel2-mock-label panel2-mock-label-link" href="ielts-academic.html?bypass=1&testMode=mock&module=academic&package=Pro&paper=2" target="_blank" rel="noreferrer">Paper 2</a>
-                              <a class="panel2-mock-label panel2-mock-label-link" href="ielts-academic.html?bypass=1&testMode=mock&module=academic&package=Pro&paper=3" target="_blank" rel="noreferrer">Paper 3</a>
-                              <a class="panel2-mock-label panel2-mock-label-link" href="ielts-academic.html?bypass=1&testMode=mock&module=academic&package=Pro&paper=4" target="_blank" rel="noreferrer">Paper 4</a>
-                              <a class="panel2-mock-label panel2-mock-label-link" href="ielts-academic.html?bypass=1&testMode=mock&module=academic&package=Pro&paper=5" target="_blank" rel="noreferrer">Paper 5</a>
-                              <a class="panel2-mock-label panel2-mock-label-link" href="ielts-academic.html?bypass=1&testMode=mock&module=academic&package=Pro&paper=6" target="_blank" rel="noreferrer">Paper 6</a>
-                              <a class="panel2-mock-label panel2-mock-label-link" href="ielts-academic.html?bypass=1&testMode=mock&module=academic&package=Pro&paper=7" target="_blank" rel="noreferrer">Paper 7</a>
-                              <a class="panel2-mock-label panel2-mock-label-link" href="ielts-academic.html?bypass=1&testMode=mock&module=academic&package=Pro&paper=8" target="_blank" rel="noreferrer">Paper 8</a>
-                              <a class="panel2-mock-label panel2-mock-label-link" href="ielts-academic.html?bypass=1&testMode=mock&module=academic&package=Pro&paper=9" target="_blank" rel="noreferrer">Paper 9</a>
-                              <a class="panel2-mock-label panel2-mock-label-link" href="ielts-academic.html?bypass=1&testMode=mock&module=academic&package=Pro&paper=10" target="_blank" rel="noreferrer">Paper 10</a>
-                            </div>
-                          </details>
-                        </div>
-                      </details>
-                      <details class="panel2-mock-type-menu" data-type="general" aria-label="General mock package labels">
-                        <summary class="panel2-mock-label">General</summary>
-                        <div class="panel2-mock-package-labels" aria-label="General package labels">
-                          <details class="panel2-mock-package-menu" aria-label="General lite papers">
-                            <summary class="panel2-mock-label">Lite</summary>
-                            <div class="panel2-mock-paper-labels" aria-label="General lite paper labels">
-                              <a class="panel2-mock-label panel2-mock-label-link" href="ielts-academic.html?bypass=1&testMode=mock&module=general&package=Lite&paper=1" target="_blank" rel="noreferrer">Paper 1</a>
-                            </div>
-                          </details>
-                          <details class="panel2-mock-package-menu" aria-label="General basic papers">
-                            <summary class="panel2-mock-label">Basic</summary>
-                            <div class="panel2-mock-paper-labels" aria-label="General basic paper labels">
-                              <a class="panel2-mock-label panel2-mock-label-link" href="ielts-academic-basic-paper1.html?bypass=1&testMode=mock&module=general&package=Basic&paper=1" target="_blank" rel="noreferrer">Paper 1</a>
-                              <a class="panel2-mock-label panel2-mock-label-link" href="ielts-academic.html?bypass=1&testMode=mock&module=general&package=Basic&paper=2" target="_blank" rel="noreferrer">Paper 2</a>
-                              <a class="panel2-mock-label panel2-mock-label-link" href="ielts-academic.html?bypass=1&testMode=mock&module=general&package=Basic&paper=3" target="_blank" rel="noreferrer">Paper 3</a>
-                            </div>
-                          </details>
-                          <details class="panel2-mock-package-menu" aria-label="General standard papers">
-                            <summary class="panel2-mock-label">Standard</summary>
-                            <div class="panel2-mock-paper-labels" aria-label="General standard paper labels">
-                              <a class="panel2-mock-label panel2-mock-label-link" href="ielts-academic.html?bypass=1&testMode=mock&module=general&package=Standard&paper=1" target="_blank" rel="noreferrer">Paper 1</a>
-                              <a class="panel2-mock-label panel2-mock-label-link" href="ielts-academic.html?bypass=1&testMode=mock&module=general&package=Standard&paper=2" target="_blank" rel="noreferrer">Paper 2</a>
-                              <a class="panel2-mock-label panel2-mock-label-link" href="ielts-academic.html?bypass=1&testMode=mock&module=general&package=Standard&paper=3" target="_blank" rel="noreferrer">Paper 3</a>
-                              <a class="panel2-mock-label panel2-mock-label-link" href="ielts-academic.html?bypass=1&testMode=mock&module=general&package=Standard&paper=4" target="_blank" rel="noreferrer">Paper 4</a>
-                              <a class="panel2-mock-label panel2-mock-label-link" href="ielts-academic.html?bypass=1&testMode=mock&module=general&package=Standard&paper=5" target="_blank" rel="noreferrer">Paper 5</a>
-                              <a class="panel2-mock-label panel2-mock-label-link" href="ielts-academic.html?bypass=1&testMode=mock&module=general&package=Standard&paper=6" target="_blank" rel="noreferrer">Paper 6</a>
-                            </div>
-                          </details>
-                          <details class="panel2-mock-package-menu" aria-label="General pro papers">
-                            <summary class="panel2-mock-label">Pro</summary>
-                            <div class="panel2-mock-paper-labels" aria-label="General pro paper labels">
-                              <a class="panel2-mock-label panel2-mock-label-link" href="ielts-academic.html?bypass=1&testMode=mock&module=general&package=Pro&paper=1" target="_blank" rel="noreferrer">Paper 1</a>
-                              <a class="panel2-mock-label panel2-mock-label-link" href="ielts-academic.html?bypass=1&testMode=mock&module=general&package=Pro&paper=2" target="_blank" rel="noreferrer">Paper 2</a>
-                              <a class="panel2-mock-label panel2-mock-label-link" href="ielts-academic.html?bypass=1&testMode=mock&module=general&package=Pro&paper=3" target="_blank" rel="noreferrer">Paper 3</a>
-                              <a class="panel2-mock-label panel2-mock-label-link" href="ielts-academic.html?bypass=1&testMode=mock&module=general&package=Pro&paper=4" target="_blank" rel="noreferrer">Paper 4</a>
-                              <a class="panel2-mock-label panel2-mock-label-link" href="ielts-academic.html?bypass=1&testMode=mock&module=general&package=Pro&paper=5" target="_blank" rel="noreferrer">Paper 5</a>
-                              <a class="panel2-mock-label panel2-mock-label-link" href="ielts-academic.html?bypass=1&testMode=mock&module=general&package=Pro&paper=6" target="_blank" rel="noreferrer">Paper 6</a>
-                              <a class="panel2-mock-label panel2-mock-label-link" href="ielts-academic.html?bypass=1&testMode=mock&module=general&package=Pro&paper=7" target="_blank" rel="noreferrer">Paper 7</a>
-                              <a class="panel2-mock-label panel2-mock-label-link" href="ielts-academic.html?bypass=1&testMode=mock&module=general&package=Pro&paper=8" target="_blank" rel="noreferrer">Paper 8</a>
-                              <a class="panel2-mock-label panel2-mock-label-link" href="ielts-academic.html?bypass=1&testMode=mock&module=general&package=Pro&paper=9" target="_blank" rel="noreferrer">Paper 9</a>
-                              <a class="panel2-mock-label panel2-mock-label-link" href="ielts-academic.html?bypass=1&testMode=mock&module=general&package=Pro&paper=10" target="_blank" rel="noreferrer">Paper 10</a>
-                            </div>
-                          </details>
-                        </div>
-                      </details>
+                  <details class="panel2-mock-type-menu" data-type="academic" aria-label="Academic tests">
+                    <summary class="panel2-mock-label">Academic</summary>
+                    <div class="panel2-mock-paper-labels" aria-label="Academic test labels">
+                      <a class="panel2-mock-label panel2-mock-label-link" href="free-mock-confirm.html?bypass=1&next=ielts-academic.html%3Fbypass%3D1%26module%3Dacademic" target="_blank" rel="noreferrer">01 Test</a>
+                      <a class="panel2-mock-label panel2-mock-label-link" href="ielts-academic.html?bypass=1&testMode=mock&module=academic&package=Lite&paper=1" target="_blank" rel="noreferrer">02 Test</a>
+                      <a class="panel2-mock-label panel2-mock-label-link" href="ielts-academic-basic-paper1.html?bypass=1&testMode=mock&module=academic&package=Basic&paper=1" target="_blank" rel="noreferrer">03 Test</a>
+                      <a class="panel2-mock-label panel2-mock-label-link" href="ielts-academic.html?bypass=1&testMode=mock&module=academic&package=Basic&paper=2" target="_blank" rel="noreferrer">04 Test</a>
                     </div>
                   </details>
-                  <a class="panel2-mock-label panel2-mock-label-link panel2-free-mock-label" href="free-mock-confirm.html?bypass=1&next=ielts-academic.html%3Fbypass%3D1%26module%3Dacademic" target="_blank" rel="noreferrer">Free Mock Test</a>
                 </div>
               </div>
             </section>
@@ -1617,6 +1674,22 @@
         var sessionsContent = document.getElementById('panel2-sessions-content');
         var sessionsNote = document.getElementById('panel2-sessions-note');
         var sessionsRefreshBtn = document.getElementById('panel2-sessions-refresh-btn');
+        var tokenForm = document.getElementById('panel2-token-form');
+        var tokenQuantityInput = document.getElementById('panel2-token-quantity');
+        var tokenGenerateBtn = document.getElementById('panel2-token-generate-btn');
+        var tokenCopyBtn = document.getElementById('panel2-token-copy-btn');
+        var tokenCodes = document.getElementById('panel2-token-codes');
+        var tokensNote = document.getElementById('panel2-tokens-note');
+        var tokenTableBody = document.getElementById('panel2-token-table-body');
+        var clearTokensBtn = document.getElementById('panel2-clear-tokens-btn');
+        var retakeTokenForm = document.getElementById('panel2-retake-token-form');
+        var retakeTokenQuantityInput = document.getElementById('panel2-retake-token-quantity');
+        var retakeTokenGenerateBtn = document.getElementById('panel2-retake-token-generate-btn');
+        var retakeTokenCopyBtn = document.getElementById('panel2-retake-token-copy-btn');
+        var retakeTokenCodes = document.getElementById('panel2-retake-token-codes');
+        var retakeTokensNote = document.getElementById('panel2-retake-tokens-note');
+        var retakeTokenTableBody = document.getElementById('panel2-retake-token-table-body');
+        var clearRetakeTokensBtn = document.getElementById('panel2-clear-retake-tokens-btn');
         var candidateSelectAllCheckbox = document.getElementById('panel2-select-all-checkbox');
         var candidateSelectAllBtn = document.getElementById('panel2-select-all-btn');
         var candidateClearSelectionBtn = document.getElementById('panel2-clear-selection-btn');
@@ -1657,38 +1730,6 @@
         var UI_LOCKOUT_THRESHOLD = 3;
         var UI_LOCKOUT_MS = 10 * 60 * 1000;
         var API_UNREACHABLE_MESSAGE = 'Cannot reach the API. Start npm run dev and refresh this page.';
-
-        function initMockTypeMenus() {
-          var typeContainer = document.querySelector('.panel2-mock-sub-labels');
-          if (!typeContainer) return;
-
-          var typeMenus = Array.prototype.slice.call(typeContainer.querySelectorAll('.panel2-mock-type-menu[data-type]'));
-          if (!typeMenus.length) return;
-
-          function setActiveType() {
-            var openType = '';
-            for (var i = 0; i < typeMenus.length; i++) {
-              if (typeMenus[i] && typeMenus[i].open) {
-                openType = String(typeMenus[i].getAttribute('data-type') || '').trim().toLowerCase();
-                break;
-              }
-            }
-
-            if (!openType) {
-              delete typeContainer.dataset.activeType;
-              return;
-            }
-
-            typeContainer.dataset.activeType = openType;
-          }
-
-          for (var j = 0; j < typeMenus.length; j++) {
-            if (!typeMenus[j]) continue;
-            typeMenus[j].addEventListener('toggle', setActiveType);
-          }
-
-          setActiveType();
-        }
 
         function getToken() {
           try {
@@ -2038,6 +2079,131 @@
           sessionsNote.className = mode === 'error' ? 'panel2-sessions-note error' : 'panel2-sessions-note';
         }
 
+        function setTokensNote(message, mode) {
+          if (!tokensNote) return;
+          tokensNote.textContent = String(message || '');
+          tokensNote.className = mode === 'error' ? 'panel2-results-note error' : 'panel2-results-note';
+        }
+
+        function renderGeneratedTokenSelection(container, codes) {
+          if (!container) return;
+          container.innerHTML =
+            '<label class="panel2-token-selection-all"><input type="checkbox" data-select-generated-tokens checked /> Select all generated tokens</label>' +
+            codes.map(function (code) {
+              return '<label class="panel2-token-code-option"><input type="checkbox" data-generated-token-code="' + escapeHtml(code) + '" checked /> <span>' + escapeHtml(code) + '</span></label>';
+            }).join('');
+          container.hidden = false;
+        }
+
+        function getSelectedGeneratedTokenCodes(container) {
+          if (!container) return [];
+          return Array.prototype.slice.call(container.querySelectorAll('[data-generated-token-code]:checked'))
+            .map(function (input) { return String(input.getAttribute('data-generated-token-code') || '').trim(); })
+            .filter(Boolean);
+        }
+
+        function syncGeneratedTokenSelection(event) {
+          var target = event.target;
+          if (!target || !target.matches || !target.matches('input[type="checkbox"]')) return;
+          var container = target.closest('.panel2-token-codes');
+          if (!container) return;
+          var tokenBoxes = Array.prototype.slice.call(container.querySelectorAll('[data-generated-token-code]'));
+          var selectAll = container.querySelector('[data-select-generated-tokens]');
+          if (target.matches('[data-select-generated-tokens]')) {
+            tokenBoxes.forEach(function (box) { box.checked = target.checked; });
+            return;
+          }
+          if (selectAll) selectAll.checked = tokenBoxes.length > 0 && tokenBoxes.every(function (box) { return box.checked; });
+        }
+
+        function renderTokens(tokens) {
+          if (!tokenTableBody) return;
+          if (!tokens.length) {
+            tokenTableBody.innerHTML = '<tr><td colspan="8">No tokens have been generated yet.</td></tr>';
+            return;
+          }
+          tokenTableBody.innerHTML = tokens.map(function (token, index) {
+            var status = String(token && token.status || 'active').toLowerCase();
+            var paper = Number(token && token.usedForPaper || 0);
+            return '<tr>' +
+              '<td>' + String(index + 1) + '</td>' +
+              '<td>••••' + escapeHtml(token && token.codeHint || '') + '</td>' +
+              '<td><span class="panel2-token-status ' + (status === 'used' || status === 'disabled' ? status : 'active') + '">' + escapeHtml(status) + '</span></td>' +
+              '<td>' + (Number(token && token.candidateNumber || 0) ? 'Candidate #' + escapeHtml(token.candidateNumber) : '—') + '</td>' +
+              '<td>' + (paper ? 'Test ' + String(paper).padStart(2, '0') : '—') + '</td>' +
+              '<td>' + escapeHtml(formatDate(token && token.usedAt)) + '</td>' +
+              '<td>' + escapeHtml(formatDate(token && token.createdAt)) + '</td>' +
+              '<td>' + (status === 'active'
+                ? '<button class="panel2-btn danger" type="button" data-disable-token="' + escapeHtml(token && token.id || '') + '">Disable</button>'
+                : '—') + '</td>' +
+              '</tr>';
+          }).join('');
+        }
+
+        function loadTokens() {
+          var token = getToken();
+          if (!token) {
+            setTokensNote('Admin login required to load tokens.', 'error');
+            return Promise.resolve();
+          }
+          setTokensNote('Loading token activity...', 'info');
+          return getJson('/api/admin/tokens', token)
+            .then(function (result) {
+              if (!result.ok) throw new Error((result.data && result.data.error) || 'Unable to load tokens.');
+              var tokens = Array.isArray(result.data && result.data.tokens) ? result.data.tokens : [];
+              renderTokens(tokens);
+              setTokensNote(String(tokens.length) + ' token' + (tokens.length === 1 ? '' : 's') + ' loaded.', 'info');
+            })
+            .catch(function (error) {
+              renderTokens([]);
+              setTokensNote(error && error.message ? error.message : 'Unable to load tokens.', 'error');
+            });
+        }
+
+        function setRetakeTokensNote(message, mode) {
+          if (!retakeTokensNote) return;
+          retakeTokensNote.textContent = String(message || '');
+          retakeTokensNote.className = mode === 'error' ? 'panel2-results-note error' : 'panel2-results-note';
+        }
+
+        function renderRetakeTokens(tokens) {
+          if (!retakeTokenTableBody) return;
+          if (!tokens.length) {
+            retakeTokenTableBody.innerHTML = '<tr><td colspan="8">No retake tokens have been generated yet.</td></tr>';
+            return;
+          }
+          retakeTokenTableBody.innerHTML = tokens.map(function (token, index) {
+            var status = String(token && token.status || 'active').toLowerCase();
+            var paper = Number(token && token.usedForPaper || 0);
+            return '<tr><td>' + String(index + 1) + '</td><td>••••' + escapeHtml(token && token.codeHint || '') + '</td>' +
+              '<td><span class="panel2-token-status ' + (status === 'used' || status === 'disabled' ? status : 'active') + '">' + escapeHtml(status) + '</span></td>' +
+              '<td>' + (Number(token && token.candidateNumber || 0) ? 'Candidate #' + escapeHtml(token.candidateNumber) : '—') + '</td>' +
+              '<td>' + (paper ? 'Test ' + String(paper).padStart(2, '0') : '—') + '</td>' +
+              '<td>' + escapeHtml(formatDate(token && token.usedAt)) + '</td><td>' + escapeHtml(formatDate(token && token.createdAt)) + '</td>' +
+              '<td>' + (status === 'active' ? '<button class="panel2-btn danger" type="button" data-disable-retake-token="' + escapeHtml(token && token.id || '') + '">Disable</button>' : '—') + '</td></tr>';
+          }).join('');
+        }
+
+        function loadRetakeTokens() {
+          var token = getToken();
+          if (!token) {
+            setRetakeTokensNote('Admin login required to load retake tokens.', 'error');
+            return Promise.resolve();
+          }
+          setRetakeTokensNote('Loading retake token activity...', 'info');
+          return getJson('/api/admin/retake-tokens', token)
+            .then(function (result) {
+              if (!result.ok) throw new Error((result.data && result.data.error) || 'Unable to load retake tokens.');
+              var tokens = Array.isArray(result.data && result.data.tokens) ? result.data.tokens : [];
+              renderRetakeTokens(tokens);
+              setRetakeTokensNote(String(tokens.length) + ' retake token' + (tokens.length === 1 ? '' : 's') + ' loaded.', 'info');
+            })
+            .catch(function (error) {
+              renderRetakeTokens([]);
+              setRetakeTokensNote(error && error.message ? error.message : 'Unable to load retake tokens.', 'error');
+            });
+        }
+
         function renderSpeakingSessions(slots) {
           if (!sessionsContent) return;
           if (!slots.length) {
@@ -2068,20 +2234,132 @@
               .slice()
               .sort(function (left, right) { return String(left.startTs || '').localeCompare(String(right.startTs || '')); })
               .map(function (slot) {
+                var isComplete = String(slot.status || '').toLowerCase() === 'completed';
+                var statusLabel = isComplete ? 'Completed' : 'Not Complete';
+                var statusClass = isComplete ? 'is-complete' : 'is-incomplete';
+                var recordingLink = String(slot.recordingLink || '').trim();
+                var recordingActions = recordingLink
+                  ? '<div class="panel2-session-recording-actions">' +
+                    '<button class="panel2-session-recording-btn" type="button" data-watch-recording="' + escapeHtml(recordingLink) + '">Watch</button>' +
+                    '<button class="panel2-session-recording-btn" type="button" data-copy-recording="' + escapeHtml(recordingLink) + '">Copy link</button>' +
+                    '<button class="panel2-session-recording-btn is-delete" type="button" data-delete-recording="' + escapeHtml(String(slot.id || '')) + '" data-session-status="' + escapeHtml(String(slot.status || 'completed')) + '" data-session-zoom-link="' + escapeHtml(String(slot.zoomLink || '')) + '" data-session-admin-note="' + escapeHtml(String(slot.adminNote || '')) + '">Delete</button>' +
+                  '</div>'
+                  : '—';
+                var scoreValue = slot.speakingBandScore == null ? '' : Number(slot.speakingBandScore).toFixed(1);
+                var scoreOptions = ['4.0', '4.5', '5.0', '5.5', '6.0', '6.5', '7.0', '7.5', '8.0', '8.5', '9.0']
+                  .map(function (value) {
+                    return '<option value="' + value + '"' + (scoreValue === value ? ' selected' : '') + '>' + value + '</option>';
+                  }).join('');
+                var scoreActions = slot.candidateId
+                  ? '<div class="panel2-session-recording-actions">' +
+                    '<select class="panel2-session-score-select" aria-label="Speaking band score for ' + escapeHtml(slot.candidateName || 'candidate') + '" data-speaking-score="' + escapeHtml(String(slot.id || '')) + '">' +
+                      '<option value="">Select score</option>' + scoreOptions +
+                    '</select>' +
+                    '<button class="panel2-session-recording-btn" type="button" data-save-speaking-score="' + escapeHtml(String(slot.id || '')) + '">Save score</button>' +
+                  '</div>'
+                  : '—';
                 return '<tr>' +
                   '<td>' + escapeHtml(formatDate(slot.startTs)) + '</td>' +
                   '<td>' + escapeHtml(formatDate(slot.endTs)) + '</td>' +
                   '<td>' + escapeHtml(String(slot.durationMinutes || '—')) + ' min</td>' +
-                  '<td><span class="panel2-session-status">' + escapeHtml(slot.status || 'pending') + '</span></td>' +
-                  '<td>' + escapeHtml(slot.sessionNote || '—') + '</td>' +
+                  '<td>' + escapeHtml(slot.candidateNumber ? String(slot.candidateNumber) : '—') + '</td>' +
+                  '<td><span class="panel2-session-status ' + statusClass + '">' + statusLabel + '</span></td>' +
+                  '<td>' + recordingActions + '</td>' +
+                  '<td>' + escapeHtml(slot.candidateName || '—') + '</td>' +
+                  '<td>' + scoreActions + '</td>' +
                 '</tr>';
               }).join('');
 
             return '<section class="panel2-session-examiner">' +
               '<div class="panel2-session-examiner-heading"><div><strong>' + escapeHtml(group.name) + '</strong><span> ' + escapeHtml(group.email || 'No email recorded') + '</span></div><span>' + String(group.slots.length) + ' slot' + (group.slots.length === 1 ? '' : 's') + '</span></div>' +
-              '<div class="panel2-candidates-table-wrap"><table class="panel2-table" aria-label="Speaking slots for ' + escapeHtml(group.name) + '"><thead><tr><th>Start</th><th>End</th><th>Duration</th><th>Status</th><th>Examiner note</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+              '<div class="panel2-candidates-table-wrap"><table class="panel2-table" aria-label="Speaking slots for ' + escapeHtml(group.name) + '"><thead><tr><th>Start</th><th>End</th><th>Duration</th><th>Candidate number</th><th>Status</th><th>REC</th><th>Name</th><th>Speaking score</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
             '</section>';
           }).join('');
+        }
+
+        function copyRecordingLink(recordingLink) {
+          if (!navigator.clipboard || !navigator.clipboard.writeText) {
+            setSessionsNote('Clipboard access is not available in this browser.', 'error');
+            return;
+          }
+
+          navigator.clipboard.writeText(recordingLink)
+            .then(function () {
+              setSessionsNote('Recording link copied.', 'info');
+            })
+            .catch(function () {
+              setSessionsNote('Unable to copy the recording link.', 'error');
+            });
+        }
+
+        function deleteRecordingLink(button) {
+          var token = getToken();
+          if (!token) {
+            setSessionsNote('Admin login required to delete recording links.', 'error');
+            return;
+          }
+
+          function saveSpeakingScore(button) {
+            var token = getToken();
+            if (!token) {
+              setSessionsNote('Admin login required to save speaking scores.', 'error');
+              return;
+            }
+
+            var slotId = String(button.getAttribute('data-save-speaking-score') || '').trim();
+            var scoreSelect = sessionsContent && sessionsContent.querySelector('[data-speaking-score="' + CSS.escape(slotId) + '"]');
+            var score = scoreSelect ? String(scoreSelect.value || '').trim() : '';
+            if (!slotId || !score) {
+              setSessionsNote('Select a speaking band score before saving.', 'error');
+              return;
+            }
+
+            button.disabled = true;
+            setSessionsNote('Saving speaking band score...', 'info');
+            postJson('/api/admin/speaking-sessions', {
+              slotId: slotId,
+              speakingBandScore: Number(score)
+            }, token)
+              .then(function (result) {
+                if (!result.ok) {
+                  throw new Error((result.data && (result.data.error || result.data.message)) || 'Unable to save speaking band score.');
+                }
+                setSessionsNote('Speaking band score saved. The candidate portal and Admin Results are updated.', 'info');
+                return loadSpeakingSessions();
+              })
+              .catch(function (error) {
+                button.disabled = false;
+                setSessionsNote(error && error.message ? error.message : 'Unable to save speaking band score.', 'error');
+              });
+          }
+
+          var slotId = String(button.getAttribute('data-delete-recording') || '').trim();
+          if (!slotId) {
+            setSessionsNote('Recording session could not be identified.', 'error');
+            return;
+          }
+          if (!window.confirm('Delete this recording link?')) return;
+
+          button.disabled = true;
+          setSessionsNote('Deleting recording link...', 'info');
+          postJson('/api/admin/speaking-sessions', {
+            slotId: slotId,
+            status: String(button.getAttribute('data-session-status') || 'completed'),
+            zoomLink: String(button.getAttribute('data-session-zoom-link') || ''),
+            adminNote: String(button.getAttribute('data-session-admin-note') || ''),
+            recordingLink: ''
+          }, token)
+            .then(function (result) {
+              if (!result.ok) {
+                throw new Error((result.data && (result.data.error || result.data.message)) || 'Unable to delete recording link.');
+              }
+              setSessionsNote('Recording link deleted.', 'info');
+              return loadSpeakingSessions();
+            })
+            .catch(function (error) {
+              button.disabled = false;
+              setSessionsNote(error && error.message ? error.message : 'Unable to delete recording link.', 'error');
+            });
         }
 
         function loadSpeakingSessions() {
@@ -2443,14 +2721,25 @@
           var answers = meta.studentAnswers && typeof meta.studentAnswers === 'object' ? meta.studentAnswers : {};
           var task1Eval = meta.task1 && typeof meta.task1 === 'object' ? meta.task1 : null;
           var task2Eval = meta.task2 && typeof meta.task2 === 'object' ? meta.task2 : null;
+          var approvedBand = meta.approvedBandScore == null ? '' : String(meta.approvedBandScore);
+          var selectedBand = approvedBand || (result.bandScore == null ? '' : String(result.bandScore));
+          var moderationStatus = String(meta.moderationStatus || '').trim().toLowerCase();
+          var approvalAction = moderationStatus === 'approved'
+            ? '<button class="panel2-btn success" type="button" disabled>Approved and published</button>'
+            : '<button class="panel2-btn" type="button" data-approve-writing-result="' + escapeHtml(String(result.id || '')) + '">Approve and publish</button>';
 
           var scorePills = [];
           if (task1Eval && task1Eval.overall != null) scorePills.push(resultPill('Task 1 AI: ' + Number(task1Eval.overall).toFixed(1), 'review'));
           if (task2Eval && task2Eval.overall != null) scorePills.push(resultPill('Task 2 AI: ' + Number(task2Eval.overall).toFixed(1), 'review'));
+          if (moderationStatus === 'approved') scorePills.push(resultPill('Examiner approved', 'error'));
 
           return '<div class="panel2-results-summary">' +
             resultPill('Writing band: ' + escapeHtml(result.bandScore == null ? '—' : Number(result.bandScore).toFixed(1)), 'review') +
             scorePills.join('') +
+          '</div>' +
+          '<div class="panel2-results-form-grid-single">' +
+            '<div class="panel2-field"><label for="panel2-writing-approved-band">Approved Writing band</label><input id="panel2-writing-approved-band" type="number" min="0" max="9" step="0.5" value="' + escapeHtml(selectedBand) + '" placeholder="0.0–9.0" /></div>' +
+            '<div class="panel2-results-actions">' + approvalAction + '</div>' +
           '</div>' +
           '<div class="panel2-results-two-col">' +
             '<div class="panel2-results-block"><strong>Task 1 question</strong><pre>' + escapeHtml(String(prompts.task1 || 'Question prompt not stored for this attempt.')) + '</pre></div>' +
@@ -2475,7 +2764,7 @@
 
           return '<div class="panel2-results-summary">' +
             resultPill('Speaking band: ' + escapeHtml(result.bandScore == null ? '—' : Number(result.bandScore).toFixed(1)), 'review') +
-            resultPill('Mode: ' + escapeHtml(mode === 'mock' ? 'Mock Test (Paid)' : 'Free Mock')) +
+            resultPill('Mode: ' + escapeHtml(mode === 'mock' ? 'Mock Test (Paid)' : '01 Test')) +
           '</div>' +
           '<div class="panel2-results-block"><strong>Speaking audio review</strong><div style="margin-top:8px">' + audioNode + '</div></div>' +
           '<div class="panel2-results-block"><strong>AI reason / moderation report</strong><pre>' + escapeHtml(aiReason || 'No AI report saved yet.') + '</pre></div>';
@@ -2601,6 +2890,47 @@
               resultsOverviewCache = { students: [], results: [] };
               renderResultsPanel();
               setResultsNote(error && error.message ? error.message : 'Unable to load results data.', 'error');
+            });
+        }
+
+        function approveWritingResult(button) {
+          var token = getToken();
+          if (!token) {
+            setResultsNote('Admin login required to approve Writing scores.', 'error');
+            return;
+          }
+
+          var resolution = resolveSelectedReviewResult();
+          var result = resolution.result;
+          var bandInput = document.getElementById('panel2-writing-approved-band');
+          var bandScore = Number(bandInput && bandInput.value);
+          if (!result || String(result.module || '').toLowerCase() !== 'writing') {
+            setResultsNote('Select a Writing result before approving a score.', 'error');
+            return;
+          }
+          if (!Number.isFinite(bandScore) || bandScore < 0 || bandScore > 9 || Math.round(bandScore * 2) !== bandScore * 2) {
+            setResultsNote('Enter a Writing band from 0.0 to 9.0 in 0.5 increments.', 'error');
+            return;
+          }
+
+          button.disabled = true;
+          setResultsNote('Approving Writing score...', 'info');
+          postJson('/api/admin/results', {
+            action: 'approve-writing',
+            id: result.id,
+            userId: result.userId,
+            bandScore: bandScore,
+          }, token)
+            .then(function (response) {
+              if (!response.ok) {
+                throw new Error((response.data && (response.data.error || response.data.message)) || 'Unable to approve Writing score.');
+              }
+              setResultsNote('Writing score approved and published to the Test Taker Portal.', 'info');
+              return loadResults();
+            })
+            .catch(function (error) {
+              button.disabled = false;
+              setResultsNote(error && error.message ? error.message : 'Unable to approve Writing score.', 'error');
             });
         }
 
@@ -2812,7 +3142,7 @@
             }).join('');
 
             if (!selectedAttempt) {
-              performanceBand.innerHTML = '<div class="panel2-empty-card">No free-mock result attempts yet.</div>';
+              performanceBand.innerHTML = '<div class="panel2-empty-card">No 01 Test result attempts yet.</div>';
               setPerformanceNote('', 'info');
               return;
             }
@@ -2828,9 +3158,9 @@
             }).join('');
 
             if (attempts.length >= 3) {
-              setPerformanceNote('Free Mock mode hides speaking and overall score. Limit reached at 3 attempts; candidates should move to paid packages.', 'info');
+              setPerformanceNote('01 Test mode hides speaking and overall score. Limit reached at 3 attempts; candidates should move to paid packages.', 'info');
             } else {
-              setPerformanceNote('Free Mock mode hides speaking and overall score by design.', 'info');
+              setPerformanceNote('01 Test mode hides speaking and overall score by design.', 'info');
             }
             return;
           }
@@ -3253,6 +3583,12 @@
           if (panelId === 'sessions-panel') {
             loadSpeakingSessions();
           }
+          if (panelId === 'future-ready-panel') {
+            loadTokens();
+          }
+          if (panelId === 'retake-tokens-panel') {
+            loadRetakeTokens();
+          }
         }
 
         function setSidebarWidth(width) {
@@ -3316,6 +3652,203 @@
           });
         }
 
+        if (tokenForm) {
+          tokenForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+            var quantity = Number(tokenQuantityInput && tokenQuantityInput.value || 0);
+            var token = getToken();
+            if (!token) {
+              setTokensNote('Admin login required to generate tokens.', 'error');
+              return;
+            }
+            if (!Number.isInteger(quantity) || quantity < 1 || quantity > 100) {
+              setTokensNote('Enter a whole number between 1 and 100.', 'error');
+              return;
+            }
+
+            if (tokenGenerateBtn) tokenGenerateBtn.disabled = true;
+            setTokensNote('Generating tokens...', 'info');
+            postJson('/api/admin/tokens', { quantity: quantity }, token)
+              .then(function (result) {
+                if (!result.ok) throw new Error((result.data && result.data.error) || 'Unable to generate tokens.');
+                var tokens = Array.isArray(result.data && result.data.tokens) ? result.data.tokens : [];
+                var codes = tokens.map(function (item) { return String(item && item.code || ''); }).filter(Boolean);
+                if (!codes.length) throw new Error('No tokens were generated.');
+                if (tokenCodes) {
+                  renderGeneratedTokenSelection(tokenCodes, codes);
+                }
+                if (tokenCopyBtn) tokenCopyBtn.disabled = false;
+                setTokensNote(String(codes.length) + ' token' + (codes.length === 1 ? '' : 's') + ' generated. Copy them now to email institutions.', 'info');
+                return loadTokens();
+              })
+              .catch(function (error) {
+                setTokensNote(error && error.message ? error.message : 'Unable to generate tokens.', 'error');
+              })
+              .finally(function () {
+                if (tokenGenerateBtn) tokenGenerateBtn.disabled = false;
+              });
+          });
+        }
+
+        if (tokenCopyBtn) {
+          tokenCopyBtn.addEventListener('click', function () {
+            var codes = getSelectedGeneratedTokenCodes(tokenCodes);
+            if (!codes.length) {
+              setTokensNote('Select at least one generated token before copying.', 'error');
+              return;
+            }
+            if (!navigator.clipboard || !navigator.clipboard.writeText) {
+              setTokensNote('Clipboard access is unavailable. Select and copy the generated tokens manually.', 'error');
+              return;
+            }
+            navigator.clipboard.writeText(codes.join('\n'))
+              .then(function () {
+                setTokensNote(String(codes.length) + ' selected token' + (codes.length === 1 ? '' : 's') + ' copied. You can now paste them into an email for an institution.', 'info');
+              })
+              .catch(function () {
+                setTokensNote('Could not copy automatically. Select and copy the generated tokens manually.', 'error');
+              });
+          });
+        }
+
+        if (tokenCodes) tokenCodes.addEventListener('change', syncGeneratedTokenSelection);
+        if (retakeTokenCodes) retakeTokenCodes.addEventListener('change', syncGeneratedTokenSelection);
+
+        if (retakeTokenForm) {
+          retakeTokenForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+            var quantity = Number(retakeTokenQuantityInput && retakeTokenQuantityInput.value || 0);
+            var token = getToken();
+            if (!token) {
+              setRetakeTokensNote('Admin login required to generate retake tokens.', 'error');
+              return;
+            }
+            if (!Number.isInteger(quantity) || quantity < 1 || quantity > 100) {
+              setRetakeTokensNote('Enter a whole number between 1 and 100.', 'error');
+              return;
+            }
+            if (retakeTokenGenerateBtn) retakeTokenGenerateBtn.disabled = true;
+            setRetakeTokensNote('Generating retake tokens...', 'info');
+            postJson('/api/admin/retake-tokens', { quantity: quantity }, token)
+              .then(function (result) {
+                if (!result.ok) throw new Error((result.data && result.data.error) || 'Unable to generate retake tokens.');
+                var codes = (Array.isArray(result.data && result.data.tokens) ? result.data.tokens : []).map(function (item) { return String(item && item.code || ''); }).filter(Boolean);
+                if (!codes.length) throw new Error('No retake tokens were generated.');
+                if (retakeTokenCodes) {
+                  renderGeneratedTokenSelection(retakeTokenCodes, codes);
+                }
+                if (retakeTokenCopyBtn) retakeTokenCopyBtn.disabled = false;
+                setRetakeTokensNote(String(codes.length) + ' retake token' + (codes.length === 1 ? '' : 's') + ' generated. Copy them now to email institutions.', 'info');
+                return loadRetakeTokens();
+              })
+              .catch(function (error) {
+                setRetakeTokensNote(error && error.message ? error.message : 'Unable to generate retake tokens.', 'error');
+              })
+              .finally(function () {
+                if (retakeTokenGenerateBtn) retakeTokenGenerateBtn.disabled = false;
+              });
+          });
+        }
+
+        if (retakeTokenCopyBtn) {
+          retakeTokenCopyBtn.addEventListener('click', function () {
+            var codes = getSelectedGeneratedTokenCodes(retakeTokenCodes);
+            if (!codes.length) {
+              setRetakeTokensNote('Select at least one generated retake token before copying.', 'error');
+              return;
+            }
+            if (!navigator.clipboard || !navigator.clipboard.writeText) {
+              setRetakeTokensNote('Clipboard access is unavailable. Select and copy the generated retake tokens manually.', 'error');
+              return;
+            }
+            navigator.clipboard.writeText(codes.join('\n')).then(function () {
+              setRetakeTokensNote(String(codes.length) + ' selected retake token' + (codes.length === 1 ? '' : 's') + ' copied. You can now send them to an institution.', 'info');
+            }).catch(function () {
+              setRetakeTokensNote('Could not copy automatically. Select and copy the generated retake tokens manually.', 'error');
+            });
+          });
+        }
+
+        if (retakeTokenTableBody) {
+          retakeTokenTableBody.addEventListener('click', function (event) {
+            var button = event.target.closest('[data-disable-retake-token]');
+            if (!button) return;
+            var tokenId = String(button.getAttribute('data-disable-retake-token') || '').trim();
+            var token = getToken();
+            if (!tokenId || !token) {
+              setRetakeTokensNote('Admin login required to disable retake tokens.', 'error');
+              return;
+            }
+            if (!window.confirm('Disable this retake token? It cannot be redeemed after this action.')) return;
+            button.disabled = true;
+            deleteJson('/api/admin/retake-tokens', { id: tokenId }, token)
+              .then(function (result) {
+                if (!result.ok) throw new Error((result.data && result.data.error) || 'Unable to disable retake token.');
+                setRetakeTokensNote('Retake token disabled. It can no longer be redeemed.', 'info');
+                return loadRetakeTokens();
+              })
+              .catch(function (error) {
+                button.disabled = false;
+                setRetakeTokensNote(error && error.message ? error.message : 'Unable to disable retake token.', 'error');
+              });
+          });
+        }
+
+        function clearAllTokens(button, endpoint, noteSetter, loader, label) {
+          var token = getToken();
+          if (!token) {
+            noteSetter('Admin login required to delete tokens.', 'error');
+            return;
+          }
+          if (!window.confirm('Delete all ' + label + ' tokens? This cannot be undone.')) return;
+          button.disabled = true;
+          deleteJson(endpoint, { clearAll: true }, token)
+            .then(function (result) {
+              if (!result.ok) throw new Error((result.data && result.data.error) || 'Unable to delete tokens.');
+              noteSetter(String(Number(result.data && result.data.deletedCount || 0)) + ' ' + label + ' token(s) deleted.', 'info');
+              return loader();
+            })
+            .catch(function (error) {
+              noteSetter(error && error.message ? error.message : 'Unable to delete tokens.', 'error');
+            })
+            .finally(function () {
+              button.disabled = false;
+            });
+        }
+
+        if (clearTokensBtn) clearTokensBtn.addEventListener('click', function () {
+          clearAllTokens(clearTokensBtn, '/api/admin/tokens', setTokensNote, loadTokens, 'regular');
+        });
+        if (clearRetakeTokensBtn) clearRetakeTokensBtn.addEventListener('click', function () {
+          clearAllTokens(clearRetakeTokensBtn, '/api/admin/retake-tokens', setRetakeTokensNote, loadRetakeTokens, 'retake');
+        });
+
+        if (tokenTableBody) {
+          tokenTableBody.addEventListener('click', function (event) {
+            var button = event.target.closest('[data-disable-token]');
+            if (!button) return;
+            var tokenId = String(button.getAttribute('data-disable-token') || '').trim();
+            var token = getToken();
+            if (!tokenId || !token) {
+              setTokensNote('Admin login required to disable tokens.', 'error');
+              return;
+            }
+            if (!window.confirm('Disable this token? It cannot be redeemed after this action.')) return;
+
+            button.disabled = true;
+            deleteJson('/api/admin/tokens', { id: tokenId }, token)
+              .then(function (result) {
+                if (!result.ok) throw new Error((result.data && result.data.error) || 'Unable to disable token.');
+                setTokensNote('Token disabled. It can no longer be redeemed.', 'info');
+                return loadTokens();
+              })
+              .catch(function (error) {
+                button.disabled = false;
+                setTokensNote(error && error.message ? error.message : 'Unable to disable token.', 'error');
+              });
+          });
+        }
+
         if (sessionsRefreshBtn) {
           sessionsRefreshBtn.addEventListener('click', function () {
             sessionsRefreshBtn.disabled = true;
@@ -3324,6 +3857,36 @@
             });
           });
         }
+
+        if (sessionsContent) {
+          sessionsContent.addEventListener('click', function (event) {
+            var watchButton = event.target.closest('[data-watch-recording]');
+            var copyButton = event.target.closest('[data-copy-recording]');
+            var deleteButton = event.target.closest('[data-delete-recording]');
+            var saveScoreButton = event.target.closest('[data-save-speaking-score]');
+
+            if (watchButton) {
+              window.open(String(watchButton.getAttribute('data-watch-recording') || ''), '_blank', 'noopener');
+              return;
+            }
+            if (copyButton) {
+              copyRecordingLink(String(copyButton.getAttribute('data-copy-recording') || ''));
+              return;
+            }
+            if (deleteButton) {
+              deleteRecordingLink(deleteButton);
+              return;
+            }
+            if (saveScoreButton) {
+              saveSpeakingScore(saveScoreButton);
+            }
+          });
+        }
+
+        window.addEventListener('storage', function (event) {
+          if (!event || event.key !== 'ieltsSpeakingRecordingsUpdatedAt' || activePanelId !== 'sessions-panel') return;
+          loadSpeakingSessions();
+        });
 
         if (candidateSearchInput) {
           candidateSearchInput.addEventListener('input', function () {
@@ -3485,6 +4048,12 @@
           resultOpenWritingBtn.addEventListener('click', function () {
             window.open('/ielts-writing-test-part1.html', '_blank', 'noopener');
             window.open('/ielts-writing-test-part2.html', '_blank', 'noopener');
+          });
+        }
+        if (resultReviewContent) {
+          resultReviewContent.addEventListener('click', function (event) {
+            var button = event.target && event.target.closest ? event.target.closest('[data-approve-writing-result]') : null;
+            if (button) approveWritingResult(button);
           });
         }
 
@@ -3730,7 +4299,6 @@
           window.addEventListener(eventName, markActivity, { passive: true });
         });
 
-        initMockTypeMenus();
 
         clearToken();
         setAuthDevHint(false);

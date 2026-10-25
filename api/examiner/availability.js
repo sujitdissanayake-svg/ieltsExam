@@ -32,6 +32,10 @@ module.exports = async function handler(req, res) {
           durationMinutes: slot.durationMinutes,
           status: slot.status,
           zoomLink: slot.zoomLink,
+          recordingLink: slot.recordingLink,
+          candidateNumber: slot.candidateNumber,
+          candidateName: slot.candidateName,
+          candidateEmail: slot.candidateEmail,
           sessionNote: slot.sessionNote,
           adminNote: slot.adminNote,
           approvedAt: slot.approvedAt,
@@ -63,11 +67,13 @@ module.exports = async function handler(req, res) {
   const status = String(body.status || '').trim();
   const hasZoomLinkUpdate = Object.prototype.hasOwnProperty.call(body || {}, 'zoomLink');
   const zoomLink = hasZoomLinkUpdate ? String(body.zoomLink || '').trim() : '';
+  const hasRecordingLinkUpdate = Object.prototype.hasOwnProperty.call(body || {}, 'recordingLink');
+  const recordingLink = hasRecordingLinkUpdate ? String(body.recordingLink || '').trim() : '';
   const slots = Array.isArray(body.slots) ? body.slots : [];
 
   if (slotId) {
-    if (!status && !hasZoomLinkUpdate) {
-      sendJson(res, 400, { error: 'status or zoomLink is required when slotId is provided.' });
+    if (!status && !hasZoomLinkUpdate && !hasRecordingLinkUpdate) {
+      sendJson(res, 400, { error: 'status, zoomLink, or recordingLink is required when slotId is provided.' });
       return;
     }
 
@@ -85,6 +91,7 @@ module.exports = async function handler(req, res) {
         slotId,
         status: effectiveStatus,
         zoomLink: hasZoomLinkUpdate ? zoomLink : String(owned.zoomLink || ''),
+        recordingLink: hasRecordingLinkUpdate ? recordingLink : String(owned.recordingLink || ''),
         adminNote: String(owned.adminNote || ''),
         approvedBy: String(owned.approvedBy || ''),
       });

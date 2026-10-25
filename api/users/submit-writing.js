@@ -325,7 +325,7 @@ module.exports = async function handler(req, res) {
       });
       if (!freeMockAttemptSummary.canSubmit) {
         sendJson(res, 403, {
-          error: 'Your one Free Mock Test has already been used. Please choose a paid mock test package, which includes a Speaking test.',
+          error: 'Your 01 Test has already been used. Please choose a paid mock test package, which includes a Speaking test.',
           freeMockAttempt: {
             limit: freeMockAttemptSummary.limit,
             usedAttempts: freeMockAttemptSummary.usedAttempts,
@@ -333,45 +333,18 @@ module.exports = async function handler(req, res) {
             status: 'blocked',
             redirectToPackages: true,
             redirectPath: '/#mock',
-            message: 'Your one Free Mock Test has already been used. Please choose a paid mock test package, which includes a Speaking test.',
+            message: 'Your 01 Test has already been used. Please choose a paid mock test package, which includes a Speaking test.',
           },
         });
         return;
       }
     }
 
-    // Ignore near-empty attempts where the student only stayed on screen without meaningfully answering.
-    if (task1WordCount < 20 && task2WordCount < 20) {
-      try {
-        await store.logActivity({
-          userId: user.id,
-          type: 'writing-result-ignored',
-          meta: {
-            reason: 'insufficient-attempt',
-            task1WordCount,
-            task2WordCount,
-          },
-        });
-      } catch (_) {}
-
-      sendJson(res, 200, {
-        ok: true,
-        skipped: true,
-        reason: 'insufficient-attempt',
-        message: 'Writing attempt ignored because answers were not sufficiently completed.',
-        writing: {
-          bandScore: null,
-          pendingRelease: false,
-        },
-      });
-      return;
-    }
-
     if (testMode === 'free') {
       const claim = await store.claimFreeMockAttempt({ userId: user.id, attemptId, deviceKey });
       if (!claim.claimed) {
         sendJson(res, 403, {
-          error: 'Your one Free Mock Test has already been used. Please choose a paid mock test package, which includes a Speaking test.',
+          error: 'Your 01 Test has already been used. Please choose a paid mock test package, which includes a Speaking test.',
         });
         return;
       }

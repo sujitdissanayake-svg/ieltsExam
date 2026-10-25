@@ -60,9 +60,9 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        border: 1px solid #1d4ed8;
+        border: 1px solid #b91c1c;
         border-radius: 8px;
-        background: #1d4ed8;
+        background: #b91c1c;
         color: #ffffff;
         font-weight: 800;
         font-size: 0.9rem;
@@ -72,7 +72,26 @@
       }
 
       .booking-next-btn:hover {
-        background: #1e40af;
+        background: #991b1b;
+      }
+
+      .booking-exit-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #ca8a04;
+        border-radius: 8px;
+        background: #facc15;
+        color: #422006;
+        font-weight: 800;
+        font-size: 0.9rem;
+        line-height: 1;
+        text-decoration: none;
+        padding: 10px 14px;
+      }
+
+      .booking-exit-btn:hover {
+        background: #eab308;
       }
 
       .booking-pill {
@@ -438,9 +457,9 @@
       .booking-note {
         margin: 12px 0 0;
         font-size: 0.9rem;
-        color: #0f172a;
-        background: #eff6ff;
-        border: 1px solid #bfdbfe;
+        color: #991b1b;
+        background: #fef2f2;
+        border: 1px solid #fca5a5;
         padding: 10px;
         border-radius: 10px;
       }
@@ -484,7 +503,8 @@
             <span class="booking-pill" id="package-pill">Package: Lite</span>
             <span class="booking-pill" id="sessions-pill">Speaking sessions: 1</span>
             <span class="booking-pill" id="left-pill">Remaining: 1</span>
-            <a class="booking-next-btn" id="registration-next-btn" href="free-mock-portal.html?package=Lite&source=speaking-booking">Continue to Registration Form (Lite)</a>
+            <a class="booking-next-btn" id="registration-next-btn" href="free-mock-portal.html?package=Lite&source=speaking-booking">Continue to Test Taker Portal</a>
+            <a class="booking-exit-btn" id="booking-exit-btn" href="/">Exit</a>
           </div>
         </section>
 
@@ -533,7 +553,7 @@
             <p class="booking-empty" id="my-booking-empty">You have not booked any speaking session yet.</p>
 
             <p class="booking-note">
-              Important: Lite includes 1 speaking session, Basic includes 3, Standard includes 6, and Pro includes 10. Booking limits are enforced automatically by package, booked slots cannot be changed, and two sessions cannot be booked at the same time.
+              <strong>Important:</strong> Each test includes one speaking session. Once you have booked a speaking slot, it cannot be changed. A second attempt of the same test does not include an additional speaking session.
             </p>
           </aside>
         </section>
@@ -543,10 +563,11 @@
     <script>
       (function () {
         var SESSION_LIMITS = {
+          '01 Test': 1,
           Lite: 1,
-          Basic: 3,
-          Standard: 6,
-          Pro: 10,
+          Basic: 1,
+          Standard: 1,
+          Pro: 1,
         };
 
         var BOOKING_KEY = 'ieltsCandidateSpeakingBookingsV1';
@@ -556,6 +577,7 @@
         var sessionsPill = document.getElementById('sessions-pill');
         var leftPill = document.getElementById('left-pill');
         var nextBtn = document.getElementById('registration-next-btn');
+        var exitBtn = document.getElementById('booking-exit-btn');
         var autoNote = document.getElementById('registration-auto-note');
         var progressFill = document.getElementById('session-progress-fill');
         var progressMeta = document.getElementById('session-progress-meta');
@@ -575,7 +597,7 @@
         }
         var packageFromQuery = normalizePackageName(params.get('package'));
         var packageFromPortal = normalizePackageName(readStorage(PACKAGE_KEY) || readStorage('ieltsMockPackage'));
-        var packageName = packageFromPortal || packageFromQuery || 'Lite';
+        var packageName = packageFromQuery || packageFromPortal || 'Lite';
         var sessionId = sessionIdFromQuery || readStorage('ieltsStripeSessionId');
         var sessionLimit = SESSION_LIMITS[packageName] || 1;
         var calendarDates = getNextDates(14);
@@ -890,7 +912,7 @@
           var percent = sessionLimit > 0 ? Math.min(100, Math.round((booked / sessionLimit) * 100)) : 0;
           var returningPortalUser = isReturningPortalUser();
 
-          if (packagePill) packagePill.textContent = 'Package: ' + packageName;
+          if (packagePill) packagePill.textContent = packageName;
           if (sessionsPill) sessionsPill.textContent = 'Speaking sessions: ' + sessionLimit;
           if (leftPill) leftPill.textContent = 'Remaining: ' + remaining;
           if (nextBtn) {
@@ -911,8 +933,8 @@
             }
             nextBtn.href = nextUrl;
             nextBtn.textContent = returningPortalUser
-              ? ('Continue to Test Taker Portal (' + packageName + ')')
-              : ('Continue to Registration Form (' + packageName + ')');
+              ? 'Continue to Test Taker Portal'
+              : 'Continue to Test Taker Portal';
           }
           if (progressFill) progressFill.style.width = String(percent) + '%';
           if (progressMeta) progressMeta.textContent = booked + ' of ' + sessionLimit + ' sessions booked';
@@ -1106,6 +1128,16 @@
             var hasOverflow = scrollWrap.scrollHeight > (scrollWrap.clientHeight + 2);
             scrollControls.hidden = !hasOverflow;
           });
+        }
+
+        function hasBookedSpeakingSession() {
+          return bookedSlots.length >= 1;
+        }
+
+        function warnBookingRequired(event) {
+          if (hasBookedSpeakingSession()) return;
+          if (event) event.preventDefault();
+          window.alert('Please book your speaking slot before leaving this page.');
         }
 
         function bookSlot(slot) {
@@ -1311,6 +1343,18 @@
               renderAvailableSlots();
             });
           }
+
+          if (nextBtn) {
+            nextBtn.addEventListener('click', warnBookingRequired);
+          }
+          if (exitBtn) {
+            exitBtn.addEventListener('click', warnBookingRequired);
+          }
+          window.addEventListener('beforeunload', function (event) {
+            if (hasBookedSpeakingSession()) return;
+            event.preventDefault();
+            event.returnValue = '';
+          });
 
           loadApprovedSlots().then(function () {
             renderCalendar();

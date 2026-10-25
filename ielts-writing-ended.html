@@ -92,19 +92,32 @@
         }
 
         var redirected = false;
+        var buildDashboardBridgeUrl = function () {
+          var params = new URLSearchParams(window.location.search || '');
+          var hashParams = new URLSearchParams();
+          var auth = String(params.get('auth') || '').trim();
+          var profile = String(params.get('profile') || '').trim();
+          if (auth) hashParams.set('auth', auth);
+          if (profile) hashParams.set('profile', profile);
+          var hash = hashParams.toString();
+          return hash ? ('/dashboard#' + hash) : '/dashboard';
+        };
         var goToSpeaking = function () {
           if (redirected) return;
           redirected = true;
           var usesHtml = /\.html$/i.test(window.location.pathname || '');
           var target = '';
+          var params = new URLSearchParams(window.location.search || '');
+          var attempt = String(params.get('attempt') || '').trim().toLowerCase();
 
-          if (isLitePaperOneContext()) {
+          if (attempt === 'retake') {
+            target = buildDashboardBridgeUrl();
+          } else if (isLitePaperOneContext()) {
             target = usesHtml ? 'ielts-speaking-lite-paper1.html' : 'ielts-speaking-lite-paper1';
           } else if (getCurrentTestMode() === 'free') {
-            // Free mock flow must always land on the speaking-unavailable page.
-            target = usesHtml ? 'ielts-speaking.html?testMode=free' : 'ielts-speaking?testMode=free';
+            target = usesHtml ? 'payment-success.html?package=01%20Test' : 'payment-success?package=01%20Test';
           } else {
-            target = usesHtml ? 'ielts-speaking.html' : 'ielts-speaking';
+            target = usesHtml ? 'payment-success.html' : 'payment-success';
           }
 
           window.location.href = target;

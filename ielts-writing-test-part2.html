@@ -225,9 +225,9 @@
           if (remainingMs <= 0) {
             if (topbarEl) topbarEl.classList.remove('topbar-last-minute');
             try {
-              window.location.replace('ielts-writing-ended.html');
+              window.location.replace('ielts-writing-ended.html' + String(window.location.search || ''));
             } catch (_) {
-              window.location.href = 'ielts-writing-ended.html';
+              window.location.href = 'ielts-writing-ended.html' + String(window.location.search || '');
             }
             return true;
           }
@@ -345,6 +345,7 @@
         var answerEl = document.getElementById('writingAnswer');
         var wordsEl = document.getElementById('writingWords');
         var maxWords = 1500;
+        var allowClipboardFor01TestReview = true;
 
         var blockPasteIntoAnswer = function (el) {
           if (!el) return;
@@ -411,7 +412,7 @@
         };
 
         if (answerEl) answerEl.addEventListener('input', render);
-        blockPasteIntoAnswer(answerEl);
+        if (!allowClipboardFor01TestReview) blockPasteIntoAnswer(answerEl);
         render();
 
         // Best-effort: discourage common third-party grammar overlays.

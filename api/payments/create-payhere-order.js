@@ -3,7 +3,9 @@ const { readJsonBody, timingSafeEqualText, isValidEmailBasic } = require('../_sh
 const { sendJson, enforceRateLimit } = require('../_http');
 const store = require('../_store');
 
-const TEST_PRICE_USD = '12.99';
+const TEST_PRICE_USD = '14.99';
+const RETAKE_PRICE_USD = '2.00';
+const MAX_PAID_RETAKES_PER_TEST = 5;
 
 const md5Upper = (value) => crypto.createHash('md5').update(String(value), 'utf8').digest('hex').toUpperCase();
 
@@ -59,6 +61,7 @@ module.exports = async function handler(req, res) {
   const email = String(body.email || '').trim();
   const passwordHash = String(body.passwordHash || '').trim();
   const paper = Math.max(1, Math.min(10, Number(body.paper) || 0));
+  const purchaseType = String(body.purchaseType || 'test').trim().toLowerCase() === 'retake' ? 'retake' : 'test';
   if (!isValidEmailBasic(email) || !passwordHash || !paper) {
     sendJson(res, 400, { error: 'A signed-in learner and valid test slot are required.' });
     return;
@@ -83,12 +86,12 @@ module.exports = async function handler(req, res) {
       return Number(meta.paper) === testPaper;
     });
 
-    if (hasPaidBookingFor(paper)) {
+    if (purchaseType === 'test' && hasPaidBookingFor(paper)) {
       sendJson(res, 409, { error: `Test ${String(paper).padStart(2, '0')} has already been booked.` });
       return;
     }
 
-    if (paper > 1) {
+    if (purchaseType === 'test' && paper > 1) {
       const previousTestBooked = hasPaidBookingFor(paper - 1);
       if (!previousTestBooked) {
         sendJson(res, 409, { error: `Book Test ${String(paper - 1).padStart(2, '0')} before booking this test.` });
@@ -96,24 +99,75 @@ module.exports = async function handler(req, res) {
       }
     }
 
-    const orderId = `IELTS-T${paper}-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
+    if (purchaseType === 'retake') {
+      if (!hasPaidBookingFor(paper)) {
+        sendJson(res, 409, { error: `Book Test ${String(paper).padStart(2, '0')} before purchasing a retake.` });
+        return;
+      }
+
+      const results = await store.listResults({ userId: user.id, limit: 200 });
+      const hasCompletedInitialTest = results.some((result) => {
+        const meta = result && result.meta && typeof result.meta === 'object' ? result.meta : {};
+        return Number(meta.paper || 1) === paper &&
+          String(meta.attemptType || 'initial').trim().toLowerCase() !== 'retake';
+      });
+      if (!hasCompletedInitialTest) {
+        sendJson(res, 409, { error: `Complete the initial Test ${String(paper).padStart(2, '0')} before purchasing a retake.` });
+        return;
+      }
+
+      const paidRetakeEntitlements = payments.filter((payment) => {
+        if (String(payment.userId || '').trim() !== String(user.id || '').trim()) return false;
+        if (String(payment.status || '').trim().toLowerCase() !== 'paid') return false;
+        const meta = payment && payment.meta && typeof payment.meta === 'object' ? payment.meta : {};
+        return Number(meta.paper) === paper && String(meta.purchaseType || '').trim().toLowerCase() === 'retake';
+      }).length;
+      if (paidRetakeEntitlements >= MAX_PAID_RETAKES_PER_TEST) {
+        sendJson(res, 409, { error: `The five paid retakes for Test ${String(paper).padStart(2, '0')} have already been used.` });
+        return;
+      }
+      const retakeAttemptIds = new Set(
+        results
+          .filter((result) => {
+            const meta = result && result.meta && typeof result.meta === 'object' ? result.meta : {};
+            return Number(meta.paper || 1) === paper &&
+              String(meta.attemptType || '').trim().toLowerCase() === 'retake';
+          })
+          .map((result) => {
+            const meta = result && result.meta && typeof result.meta === 'object' ? result.meta : {};
+            return String(meta.attemptId || result.id || `${result.module || 'module'}-${result.createdAt || ''}`);
+          })
+      );
+      if (retakeAttemptIds.size < 1 + paidRetakeEntitlements) {
+        sendJson(res, 409, { error: `A retake for Test ${String(paper).padStart(2, '0')} is already available.` });
+        return;
+      }
+    }
+
+    const amount = purchaseType === 'retake' ? RETAKE_PRICE_USD : TEST_PRICE_USD;
+    const item = purchaseType === 'retake'
+      ? `IELTS Mock Test ${String(paper).padStart(2, '0')} Retake`
+      : `IELTS Mock Test ${String(paper).padStart(2, '0')}`;
+    const orderId = `${purchaseType === 'retake' ? 'IELTS-RTK' : 'IELTS-T'}-${paper}-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
     const origin = getOrigin(req);
     const sandbox = String(process.env.PAYHERE_SANDBOX || '').trim().toLowerCase() === 'true';
     const nameParts = String(user.name || '').trim().split(/\s+/).filter(Boolean);
     const firstName = nameParts[0] || 'IELTS';
     const lastName = nameParts.slice(1).join(' ') || 'Candidate';
-    const hash = md5Upper(`${merchantId}${orderId}${TEST_PRICE_USD}${currency}${md5Upper(merchantSecret)}`);
+    const hash = md5Upper(`${merchantId}${orderId}${amount}${currency}${md5Upper(merchantSecret)}`);
 
     await store.createPayment({
       userId: user.id,
-      amount: Math.round(Number(TEST_PRICE_USD) * 100),
+      amount: Math.round(Number(amount) * 100),
       currency,
       status: 'pending',
       method: 'payhere',
       meta: {
         payhereOrderId: orderId,
         paper,
-        item: `IELTS Mock Test ${String(paper).padStart(2, '0')}`,
+        item,
+        purchaseType,
+        includesSpeaking: purchaseType !== 'retake',
         amountFormat: 'usd_cents',
         sandbox,
         verified: false,
@@ -129,8 +183,8 @@ module.exports = async function handler(req, res) {
         cancel_url: `${origin}/dashboard?payment=cancelled`,
         notify_url: `${origin}/api/payments/payhere-notify`,
         order_id: orderId,
-        items: `IELTS Mock Test ${String(paper).padStart(2, '0')}`,
-        amount: TEST_PRICE_USD,
+        items: item,
+        amount,
         currency,
         hash,
         first_name: firstName,

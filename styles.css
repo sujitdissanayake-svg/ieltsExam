@@ -7210,7 +7210,7 @@ main {
 .promo-gids {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 18px;
+  gap: 12px;
   margin-top: 18px;
   padding-top: 10px;
   padding-bottom: 6px;
@@ -7403,7 +7403,7 @@ main {
 .mock-test-promo {
   --promoAccent: var(--accentGreen);
   width: 100%;
-  max-width: 300px;
+  max-width: 330px;
   min-height: 460px;
   height: auto;
   border: 1.5px solid color-mix(in srgb, var(--promoAccent), transparent 45%);
@@ -7471,7 +7471,7 @@ main {
 .promo-title {
   margin: 0 0 12px;
   width: 100%;
-  text-align: left;
+  text-align: center;
   font-family: "Poppins", sans-serif;
   font-size: clamp(22px, 1.7vw, 28px);
   font-weight: 900;
@@ -7491,6 +7491,10 @@ main {
   font-weight: 650;
   line-height: 1.35;
   max-width: none;
+}
+
+.promo-description--centered {
+  text-align: center;
 }
 
 .promo-description--list {
@@ -7992,8 +7996,7 @@ main {
 
 .footer-layout {
   display: grid;
-  grid-template-columns: 1fr 1.15fr;
-  gap: 28px;
+  grid-template-columns: 1fr;
   padding: 18px 0 12px;
   align-items: start;
 }
@@ -8004,6 +8007,7 @@ main {
   gap: 12px 18px;
   align-items: start;
   position: relative;
+  min-height: 425px;
 }
 
 .footer-brand,
@@ -8064,110 +8068,12 @@ main {
 
 .footer-image img {
   display: block;
-  height: var(--lecturerBoxHeight, 240px);
+  height: 425px;
   width: auto;
   max-width: min(680px, 100%);
   border-radius: 14px;
   border: 1px solid var(--border);
   background: var(--bg);
-}
-
-
-.footer-center {
-  display: flex;
-  justify-content: flex-end;
-}
-
-.footer-lecturer-box {
-  width: min(680px, 100%);
-  border: 1px solid var(--border);
-  background: var(--bg);
-  border-radius: 18px;
-  padding: 12px 14px;
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
-}
-
-.footer-lecturer-kicker {
-  margin: 0 0 6px;
-  font-weight: 900;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
-  font-size: 12px;
-  color: color-mix(in srgb, var(--heroIntro), transparent 10%);
-}
-
-.footer-lecturer-title {
-  margin: 0 0 6px;
-  font-family: "Poppins", sans-serif;
-  font-weight: 900;
-  font-size: 18px;
-  color: var(--text);
-}
-
-.footer-lecturer-topic {
-  margin: 0 0 10px;
-  color: var(--muted);
-  font-weight: 700;
-  font-size: 13px;
-  line-height: 1.35;
-}
-
-.footer-lecturer-form {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-.footer-field {
-  display: grid;
-  gap: 6px;
-}
-
-.footer-field:nth-last-child(2) {
-  grid-column: 1 / -1;
-}
-
-.footer-label {
-  font-size: 12px;
-  font-weight: 800;
-  color: color-mix(in srgb, var(--text), transparent 25%);
-}
-
-.footer-input,
-.footer-textarea {
-  width: 100%;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 9px 10px;
-  font: inherit;
-  color: var(--text);
-  background: var(--surface);
-}
-
-.footer-textarea {
-  resize: none;
-}
-
-.footer-input:focus-visible,
-.footer-textarea:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--focus), transparent 65%);
-  outline-offset: 2px;
-}
-
-.footer-submit {
-  grid-column: 1 / -1;
-  justify-self: start;
-  border: 1px solid color-mix(in srgb, var(--heroIntro), transparent 50%);
-  background: color-mix(in srgb, var(--heroIntro), transparent 90%);
-  color: var(--heroIntro);
-  font-weight: 900;
-  border-radius: 12px;
-  padding: 10px 12px;
-  cursor: pointer;
-}
-
-.footer-submit:hover {
-  background: color-mix(in srgb, var(--heroIntro), transparent 84%);
 }
 
 .footer-col-title {
@@ -8208,6 +8114,7 @@ main {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  margin-top: 24px;
   color: var(--muted);
   font-weight: 700;
   padding: 10px 0 18px;
@@ -8226,6 +8133,7 @@ main {
 
   .footer-left {
     grid-template-columns: 1fr;
+    min-height: 0;
   }
 
   .footer-meta {
@@ -8252,9 +8160,6 @@ main {
     font-size: 13px;
   }
 
-  .footer-lecturer-form {
-    grid-template-columns: 1fr;
-  }
 }
 
 @media (max-width: 900px) {
@@ -8377,19 +8282,5 @@ main {
 
   .mock-test-promo {
     max-width: none;
-  }
-}
-
-@media (max-width: 420px) {
-  .footer-lecturer-box {
-    padding: 10px 10px;
-  }
-
-  .footer-lecturer-title {
-    font-size: 16px;
-  }
-
-  .footer-lecturer-topic {
-    font-size: 12px;
   }
 }

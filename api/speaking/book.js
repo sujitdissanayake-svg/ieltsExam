@@ -71,6 +71,49 @@ module.exports = async function handler(req, res) {
     return;
   }
 
+  if (packageName === '01 Test') {
+    try {
+      const [results, bookings] = await Promise.all([
+        store.listResults({ userId: String(user.id || '').trim(), limit: 200 }),
+        store.listSpeakingBookingsByUser({ userId: String(user.id || '').trim(), limit: 200 }),
+      ]);
+      const completedWriting = results.some((result) =>
+        String(result && result.module || '').trim().toLowerCase() === 'writing' &&
+        String(result && result.meta && result.meta.testMode || '').trim().toLowerCase() === 'free'
+      );
+      const existing01TestBooking = bookings.some((booking) => String(booking && booking.packageName || '').trim() === '01 Test');
+
+      if (!completedWriting) {
+        sendJson(res, 403, { error: 'Complete the 01 Test writing module before booking a speaking session.' });
+        return;
+      }
+      if (existing01TestBooking) {
+        sendJson(res, 409, { error: 'Your 01 Test speaking session has already been booked.' });
+        return;
+      }
+    } catch (err) {
+      sendJson(res, 500, { error: err && err.message ? err.message : 'Unable to validate 01 Test speaking eligibility.' });
+      return;
+    }
+  }
+
+  if (packageName !== '01 Test') {
+    try {
+      const bookings = await store.listSpeakingBookingsByUser({
+        userId: String(user.id || '').trim(),
+        limit: 200,
+      });
+      const existingBooking = bookings.some((booking) => String(booking && booking.packageName || '').trim() === packageName);
+      if (existingBooking) {
+        sendJson(res, 409, { error: 'Your speaking session for this test has already been booked.' });
+        return;
+      }
+    } catch (err) {
+      sendJson(res, 500, { error: err && err.message ? err.message : 'Unable to validate speaking booking eligibility.' });
+      return;
+    }
+  }
+
   try {
     const result = await store.bookSpeakingSlot({
       slotId,

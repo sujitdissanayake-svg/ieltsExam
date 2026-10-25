@@ -168,6 +168,8 @@ module.exports = async function handler(req, res) {
   const answers = body && typeof body.answers === 'object' ? body.answers : {};
   const attemptId = normalizeSpaces(body.attemptId || '').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 80);
   const testMode = store.normalizeTestMode(body.testMode || '') || 'mock';
+  const paper = Math.max(1, Math.min(10, Number.parseInt(body.paper, 10) || 1));
+  const attemptType = String(body.attemptType || '').trim().toLowerCase() === 'retake' ? 'retake' : 'initial';
   const deviceKey = store.normalizeDeviceKey(body.deviceKey || '');
 
   if (!isValidEmailBasic(email) || !passwordHash) {
@@ -198,7 +200,7 @@ module.exports = async function handler(req, res) {
 
       if (!freeMockAttemptSummary.canSubmit) {
         sendJson(res, 403, {
-          error: 'Your one Free Mock Test has already been used. Please choose a paid mock test package, which includes a Speaking test.',
+          error: 'Your 01 Test has already been used. Please choose a paid mock test package, which includes a Speaking test.',
           freeMockAttempt: {
             limit: freeMockAttemptSummary.limit,
             usedAttempts: freeMockAttemptSummary.usedAttempts,
@@ -206,7 +208,7 @@ module.exports = async function handler(req, res) {
             status: 'blocked',
             redirectToPackages: true,
             redirectPath: '/#mock',
-            message: 'Your one Free Mock Test has already been used. Please choose a paid mock test package, which includes a Speaking test.',
+            message: 'Your 01 Test has already been used. Please choose a paid mock test package, which includes a Speaking test.',
           },
         });
         return;
@@ -236,7 +238,7 @@ module.exports = async function handler(req, res) {
       const claim = await store.claimFreeMockAttempt({ userId: user.id, attemptId, deviceKey });
       if (!claim.claimed) {
         sendJson(res, 403, {
-          error: 'Your one Free Mock Test has already been used. Please choose a paid mock test package, which includes a Speaking test.',
+          error: 'Your 01 Test has already been used. Please choose a paid mock test package, which includes a Speaking test.',
         });
         return;
       }
@@ -263,6 +265,8 @@ module.exports = async function handler(req, res) {
         proficiency,
         attemptId,
         testMode,
+        paper,
+        attemptType,
         deviceKey,
         attemptedAnswers,
         submittedAt: new Date().toISOString(),
@@ -292,7 +296,7 @@ module.exports = async function handler(req, res) {
         redirectToPackages: reachedMax,
         redirectPath: '/#mock',
         message: reachedMax
-          ? 'You have used the maximum free mock attempts. Free Mock Test is now blocked. Opening Mock Test.'
+          ? 'You have used the maximum 01 Test attempts. 01 Test is now blocked. Opening Mock Test.'
           : ('You have remaining ' + String(remainingAfterSubmit) + ' free attempts.'),
       };
     }

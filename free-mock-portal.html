@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>IELTS Free Mock Registration</title>
+    <title>IELTS 01 Test Registration</title>
     <link rel="stylesheet" href="styles.css?v=20260226" />
   </head>
   <body>
@@ -718,7 +718,7 @@
         function redirectBlockedFreeMock(status) {
           var details = status && typeof status === 'object' ? status : {};
           var message = String(details.message || '').trim()
-            || 'Your one Free Mock Test has already been used. Please choose a paid mock test package, which includes a Speaking test.';
+            || 'Your 01 Test has already been used. Please choose a paid mock test package, which includes a Speaking test.';
           setNote(loginNote, message, 'error');
           window.setTimeout(function () {
             window.location.href = paidMockPackagesUrl();

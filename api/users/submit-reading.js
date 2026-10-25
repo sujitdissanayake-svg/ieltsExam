@@ -148,6 +148,8 @@ module.exports = async function handler(req, res) {
   const moduleType = normalizeSpaces(body.moduleType || '').toLowerCase() === 'general' ? 'general' : 'academic';
   const attemptId = normalizeSpaces(body.attemptId || '').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 80);
   const testMode = store.normalizeTestMode(body.testMode || '') || 'mock';
+  const paper = Math.max(1, Math.min(10, Number.parseInt(body.paper, 10) || 1));
+  const attemptType = String(body.attemptType || '').trim().toLowerCase() === 'retake' ? 'retake' : 'initial';
   const deviceKey = store.normalizeDeviceKey(body.deviceKey || '');
 
   if (!isValidEmailBasic(email) || !passwordHash) {
@@ -176,7 +178,7 @@ module.exports = async function handler(req, res) {
       });
       if (!freeMockAttemptSummary.canSubmit) {
         sendJson(res, 403, {
-          error: 'Your one Free Mock Test has already been used. Please choose a paid mock test package, which includes a Speaking test.',
+          error: 'Your 01 Test has already been used. Please choose a paid mock test package, which includes a Speaking test.',
           freeMockAttempt: {
             limit: freeMockAttemptSummary.limit,
             usedAttempts: freeMockAttemptSummary.usedAttempts,
@@ -184,7 +186,7 @@ module.exports = async function handler(req, res) {
             status: 'blocked',
             redirectToPackages: true,
             redirectPath: '/#mock',
-            message: 'Your one Free Mock Test has already been used. Please choose a paid mock test package, which includes a Speaking test.',
+            message: 'Your 01 Test has already been used. Please choose a paid mock test package, which includes a Speaking test.',
           },
         });
         return;
@@ -211,6 +213,8 @@ module.exports = async function handler(req, res) {
         answerKey: ANSWER_KEY,
         attemptId,
         testMode,
+        paper,
+        attemptType,
         deviceKey,
         submittedAt: new Date().toISOString(),
       },

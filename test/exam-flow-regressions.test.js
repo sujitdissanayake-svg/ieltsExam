@@ -9,7 +9,7 @@ function readFile(relativePath) {
   return fs.readFileSync(path.join(root, relativePath), 'utf8');
 }
 
-test('Free Mock modules share one attempt ID', () => {
+test('01 Test modules share one attempt ID', () => {
   const listeningInstructions = readFile('ielts-listening-instructions.html');
   const readingScorer = readFile('reading-score.js');
   const writingScorer = readFile('writing-score.js');
@@ -22,7 +22,7 @@ test('Free Mock modules share one attempt ID', () => {
   assert.match(writingInstructions, /if \(testMode !== 'free'\)/);
 });
 
-test('Free Mock Listening ends after 24 minutes', () => {
+test('01 Test Listening ends after 24 minutes', () => {
   const listeningInstructions = readFile('ielts-listening-instructions.html');
   const listeningTest = readFile('ielts-listening-test.html');
 
@@ -79,9 +79,21 @@ test('Writing answers are retained and released after 12 hours', () => {
   const portalOverview = readFile(path.join('api', 'users', 'live-overview.js'));
 
   assert.match(submissionHandler, /WRITING_RELEASE_DELAY_MS = 12 \* 60 \* 60 \* 1000/);
+  assert.doesNotMatch(submissionHandler, /writing-result-ignored/);
   assert.match(submissionHandler, /studentAnswers:\s*\{\s*task1: task1Answer,\s*task2: task2Answer,/);
   assert.match(submissionHandler, /releaseAt: releaseAtIso/);
   assert.match(portalOverview, /return nowMs >= releaseAtMs/);
+});
+
+test('Approved Writing scores are released to the student portal', () => {
+  const resultsHandler = readFile(path.join('api', 'admin', 'results.js'));
+  const portalOverview = readFile(path.join('api', 'users', 'live-overview.js'));
+  const directorPanel = readFile('director-panel.html');
+
+  assert.match(resultsHandler, /action \|\| ''\)\.trim\(\) === 'approve-writing'/);
+  assert.match(resultsHandler, /moderationStatus: 'approved'/);
+  assert.match(portalOverview, /moderationStatus.*approved/);
+  assert.match(directorPanel, /Approve and publish/);
 });
 
 test('Listening accepts the corrected tour answers', () => {
@@ -91,4 +103,43 @@ test('Listening accepts the corrected tour answers', () => {
   assert.match(handler, /22: \['E', 'library tour'\]/);
   assert.match(handler, /23: \['C', 'computer lab visit'\]/);
   assert.match(handler, /24: \['A', 'bbq'\]/);
+});
+
+test('Test portal permits five paid retakes per test', () => {
+  const dashboard = readFile(path.join('student-portal-next', 'src', 'app', 'dashboard', 'page.tsx'));
+  const paymentHandler = readFile(path.join('api', 'payments', 'create-payhere-order.js'));
+  const retakeTokenHandler = readFile(path.join('api', 'retake-tokens', 'redeem.js'));
+  const store = readFile(path.join('api', '_store.js'));
+
+  assert.match(dashboard, /MAX_PAID_RETAKES_PER_TEST = 5/);
+  assert.match(paymentHandler, /MAX_PAID_RETAKES_PER_TEST = 5/);
+  assert.match(retakeTokenHandler, /MAX_PAID_RETAKES_PER_TEST = 5/);
+  assert.match(store, /paidRetakes >= 5/);
+  assert.match(store, /\) < 5/);
+});
+
+test('Test portal labels each booking and retake state', () => {
+  const dashboard = readFile(path.join('student-portal-next', 'src', 'app', 'dashboard', 'page.tsx'));
+
+  assert.match(dashboard, /"Test Booked"/);
+  assert.match(dashboard, /"Test Completed"/);
+  assert.match(dashboard, /"Retake Available"/);
+  assert.match(dashboard, /"Retake Completed"/);
+  assert.match(dashboard, /Retake Limit Reached/);
+});
+
+test('Test portal records paper and attempt type for Listening and Reading', () => {
+  const dashboard = readFile(path.join('student-portal-next', 'src', 'app', 'dashboard', 'page.tsx'));
+  const listeningEnded = readFile('ielts-listening-ended.html');
+  const readingScorer = readFile('reading-score.js');
+  const listeningHandler = readFile(path.join('api', 'users', 'submit-listening.js'));
+  const readingHandler = readFile(path.join('api', 'users', 'submit-reading.js'));
+
+  assert.match(dashboard, /testMode=mock&module=academic&package=Lite&paper=1&attempt=/);
+  assert.match(listeningEnded, /paper: getTestPaper\(\)/);
+  assert.match(listeningEnded, /attemptType: getAttemptType\(\)/);
+  assert.match(readingScorer, /paper: readTestPaper\(\)/);
+  assert.match(readingScorer, /attemptType: readAttemptType\(\)/);
+  assert.match(listeningHandler, /paper,\s*attemptType,/);
+  assert.match(readingHandler, /paper,\s*attemptType,/);
 });

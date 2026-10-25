@@ -190,6 +190,9 @@
         };
 
         var times = ensureWritingTimes();
+        var preserveTestContext = function (path) {
+          return path + String(window.location.search || '');
+        };
 
         var renderWritingTimer = function () {
           if (!timerMinutesEl) return;
@@ -234,9 +237,9 @@
           if (remainingMs <= 0) {
             if (topbarEl) topbarEl.classList.remove('topbar-last-minute');
             try {
-              window.location.replace('ielts-writing-ended.html');
+              window.location.replace(preserveTestContext('ielts-writing-ended.html'));
             } catch (_) {
-              window.location.href = 'ielts-writing-ended.html';
+              window.location.href = preserveTestContext('ielts-writing-ended.html');
             }
             return true;
           }
@@ -256,9 +259,9 @@
         if (nextBtn) {
           nextBtn.addEventListener('click', function () {
             try {
-              window.location.href = 'ielts-writing-test-part2.html';
+              window.location.href = preserveTestContext('ielts-writing-test-part2.html');
             } catch (_) {
-              window.location.replace('ielts-writing-test-part2.html');
+              window.location.replace(preserveTestContext('ielts-writing-test-part2.html'));
             }
           });
         }
@@ -266,9 +269,9 @@
         var navPart2 = document.getElementById('writingNavPart2');
         var gotoPart2 = function () {
           try {
-            window.location.href = 'ielts-writing-test-part2.html';
+            window.location.href = preserveTestContext('ielts-writing-test-part2.html');
           } catch (_) {
-            window.location.replace('ielts-writing-test-part2.html');
+            window.location.replace(preserveTestContext('ielts-writing-test-part2.html'));
           }
         };
         if (navPart2) {
@@ -354,6 +357,7 @@
         var answerEl = document.getElementById('writingAnswer');
         var wordsEl = document.getElementById('writingWords');
         var maxWords = 1000;
+        var allowClipboardFor01TestReview = true;
 
         var blockPasteIntoAnswer = function (el) {
           if (!el) return;
@@ -420,7 +424,7 @@
         };
 
         if (answerEl) answerEl.addEventListener('input', render);
-        blockPasteIntoAnswer(answerEl);
+        if (!allowClipboardFor01TestReview) blockPasteIntoAnswer(answerEl);
         render();
 
         // Best-effort: discourage common third-party grammar overlays.
