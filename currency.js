@@ -8,7 +8,27 @@
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(usdAmount * rate);
-    return '$' + usdAmount.toFixed(2) + ' (LKR ' + lkrAmount + ')';
+    return {
+      usd: '$' + usdAmount.toFixed(2),
+      lkr: 'LKR ' + lkrAmount,
+    };
+  }
+
+  function renderPrice(element, price) {
+    if (!element.classList.contains('promo-price')) {
+      element.textContent = price.usd + ' (' + price.lkr + ')';
+      return;
+    }
+
+    var usd = document.createElement('span');
+    usd.className = 'promo-price-usd';
+    usd.textContent = price.usd;
+
+    var lkr = document.createElement('span');
+    lkr.className = 'promo-price-lkr';
+    lkr.textContent = '(' + price.lkr + ')';
+
+    element.replaceChildren(usd, lkr);
   }
 
   function renderPrices(rate) {
@@ -18,7 +38,7 @@
         console.error('Invalid USD price on a price element.', element);
         return;
       }
-      element.textContent = formatPrice(usdAmount, rate);
+      renderPrice(element, formatPrice(usdAmount, rate));
       element.title = 'LKR conversion uses the latest available USD/LKR exchange rate.';
     });
   }

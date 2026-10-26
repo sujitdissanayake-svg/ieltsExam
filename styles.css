@@ -7590,11 +7590,25 @@ main {
 .promo-price {
   margin-top: auto;
   margin-bottom: 10px;
-  color: var(--promoAccent);
   text-align: center;
   font-size: clamp(26px, 2.2vw, 34px);
   font-weight: 900;
   line-height: 1.1;
+}
+
+.promo-price-usd,
+.promo-price-lkr {
+  display: block;
+}
+
+.promo-price-usd {
+  color: var(--promoAccent);
+}
+
+.promo-price-lkr {
+  margin-top: 28px;
+  color: #000000;
+  font-size: 1.15em;
 }
 
 .promo-logos {
