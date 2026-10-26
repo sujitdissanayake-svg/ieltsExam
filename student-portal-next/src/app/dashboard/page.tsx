@@ -437,6 +437,27 @@ function getPayHereOrderUrl() {
   return "/api/payhere-order";
 }
 
+function getExchangeRateUrl() {
+  if (typeof window === "undefined") return "/api/exchange-rate";
+
+  const protocol = window.location.protocol || "https:";
+  const hostname = String(window.location.hostname || "").toLowerCase();
+  const port = String(window.location.port || "");
+  if (hostname === "localhost" || hostname === "127.0.0.1" || port === "3000") {
+    return `${protocol}//${hostname}:5500/api/exchange-rate`;
+  }
+  if (hostname === "www.ieltscambridge.com") return "/api/exchange-rate";
+  return "/api/exchange-rate";
+}
+
+function formatLkrAmount(usdAmount: number, usdLkrRate: number) {
+  const localAmount = new Intl.NumberFormat("en-LK", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(usdAmount * usdLkrRate);
+  return `LKR ${localAmount}`;
+}
+
 function getCompleteSpeakingSessionUrl() {
   if (typeof window === "undefined") return "/api/speaking/complete";
 
@@ -666,6 +687,7 @@ function getSpeakingJoinState(
 
 export default function DashboardPage() {
   const [liveOverview, setLiveOverview] = useState<LiveOverview | null>(null);
+  const [usdLkrRate, setUsdLkrRate] = useState<number | null>(null);
   const [bridgeProfile, setBridgeProfile] = useState<BridgeProfile | null>(null);
   const [liveMode, setLiveMode] = useState<"connecting" | "live" | "preview">("connecting");
   const [mainSiteBaseUrl, setMainSiteBaseUrl] = useState("https://www.ieltscambridge.com");
@@ -686,6 +708,9 @@ export default function DashboardPage() {
   const [redeemingRetakeToken, setRedeemingRetakeToken] = useState(false);
   const [completingSpeakingSlotId, setCompletingSpeakingSlotId] = useState("");
   const [speakingActionMessage, setSpeakingActionMessage] = useState("");
+  const testPriceLkrLabel = usdLkrRate === null
+    ? "(LKR rate unavailable)"
+    : `(${formatLkrAmount(23, usdLkrRate)})`;
 
   const logOut = () => {
     clearLiveBridgeState(setLiveOverview, setLiveMode, { clearAuth: true });
@@ -814,6 +839,34 @@ export default function DashboardPage() {
 
     return () => {
       window.clearInterval(timer);
+    };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+
+    const refreshExchangeRate = async () => {
+      try {
+        const response = await fetch(getExchangeRateUrl(), { cache: "no-store" });
+        const data = (await response.json()) as { rate?: number; error?: string };
+        const rate = Number(data.rate);
+        if (!response.ok || !Number.isFinite(rate) || rate <= 0) {
+          throw new Error(data.error || "Unable to retrieve a valid USD/LKR rate.");
+        }
+        if (active) setUsdLkrRate(rate);
+      } catch (error) {
+        console.error("Unable to refresh the USD/LKR exchange rate.", error);
+      }
+    };
+
+    void refreshExchangeRate();
+    const timer = window.setInterval(refreshExchangeRate, 15 * 60 * 1000);
+    window.addEventListener("focus", refreshExchangeRate);
+
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+      window.removeEventListener("focus", refreshExchangeRate);
     };
   }, []);
 
@@ -1732,7 +1785,7 @@ export default function DashboardPage() {
                 return (
                   <div
                     key={paper}
-                    className="grid grid-cols-[minmax(100px,1fr)_minmax(160px,1.5fr)_minmax(60px,0.65fr)_repeat(2,minmax(150px,1.45fr))_minmax(140px,1.35fr)_minmax(160px,1.5fr)] gap-1.5 rounded-xl border border-slate-100 bg-slate-50/80 p-1.5 transition hover:border-slate-200 hover:bg-white sm:gap-2"
+                    className="grid grid-cols-[minmax(100px,1fr)_minmax(160px,1.5fr)_minmax(94px,0.85fr)_repeat(2,minmax(150px,1.45fr))_minmax(140px,1.35fr)_minmax(160px,1.5fr)] gap-1.5 rounded-xl border border-slate-100 bg-slate-50/80 p-1.5 transition hover:border-slate-200 hover:bg-white sm:gap-2"
                   >
                     <p className="whitespace-nowrap rounded-lg bg-emerald-600 px-3 py-2 text-center text-base font-extrabold tracking-tight text-white shadow-sm shadow-emerald-900/15 sm:text-lg">{testLabel}</p>
                     <button
@@ -1750,8 +1803,9 @@ export default function DashboardPage() {
                     >
                       {booked ? "Test Booked" : bookingPaper === paper ? "Opening PayHere..." : "Book the Test"}
                     </button>
-                    <p className="whitespace-nowrap text-center text-[18px] font-bold text-slate-900" aria-label={`${testLabel} price`}>
-                      $14.99
+                    <p className="min-w-0 text-center text-sm font-bold leading-tight text-slate-900" aria-label={`${testLabel} price: $23.00 ${testPriceLkrLabel}`}>
+                      <span className="block">$23.00</span>
+                      <span className="block text-xs font-medium text-slate-600">{testPriceLkrLabel}</span>
                     </p>
                     <a
                       href={initialUrl}
@@ -1987,7 +2041,7 @@ export default function DashboardPage() {
               Book {String(tokenPaper).padStart(2, "0")} Test with a token
             </h2>
             <p className="mt-3 text-base leading-6 text-slate-600">
-              Enter the $14.99 USD token provided by your institution. It can be used only once and will be deactivated immediately after booking this test.
+              Enter the $23.00 USD ({usdLkrRate === null ? "LKR rate unavailable" : formatLkrAmount(23, usdLkrRate)}) token provided by your institution. It can be used only once and will be deactivated immediately after booking this test.
             </p>
             <label className="mt-5 block text-sm font-bold text-slate-800" htmlFor="test-token-code">
               Token code

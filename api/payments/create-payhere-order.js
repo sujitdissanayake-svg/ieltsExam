@@ -1,10 +1,11 @@
 const crypto = require('crypto');
 const { readJsonBody, timingSafeEqualText, isValidEmailBasic } = require('../_shared');
 const { sendJson, enforceRateLimit } = require('../_http');
+const { getUsdLkrRate } = require('../_currency');
 const store = require('../_store');
 
-const TEST_PRICE_USD = '14.99';
-const RETAKE_PRICE_USD = '2.00';
+const TEST_PRICE_USD = 23;
+const RETAKE_PRICE_USD = 2;
 const MAX_PAID_RETAKES_PER_TEST = 5;
 
 const md5Upper = (value) => crypto.createHash('md5').update(String(value), 'utf8').digest('hex').toUpperCase();
@@ -144,7 +145,9 @@ module.exports = async function handler(req, res) {
       }
     }
 
-    const amount = purchaseType === 'retake' ? RETAKE_PRICE_USD : TEST_PRICE_USD;
+    const usdAmount = purchaseType === 'retake' ? RETAKE_PRICE_USD : TEST_PRICE_USD;
+    const exchangeRate = currency === 'LKR' ? await getUsdLkrRate() : null;
+    const amount = (exchangeRate ? usdAmount * exchangeRate.rate : usdAmount).toFixed(2);
     const item = purchaseType === 'retake'
       ? `IELTS Mock Test ${String(paper).padStart(2, '0')} Retake`
       : `IELTS Mock Test ${String(paper).padStart(2, '0')}`;
@@ -168,7 +171,9 @@ module.exports = async function handler(req, res) {
         item,
         purchaseType,
         includesSpeaking: purchaseType !== 'retake',
-        amountFormat: 'usd_cents',
+        amountFormat: currency === 'LKR' ? 'lkr_cents' : 'usd_cents',
+        usdAmount: usdAmount.toFixed(2),
+        ...(exchangeRate ? { usdLkrRate: exchangeRate.rate } : {}),
         sandbox,
         verified: false,
       },

@@ -83,7 +83,7 @@
               </li>
             </ul>
             <div class="package-actions">
-              <div class="package-price" aria-label="Price">$14.99</div>
+              <div class="package-price" aria-label="Price" data-usd-price="23">$23.00 (LKR rate loading)</div>
               <div class="package-cta package-cta--static">Read</div>
             </div>
           </article>
@@ -191,6 +191,7 @@
       </div>
     </main>
 
+    <script src="currency.js?v=20261026-1"></script>
     <script>
       (function () {
         function writePortalValue(key, value) {
@@ -214,8 +215,13 @@
 
             if (card) {
               var priceEl = card.querySelector('.package-price');
-              var raw = String((priceEl && priceEl.textContent) || '').replace(/[^0-9.]/g, '');
-              amount = Number(raw) || 0;
+              var amountFromAttribute = Number(priceEl && priceEl.getAttribute('data-usd-price'));
+              if (Number.isFinite(amountFromAttribute) && amountFromAttribute > 0) {
+                amount = amountFromAttribute;
+              } else {
+                var raw = String((priceEl && priceEl.textContent) || '').replace(/[^0-9.]/g, '');
+                amount = Number(raw) || 0;
+              }
             }
 
             writePortalValue('ieltsMockPackage', String(pkg || '').trim());

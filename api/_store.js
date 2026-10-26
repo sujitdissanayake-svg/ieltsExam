@@ -1074,7 +1074,7 @@ const redeemTestTokenForBooking = async ({ code, userId, paper } = {}) => {
   const payment = {
     id: makeId(),
     userId: normalizedUserId,
-    amount: 1499,
+    amount: 2300,
     currency: 'USD',
     status: 'paid',
     method: 'token',
