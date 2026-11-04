@@ -760,44 +760,44 @@
             if (selectedBrand && badgeBrand === selectedBrand) badge.classList.add('is-selected');
             else badge.classList.remove('is-selected');
           }
+        }
 
-          function readPaymentAuth() {
-            var email = readStorage('ieltsPortalEmail');
-            var passwordHash = readStorage('ieltsPortalPasswordHash');
-            if (email && passwordHash) {
-              return { email: email, passwordHash: passwordHash };
-            }
-
-            if (!authBridge) return null;
-            try {
-              var parsed = JSON.parse(window.atob(decodeURIComponent(authBridge)));
-              var bridgeEmail = String((parsed && parsed.email) || '').trim();
-              var bridgeHash = String((parsed && parsed.passwordHash) || '').trim();
-              return bridgeEmail && bridgeHash ? { email: bridgeEmail, passwordHash: bridgeHash } : null;
-            } catch (_) {
-              return null;
-            }
+        function readPaymentAuth() {
+          var email = readStorage('ieltsPortalEmail');
+          var passwordHash = readStorage('ieltsPortalPasswordHash');
+          if (email && passwordHash) {
+            return { email: email, passwordHash: passwordHash };
           }
 
-          function submitPayHerePayment(payment) {
-            var form = document.createElement('form');
-            form.method = 'post';
-            form.action = payment.sandbox
-              ? 'https://sandbox.payhere.lk/pay/checkout'
-              : 'https://www.payhere.lk/pay/checkout';
-
-            Object.keys(payment).forEach(function (key) {
-              if (key === 'sandbox' || payment[key] == null) return;
-              var input = document.createElement('input');
-              input.type = 'hidden';
-              input.name = key;
-              input.value = String(payment[key]);
-              form.appendChild(input);
-            });
-
-            document.body.appendChild(form);
-            form.submit();
+          if (!authBridge) return null;
+          try {
+            var parsed = JSON.parse(window.atob(decodeURIComponent(authBridge)));
+            var bridgeEmail = String((parsed && parsed.email) || '').trim();
+            var bridgeHash = String((parsed && parsed.passwordHash) || '').trim();
+            return bridgeEmail && bridgeHash ? { email: bridgeEmail, passwordHash: bridgeHash } : null;
+          } catch (_) {
+            return null;
           }
+        }
+
+        function submitPayHerePayment(payment) {
+          var form = document.createElement('form');
+          form.method = 'post';
+          form.action = payment.sandbox
+            ? 'https://sandbox.payhere.lk/pay/checkout'
+            : 'https://www.payhere.lk/pay/checkout';
+
+          Object.keys(payment).forEach(function (key) {
+            if (key === 'sandbox' || payment[key] == null) return;
+            var input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = key;
+            input.value = String(payment[key]);
+            form.appendChild(input);
+          });
+
+          document.body.appendChild(form);
+          form.submit();
         }
 
         if (expiryYearEl) {
