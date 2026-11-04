@@ -457,66 +457,18 @@
   <body>
     <main class="gateway-page" aria-label="Secure payment gateway">
       <div class="gateway-shell">
-        <section class="gateway-main-card" aria-label="Card payment details">
+        <section class="gateway-main-card" aria-label="PayHere payment">
           <a class="packages-back gateway-back" id="gateway-back-link" href="demo-payment.html">Back to summary</a>
 
           <div class="gateway-method-row">
             <span class="gateway-radio-dot" aria-hidden="true"></span>
-            <span class="gateway-card-icon" aria-hidden="true"></span>
-            <p class="gateway-method-title">Credit or debit card</p>
+            <p class="gateway-method-title">Pay securely with PayHere</p>
           </div>
 
           <form id="gateway-card-form" novalidate>
             <div class="gateway-fields">
-              <p class="gateway-required">* Required field</p>
-
-              <div class="gateway-field">
-                <label class="gateway-label" for="gateway-card-name">Cardholder name (exactly as printed on card) <span class="req">*</span></label>
-                <input class="gateway-input" id="gateway-card-name" name="cardName" type="text" autocomplete="cc-name" required />
-              </div>
-
-              <div class="gateway-field">
-                <label class="gateway-label" for="gateway-card-number">Card number <span class="req">*</span></label>
-                <input class="gateway-input" id="gateway-card-number" name="cardNumber" type="text" inputmode="numeric" autocomplete="cc-number" maxlength="19" required />
-                <div class="gateway-brand-row" aria-hidden="true">
-                  <span class="gateway-brand" data-brand="visa">VISA</span>
-                  <span class="gateway-brand" data-brand="mc">MC</span>
-                  <span class="gateway-brand" data-brand="amex">AMEX</span>
-                  <span class="gateway-brand" data-brand="disc">DISC</span>
-                </div>
-              </div>
-
-              <div class="gateway-field">
-                <label class="gateway-label" for="gateway-exp-month">Expiration date <span class="req">*</span></label>
-                <div class="gateway-expiry-grid">
-                  <select class="gateway-select" id="gateway-exp-month" name="expiryMonth" required>
-                    <option value="">- Select Month -</option>
-                    <option value="01">01</option>
-                    <option value="02">02</option>
-                    <option value="03">03</option>
-                    <option value="04">04</option>
-                    <option value="05">05</option>
-                    <option value="06">06</option>
-                    <option value="07">07</option>
-                    <option value="08">08</option>
-                    <option value="09">09</option>
-                    <option value="10">10</option>
-                    <option value="11">11</option>
-                    <option value="12">12</option>
-                  </select>
-                  <select class="gateway-select" id="gateway-exp-year" name="expiryYear" required>
-                    <option value="">- Select Year -</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="gateway-field">
-                <label class="gateway-label" for="gateway-cvv">CVV <span class="req">*</span></label>
-                <input class="gateway-input" id="gateway-cvv" name="cvv" type="password" inputmode="numeric" maxlength="4" autocomplete="cc-csc" required />
-              </div>
-
               <p class="gateway-muted" style="font-size: 0.82rem; margin-top: 8px;">
-                Payment is processed securely by Stripe.
+                You will be redirected to PayHere to choose a payment method. Your card details are never entered on this website.
               </p>
             </div>
 
@@ -704,14 +656,6 @@
           ],
         };
 
-        var TEMP_BYPASS_CARD = {
-          name: 'Sujit',
-          number: '123456789101112',
-          month: '01',
-          year: '2030',
-          cvv: '001',
-        };
-
         function buildSuccessUrl(sessionId) {
           var sid = String(sessionId || '').trim();
           var qs = '?session_id=' + encodeURIComponent(sid || ('MOCK-' + String(Date.now())))
@@ -734,25 +678,6 @@
         function getPackageAmount(value) {
           var key = normalizePackageName(value);
           return Number(PACKAGE_PRICING[key]) || 0;
-        }
-
-        function matchesTemporaryBypassCard(details) {
-          var name = String((details && details.name) || '').trim().toLowerCase();
-          var number = String((details && details.number) || '').trim();
-          var month = String((details && details.month) || '').trim();
-          var year = String((details && details.year) || '').trim();
-          var cvv = String((details && details.cvv) || '').trim();
-          var bypassName = String(TEMP_BYPASS_CARD.name || '').trim().toLowerCase();
-
-          var yearNormalized = year === '30' ? '2030' : year;
-
-          return (
-            name === bypassName
-            && number === TEMP_BYPASS_CARD.number
-            && month === TEMP_BYPASS_CARD.month
-            && yearNormalized === TEMP_BYPASS_CARD.year
-            && cvv === TEMP_BYPASS_CARD.cvv
-          );
         }
 
         var params = new URLSearchParams(window.location.search || '');
@@ -835,6 +760,44 @@
             if (selectedBrand && badgeBrand === selectedBrand) badge.classList.add('is-selected');
             else badge.classList.remove('is-selected');
           }
+
+          function readPaymentAuth() {
+            var email = readStorage('ieltsPortalEmail');
+            var passwordHash = readStorage('ieltsPortalPasswordHash');
+            if (email && passwordHash) {
+              return { email: email, passwordHash: passwordHash };
+            }
+
+            if (!authBridge) return null;
+            try {
+              var parsed = JSON.parse(window.atob(decodeURIComponent(authBridge)));
+              var bridgeEmail = String((parsed && parsed.email) || '').trim();
+              var bridgeHash = String((parsed && parsed.passwordHash) || '').trim();
+              return bridgeEmail && bridgeHash ? { email: bridgeEmail, passwordHash: bridgeHash } : null;
+            } catch (_) {
+              return null;
+            }
+          }
+
+          function submitPayHerePayment(payment) {
+            var form = document.createElement('form');
+            form.method = 'post';
+            form.action = payment.sandbox
+              ? 'https://sandbox.payhere.lk/pay/checkout'
+              : 'https://www.payhere.lk/pay/checkout';
+
+            Object.keys(payment).forEach(function (key) {
+              if (key === 'sandbox' || payment[key] == null) return;
+              var input = document.createElement('input');
+              input.type = 'hidden';
+              input.name = key;
+              input.value = String(payment[key]);
+              form.appendChild(input);
+            });
+
+            document.body.appendChild(form);
+            form.submit();
+          }
         }
 
         if (expiryYearEl) {
@@ -879,45 +842,9 @@
         if (cardForm) {
           cardForm.addEventListener('submit', async function (event) {
             event.preventDefault();
-            var cardName = String((cardForm.elements.cardName && cardForm.elements.cardName.value) || '').trim();
-            var cardNumber = String((cardForm.elements.cardNumber && cardForm.elements.cardNumber.value) || '').replace(/\D+/g, '');
-            var expiryMonth = String((cardForm.elements.expiryMonth && cardForm.elements.expiryMonth.value) || '').trim();
-            var expiryYear = String((cardForm.elements.expiryYear && cardForm.elements.expiryYear.value) || '').trim();
-            var cvv = String((cardForm.elements.cvv && cardForm.elements.cvv.value) || '').replace(/\D+/g, '');
-
-            if (matchesTemporaryBypassCard({
-              name: cardName,
-              number: cardNumber,
-              month: expiryMonth,
-              year: expiryYear,
-              cvv: cvv,
-            })) {
-              var mockSessionId = 'MOCK-' + String(Date.now());
-              writeStorage('ieltsLastPaymentStatus', 'paid-mock');
-              writeStorage('ieltsLastPaymentPackage', selectedPackage);
-              writeStorage('ieltsLastPaymentAmount', String(selectedAmount));
-              writeStorage('ieltsStripeSessionId', mockSessionId);
-              showSuccessAndRedirect(mockSessionId);
-              return;
-            }
-
-            if (!cardName) {
-              if (errorEl) errorEl.textContent = 'Enter cardholder name.';
-              return;
-            }
-
-            if (cardNumber.length < 12) {
-              if (errorEl) errorEl.textContent = 'Enter a valid card number.';
-              return;
-            }
-
-            if (!isFutureExpiry(expiryMonth, expiryYear)) {
-              if (errorEl) errorEl.textContent = 'Select a valid expiration date.';
-              return;
-            }
-
-            if (cvv.length < 3 || cvv.length > 4) {
-              if (errorEl) errorEl.textContent = 'Enter a valid CVV.';
+            var auth = readPaymentAuth();
+            if (!auth) {
+              if (errorEl) errorEl.textContent = 'Please sign in to the Test Taker Portal before paying.';
               return;
             }
 
@@ -925,25 +852,26 @@
             if (errorEl) errorEl.textContent = '';
 
             try {
-              var response = await fetch('/api/payments/create-checkout-session', {
+              var response = await fetch('/api/payments/create-payhere-package-order', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                   package: selectedPackage,
-                  amount: selectedAmount,
+                  email: auth.email,
+                  passwordHash: auth.passwordHash,
                 }),
               });
 
               var data = await response.json().catch(function () { return {}; });
-              if (!response.ok || !data || !data.checkoutUrl) {
-                throw new Error((data && data.error) || 'Unable to start Stripe checkout.');
+              if (!response.ok || !data || !data.payment) {
+                throw new Error((data && data.error) || 'Unable to start the PayHere payment.');
               }
 
               writeStorage('ieltsLastPaymentStatus', 'initiated');
               writeStorage('ieltsLastPaymentPackage', selectedPackage);
               writeStorage('ieltsLastPaymentAmount', String(selectedAmount));
-              writeStorage('ieltsStripeSessionId', String(data.sessionId || ''));
-              window.location.href = String(data.checkoutUrl);
+              writeStorage('ieltsPayHereOrderId', String(data.payment.order_id || ''));
+              submitPayHerePayment(data.payment);
             } catch (err) {
               if (errorEl) {
                 errorEl.textContent = err && err.message ? err.message : 'Unable to start payment gateway.';

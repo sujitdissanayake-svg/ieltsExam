@@ -710,7 +710,13 @@ const deleteUsersByEmails = async (emails) => {
   }
 
   await ensureSchema();
-  const result = await sql`delete from users where email = any(${targets})`;
+  const usersResult = await sql`select id from users where email = any(${targets})`;
+  const userIds = (usersResult.rows || []).map((row) => String(row.id || '')).filter(Boolean);
+  if (!userIds.length) return { deleted: 0 };
+
+  await sql`delete from payments where user_id = any(${userIds})`;
+  await sql`delete from test_tokens where used_by_user_id = any(${userIds})`;
+  const result = await sql`delete from users where id = any(${userIds})`;
   return { deleted: Number(result.rowCount) || 0 };
 };
 

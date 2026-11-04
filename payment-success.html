@@ -590,6 +590,7 @@
         var myBookingEmpty = document.getElementById('my-booking-empty');
         var params = new URLSearchParams(window.location.search || '');
         var sessionIdFromQuery = String(params.get('session_id') || params.get('sessionId') || '').trim();
+        var payHereOrderId = String(params.get('order_id') || '').trim();
         var authBridge = String(params.get('auth') || '').trim();
         var profileBridge = String(params.get('profile') || '').trim();
         if (sessionIdFromQuery) {
@@ -1362,7 +1363,61 @@
           });
         }
 
-        init();
+        function readPaymentAuth() {
+          var email = readStorage('ieltsPortalEmail');
+          var passwordHash = readStorage('ieltsPortalPasswordHash');
+          if (email && passwordHash) return { email: email, passwordHash: passwordHash };
+
+          if (!authBridge) return null;
+          try {
+            var parsed = JSON.parse(window.atob(decodeURIComponent(authBridge)));
+            var bridgeEmail = String((parsed && parsed.email) || '').trim();
+            var bridgeHash = String((parsed && parsed.passwordHash) || '').trim();
+            return bridgeEmail && bridgeHash ? { email: bridgeEmail, passwordHash: bridgeHash } : null;
+          } catch (_) {
+            return null;
+          }
+        }
+
+        function startVerifiedPaymentFlow() {
+          if (!payHereOrderId) {
+            init();
+            return;
+          }
+
+          var auth = readPaymentAuth();
+          if (!auth) {
+            window.location.replace('free-mock-portal.html?source=payment-verification');
+            return;
+          }
+
+          fetch('/api/payments/payhere-package-status', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              orderId: payHereOrderId,
+              email: auth.email,
+              passwordHash: auth.passwordHash,
+            }),
+          }).then(function (response) {
+            return response.json().catch(function () { return {}; }).then(function (data) {
+              return { ok: response.ok, data: data };
+            });
+          }).then(function (result) {
+            if (result.ok && result.data && result.data.paid) {
+              packageName = normalizePackageName(result.data.package) || packageName;
+              sessionId = payHereOrderId;
+              init();
+              return;
+            }
+
+            window.location.replace('payment-cancel.html?order_id=' + encodeURIComponent(payHereOrderId));
+          }).catch(function () {
+            window.location.replace('payment-cancel.html?order_id=' + encodeURIComponent(payHereOrderId));
+          });
+        }
+
+        startVerifiedPaymentFlow();
       })();
     </script>
   </body>

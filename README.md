@@ -9,6 +9,20 @@
 
 This repo includes a simple Node dev server (`dev-server.mjs`) that serves static pages **and** runs the `/api/*` handlers locally.
 
+### PayHere payments
+
+The package checkout and Test Taker Portal use PayHere's hosted checkout. Card details are entered only on PayHere and payment notifications are verified on the server before the related payment is marked paid.
+
+Set these variables in **Vercel → Project → Settings → Environment Variables** for Production, Preview, and Development as appropriate:
+
+- `PAYHERE_MERCHANT_ID` — your PayHere Merchant ID
+- `PAYHERE_MERCHANT_SECRET` — the Merchant Secret generated for this deployed domain; never expose or commit it
+- `PAYHERE_PUBLIC_ORIGIN` — the public HTTPS origin registered in PayHere, for example `https://www.ieltscambridge.com`
+- `PAYHERE_SANDBOX` — `false` for live payments, or `true` for PayHere sandbox testing
+- `PAYHERE_CURRENCY` — `USD` (the configured package prices are USD)
+
+For local development, add the same settings to the ignored `.env.local` file. PayHere must be able to reach `PAYHERE_PUBLIC_ORIGIN/api/payments/payhere-notify`; a localhost URL cannot receive live payment notifications.
+
 ### Email OTP registration
 
 To activate registration with email OTP locally or on Vercel, configure:
